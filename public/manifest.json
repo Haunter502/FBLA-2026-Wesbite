@@ -1,0 +1,67 @@
+{
+  "name": "Numera - Math Hub for Algebra 1",
+  "short_name": "Numera",
+  "description": "Learn, Practice, Track, Win. Complete Algebra 1 learning platform with lessons, quizzes, flashcards, and live tutoring.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00A799",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "scope": "/",
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Numera Dashboard on Desktop"
+    },
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Numera on Mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "View your learning progress"
+    },
+    {
+      "name": "Units",
+      "url": "/units",
+      "description": "Browse Algebra 1 units"
+    },
+    {
+      "name": "Tutoring",
+      "url": "/tutoring",
+      "description": "Schedule tutoring sessions"
+    },
+    {
+      "name": "Search",
+      "url": "/search",
+      "description": "Search lessons and resources"
+    }
+  ]
+}
+
