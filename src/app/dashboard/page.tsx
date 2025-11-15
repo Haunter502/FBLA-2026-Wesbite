@@ -7,8 +7,21 @@ import { Button } from "@/components/ui/button"
 import { ProgressRing } from "@/components/dashboard/progress-ring"
 import { BookOpen, Award, Flame, ArrowRight, TrendingUp } from "lucide-react"
 import Link from "next/link"
-import { units, progress, userBadges, badges, streaks } from "../../../drizzle/schema"
+import { units, progress, userBadges, badges, streaks } from "@/lib/schema"
 import { eq, and, desc, asc } from "@/lib/drizzle-helpers"
+import { FadeInUp } from "@/components/animations/fade-in-up"
+import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
+import { AnimatedStatCard } from "@/components/dashboard/animated-stat-card"
+import { AnimatedNumber } from "@/components/dashboard/animated-number"
+import { AnimatedUnitCard } from "@/components/dashboard/animated-unit-card"
+
+function getLetterGrade(score: number): string {
+  if (score >= 90) return 'A'
+  if (score >= 80) return 'B'
+  if (score >= 70) return 'C'
+  if (score >= 60) return 'D'
+  return 'F'
+}
 
 async function getDashboardData(userId: string) {
   const [unitProgress, userBadgesList, userStreak, nextLesson] = await Promise.all([
@@ -30,7 +43,7 @@ async function getDashboardData(userId: string) {
       .where(eq(userBadges.userId, userId))
       .orderBy(desc(userBadges.awardedAt))
       .limit(5),
-    db.select().from(streaks).where(eq(streaks.userId, userId)).limit(1).then(rows => rows[0]),
+    db.select().from(streaks).where(eq(streaks.userId, userId)).limit(1).then((rows: typeof streaks.$inferSelect[]) => rows[0]),
     getNextBestLesson(userId),
   ])
 
@@ -39,8 +52,17 @@ async function getDashboardData(userId: string) {
   const completedLessons = unitProgress.reduce((sum, up) => sum + up.completedLessons, 0)
   const overallProgress = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0
 
+  // Calculate overall grade (average of all unit grades)
+  const unitGrades = unitProgress
+    .map(up => up.grade)
+    .filter((grade): grade is number => grade !== null)
+  const overallGrade = unitGrades.length > 0
+    ? Math.round(unitGrades.reduce((sum, grade) => sum + grade, 0) / unitGrades.length)
+    : null
+
   return {
     overallProgress,
+    overallGrade,
     unitProgress,
     badges: userBadgesList,
     streak: userStreak,
@@ -65,118 +87,160 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Overall Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-center">
-              <ProgressRing progress={data.overallProgress} size={120} />
-            </div>
-          </CardContent>
-        </Card>
+      <StaggerChildren className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <StaggerItem>
+          <AnimatedStatCard>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Overall Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-center">
+                  <ProgressRing progress={data.overallProgress} size={120} />
+                </div>
+              </CardContent>
+            </Card>
+          </AnimatedStatCard>
+        </StaggerItem>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Flame className="h-5 w-5 text-orange-500" />
-              Streak
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-orange-500 mb-2">
-                {data.streak?.current || 0}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Longest: {data.streak?.longest || 0} days
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <StaggerItem>
+          <AnimatedStatCard>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5 text-blue-500" />
+                  Overall Grade
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center">
+                  {data.overallGrade !== null ? (
+                    <>
+                      <AnimatedNumber>
+                        <div className="text-4xl font-bold text-blue-500 mb-2">
+                          {data.overallGrade}%
+                        </div>
+                      </AnimatedNumber>
+                      <p className="text-sm text-muted-foreground">
+                        {getLetterGrade(data.overallGrade)}
+                      </p>
+                    </>
+                  ) : (
+                    <div className="text-2xl text-muted-foreground">
+                      No grades yet
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </AnimatedStatCard>
+        </StaggerItem>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-yellow-500" />
-              Badges Earned
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-yellow-500 mb-2">
-                {data.badges.length}
-              </div>
-              <p className="text-sm text-muted-foreground">Keep it up!</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <StaggerItem>
+          <AnimatedStatCard>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Flame className="h-5 w-5 text-orange-500" />
+                  Streak
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center">
+                  <AnimatedNumber>
+                    <div className="text-4xl font-bold text-orange-500 mb-2">
+                      {data.streak?.current || 0}
+                    </div>
+                  </AnimatedNumber>
+                  <p className="text-sm text-muted-foreground">
+                    Longest: {data.streak?.longest || 0} days
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </AnimatedStatCard>
+        </StaggerItem>
+
+        <StaggerItem>
+          <AnimatedStatCard>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5 text-yellow-500" />
+                  Badges Earned
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center">
+                  <AnimatedNumber>
+                    <div className="text-4xl font-bold text-yellow-500 mb-2">
+                      {data.badges.length}
+                    </div>
+                  </AnimatedNumber>
+                  <p className="text-sm text-muted-foreground">Keep it up!</p>
+                </div>
+              </CardContent>
+            </Card>
+          </AnimatedStatCard>
+        </StaggerItem>
+      </StaggerChildren>
 
       {/* Next Best Lesson */}
       {data.nextLesson && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Next Best Lesson</CardTitle>
-            <CardDescription>{data.nextLesson.reason}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-lg">{data.nextLesson.lesson.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {data.nextLesson.lesson.description}
-                </p>
+        <FadeInUp delay={0.3}>
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Next Best Lesson</CardTitle>
+              <CardDescription>Continue your learning journey</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-lg">{data.nextLesson.lesson.title}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {data.nextLesson.lesson.description}
+                  </p>
+                </div>
+                <Link href={`/lessons/${data.nextLesson.lesson.slug}`}>
+                  <Button>
+                    Start Lesson
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
-              <Link href={`/lessons/${data.nextLesson.lesson.slug}`}>
-                <Button>
-                  Start Lesson
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </FadeInUp>
       )}
 
       {/* Unit Progress */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Your Progress</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.unitProgress.slice(0, 6).map((unitProgress) => (
-            <Link key={unitProgress.unit.id} href={`/units/${unitProgress.unit.slug}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <CardTitle className="text-lg">{unitProgress.unit.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-semibold">{unitProgress.percentage}%</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={{ width: `${unitProgress.percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+      <FadeInUp delay={0.4}>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Your Progress</h2>
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {data.unitProgress.slice(0, 6).map((unitProgress, index) => (
+              <StaggerItem key={unitProgress.unit.id}>
+                <AnimatedUnitCard
+                  href={`/units/${unitProgress.unit.slug}`}
+                  title={unitProgress.unit.title}
+                  percentage={unitProgress.percentage}
+                  grade={unitProgress.grade}
+                  letterGrade={unitProgress.grade !== null ? getLetterGrade(unitProgress.grade) : null}
+                  index={index}
+                />
+              </StaggerItem>
+            ))}
+          </StaggerChildren>
         </div>
         <div className="mt-4 text-center">
           <Link href="/units">
             <Button variant="outline">View All Units</Button>
           </Link>
         </div>
-      </div>
+      </FadeInUp>
 
       {/* Recent Badges */}
       {data.badges.length > 0 && (
@@ -186,7 +250,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
-              {data.badges.map((userBadge) => (
+              {data.badges.map((userBadge: typeof data.badges[0]) => (
                 <div
                   key={userBadge.id}
                   className="flex flex-col items-center p-4 border rounded-lg"

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db"
-import { teachers } from "../../../drizzle/schema"
+import { teachers } from "@/lib/schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, Clock } from "lucide-react"
 import { asc } from "@/lib/drizzle-helpers"
@@ -21,7 +21,7 @@ export default async function TeachersPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {teachers.map((teacher) => (
+        {teachers.map((teacher: typeof teachers[0]) => (
           <Card key={teacher.id}>
             <CardHeader>
               <div className="flex items-center gap-4 mb-4">

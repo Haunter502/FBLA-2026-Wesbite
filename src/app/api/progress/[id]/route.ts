@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { progress, lessons, units, streaks, eventLogs } from '../../../../../drizzle/schema';
+import { progress, lessons, units, streaks, eventLogs } from '@/lib/schema';
 import { eq, and } from '@/lib/drizzle-helpers';
 import { z } from 'zod';
 
@@ -89,7 +89,7 @@ export async function PATCH(
       await db.insert(eventLogs).values({
         userId: session.user.id,
         type: 'lesson_completed',
-        payload: { progressId: params.id, score: validated.score },
+        payload: { progressId: id, score: validated.score },
       });
     }
 
@@ -98,7 +98,7 @@ export async function PATCH(
     console.error('Error updating progress:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request body', details: error.errors },
+        { error: 'Invalid request body', details: error.issues },
         { status: 400 }
       );
     }

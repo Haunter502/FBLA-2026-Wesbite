@@ -1,12 +1,15 @@
 import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { tutoringSlots, teachers } from "../../../drizzle/schema"
+import { tutoringSlots, teachers } from "@/lib/schema"
 import { TutoringSchedule } from "@/components/tutoring/tutoring-schedule"
 import { ImmediateHelp } from "@/components/tutoring/immediate-help"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, MessageCircle, Clock, Users } from "lucide-react"
 import { gte, gt, asc, eq } from "@/lib/drizzle-helpers"
+import { ScrollReveal } from "@/components/animations/scroll-reveal"
+import { GradientText } from "@/components/animations/gradient-text"
+import { GlowEffect } from "@/components/animations/glow-effect"
 
 async function getTutoringData() {
   const now = new Date()
@@ -35,12 +38,16 @@ export default async function TutoringPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Live Tutoring</h1>
-        <p className="text-muted-foreground">
-          Get help from expert teachers through scheduled sessions or immediate assistance
-        </p>
-      </div>
+      <ScrollReveal>
+        <div className="mb-12 text-center">
+          <h1 className="text-5xl font-bold mb-4">
+            <GradientText variant="primary">Live Tutoring</GradientText>
+          </h1>
+          <p className="text-xl text-muted-foreground">
+            Get help from expert teachers through scheduled sessions or immediate assistance
+          </p>
+        </div>
+      </ScrollReveal>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Card>

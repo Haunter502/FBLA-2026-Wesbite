@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { tests, units, progress } from "../../../../drizzle/schema"
+import { tests, units, progress } from "@/lib/schema"
 import { eq, and } from "@/lib/drizzle-helpers"
 import { QuizViewer } from "@/components/quizzes/quiz-viewer"
 import Link from "next/link"

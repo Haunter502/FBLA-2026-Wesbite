@@ -6,16 +6,6 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
-    // Configure Turbopack to externalize native modules
-    turbo: {
-      resolveAlias: {
-        // Prevent Turbopack from bundling these packages
-        'better-sqlite3': false,
-        'drizzle-orm': false,
-        'drizzle-orm/better-sqlite3': false,
-        'drizzle-orm/sqlite-core': false,
-      },
-    },
   },
 };
 

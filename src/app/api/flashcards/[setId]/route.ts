@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { flashcardSets, flashcards } from "../../../../../drizzle/schema"
+import { flashcardSets, flashcards } from "@/lib/schema"
 import { eq, asc } from "@/lib/drizzle-helpers"
 
 export async function GET(

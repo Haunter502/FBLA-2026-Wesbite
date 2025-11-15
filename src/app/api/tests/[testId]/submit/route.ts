@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { tests, progress } from "../../../../../../drizzle/schema"
+import { tests, progress } from "@/lib/schema"
 import { eq, and } from "@/lib/drizzle-helpers"
 import { z } from "zod"
 
 const submitSchema = z.object({
-  answers: z.record(z.number(), z.number()),
+  answers: z.record(z.string(), z.number()).transform((val) => {
+    // Convert string keys back to numbers for consistency
+    const result: Record<number, number> = {}
+    for (const [key, value] of Object.entries(val)) {
+      result[Number(key)] = value
+    }
+    return result
+  }),
   score: z.number().min(0).max(100),
   passed: z.boolean(),
 })
@@ -15,6 +22,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ testId: string }> }
 ) {
+  let body: any = null
   try {
     const session = await auth()
     const { testId } = await params
@@ -23,7 +31,10 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const body = await request.json()
+    body = await request.json()
+    console.log('Test submission body:', JSON.stringify(body, null, 2))
+    
+    // Validate the request
     const validated = submitSchema.parse(body)
 
     // Get test to find unitId
@@ -72,7 +83,12 @@ export async function POST(
   } catch (error) {
     console.error("Error submitting test:", error)
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Invalid request", details: error.errors }, { status: 400 })
+      console.error("Validation errors:", error.issues)
+      return NextResponse.json({ 
+        error: "Invalid request", 
+        details: error.issues,
+        received: body 
+      }, { status: 400 })
     }
     return NextResponse.json({ 
       error: "Internal server error", 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { users, streaks } from "../../../../../drizzle/schema"
+import { users, streaks } from "@/lib/schema"
 import { hash } from "bcryptjs"
 import { z } from "zod"
 import { eq } from "@/lib/drizzle-helpers"

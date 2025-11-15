@@ -147,7 +147,7 @@ export function QuizViewer({ quiz, userId, isTest = false, completionStatus }: Q
   }
 
   // Show previous results if completed and not retaking
-  if (showPreviousResults && !isRetaking && completionStatus?.score !== null && !results) {
+  if (showPreviousResults && !isRetaking && completionStatus && completionStatus.score !== null && !results) {
     const previousScore = completionStatus.score
     const previousPassed = completionStatus.passed
     return (

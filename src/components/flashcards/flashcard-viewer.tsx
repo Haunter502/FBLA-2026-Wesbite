@@ -5,14 +5,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { RotateCcw, ChevronLeft, ChevronRight, Check, X, RotateCw } from "lucide-react"
-type Flashcard = {
-  id: string
-  front: string
-  back: string
-  hint?: string | null
-  order: number
-  setId: string
-}
+import { flashcards as flashcardsTable } from "@/lib/schema"
+type Flashcard = typeof flashcardsTable.$inferSelect
 
 interface FlashcardViewerProps {
   flashcards: Flashcard[]

@@ -28,7 +28,16 @@ export function getDbSync() {
     const Database = createRequire(sqlitePath);
     
     const { drizzle } = dbModule;
-    const dbPath = (process.env.DATABASE_URL || './dev.db').replace(/^file:/, '');
+    // Use DATABASE_URL from env, or default to drizzle/local.db
+    let dbPath = process.env.DATABASE_URL || './drizzle/local.db';
+    dbPath = dbPath.replace(/^file:/, '');
+    
+    // Resolve relative paths to absolute to ensure it works
+    if (!dbPath.startsWith('/') && !process.env.DATABASE_URL) {
+      const path = require('path');
+      dbPath = path.resolve(process.cwd(), dbPath);
+    }
+    
     const sqlite = new Database(dbPath);
     _db = drizzle(sqlite, { schema });
     return _db;
@@ -37,4 +46,3 @@ export function getDbSync() {
     throw error;
   }
 }
-

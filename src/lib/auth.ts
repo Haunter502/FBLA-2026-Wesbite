@@ -6,7 +6,7 @@ import { db } from "@/lib/db"
 import { compare } from "bcryptjs"
 import { z } from "zod"
 import { eq } from "@/lib/drizzle-helpers"
-import { users } from "../../drizzle/schema"
+import { users } from "@/lib/schema"
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -14,8 +14,9 @@ const credentialsSchema = z.object({
 })
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET || "fallback-secret-change-in-production-min-32-chars",
   adapter: DrizzleAdapter(db) as any,
+  trustHost: true, // Allow dynamic host in development - required for Next.js 15
   providers: [
     CredentialsProvider({
       name: "credentials",

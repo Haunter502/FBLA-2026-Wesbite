@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { tutoringSlots, tutoringRequests } from "../../../../../drizzle/schema"
+import { tutoringSlots, tutoringRequests } from "@/lib/schema"
 import { z } from "zod"
 import { eq } from "@/lib/drizzle-helpers"
 

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { db } from "@/lib/db"
-import { flashcardSets, flashcards, lessons, units } from "../../../../../../drizzle/schema"
+import { flashcardSets, flashcards, lessons, units } from "@/lib/schema"
 import { FlashcardViewer } from "@/components/flashcards/flashcard-viewer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"

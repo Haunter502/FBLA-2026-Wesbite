@@ -4,6 +4,7 @@ import "./globals.css";
 import { NavBar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SessionProvider } from "@/components/providers/session-provider";
+import { ScrollProgressWrapper } from "@/components/layout/scroll-progress-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <SessionProvider>
+          <ScrollProgressWrapper />
           <a href="#main-content" className="skip-to-content">
             Skip to main content
           </a>

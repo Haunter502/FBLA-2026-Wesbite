@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { tutoringSlots, teachers } from "../../../../../drizzle/schema"
+import { tutoringSlots, teachers } from "@/lib/schema"
 import { gte, gt, asc, eq, and } from "@/lib/drizzle-helpers"
 
 export async function GET() {

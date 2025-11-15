@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { tutoringRequests } from "../../../../../drizzle/schema"
+import { tutoringRequests } from "@/lib/schema"
 import { z } from "zod"
 
 const immediateHelpSchema = z.object({

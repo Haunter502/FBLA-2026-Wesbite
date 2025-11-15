@@ -1,48 +1,51 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
+import { db } from "@/lib/db"
+import { contacts } from "@/lib/schema"
 
 const contactSchema = z.object({
-  name: z.string().min(2).max(100),
+  name: z.string().min(1),
   email: z.string().email(),
-  subject: z.string().min(5).max(200),
-  message: z.string().min(10).max(5000),
-});
+  subject: z.string().min(1),
+  message: z.string().min(1),
+})
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await req.json()
+    const parsed = contactSchema.safeParse(body)
 
-    // Validate input
-    const validatedData = contactSchema.parse(body);
-
-    // TODO: Send email via SMTP or third-party service
-    // For now, just log to console
-    console.log("Contact form submission:", validatedData);
-
-    // In production, you would:
-    // 1. Send email to support@numeraedu.com
-    // 2. Store in database
-    // 3. Add rate limiting
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Your message has been received. We'll get back to you soon!",
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { success: false, errors: error.errors },
+        { error: "Invalid input" },
         { status: 400 }
-      );
+      )
     }
 
-    console.error("Contact form error:", error);
+    // Save to database
+    const [contact] = await db
+      .insert(contacts)
+      .values({
+        name: parsed.data.name,
+        email: parsed.data.email,
+        subject: parsed.data.subject,
+        message: parsed.data.message,
+        read: false,
+        responded: false,
+      })
+      .returning()
+
+    console.log("Contact form submission saved:", contact.id)
+
+    // In production, send email here as well
+    // TODO: Send email notification to admin
+
+    return NextResponse.json({ success: true, id: contact.id })
+  } catch (error) {
+    console.error("Contact form error:", error)
     return NextResponse.json(
-      { success: false, message: "Failed to send message" },
+      { error: "Internal server error" },
       { status: 500 }
-    );
+    )
   }
 }

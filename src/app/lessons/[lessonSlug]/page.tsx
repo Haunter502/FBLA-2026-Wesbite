@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
-import { lessons, units, flashcardSets, flashcards, progress } from "../../../../drizzle/schema"
+import { lessons, units, flashcardSets, flashcards, progress } from "@/lib/schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { extractYouTubeId } from "@/lib/utils"
@@ -9,6 +9,11 @@ import { Play, BookOpen, Lightbulb, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { eq, asc, and } from "@/lib/drizzle-helpers"
 import { CompleteLessonButton } from "@/components/lessons/complete-lesson-button"
+import { ScrollReveal } from "@/components/animations/scroll-reveal"
+import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
+import { AnimatedLessonHeader } from "@/components/lessons/animated-lesson-header"
+import { AnimatedVideoCard } from "@/components/lessons/animated-video-card"
+import { AnimatedLessonCard } from "@/components/lessons/animated-lesson-card"
 
 async function getLesson(slug: string, userId?: string) {
   const [lesson] = await db.select().from(lessons).where(eq(lessons.slug, slug)).limit(1)
@@ -24,7 +29,7 @@ async function getLesson(slug: string, userId?: string) {
   const sets = await db.select().from(flashcardSets).where(eq(flashcardSets.lessonId, lesson.id))
 
   const setsWithCards = await Promise.all(
-    sets.map(async (set) => {
+    sets.map(async (set: typeof sets[0]) => {
       const cards = await db
         .select()
         .from(flashcards)
@@ -73,68 +78,24 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-          <Link href="/units" className="hover:text-foreground">
-            Units
-          </Link>
-          <span>/</span>
-          <Link href={`/units/${lesson.unit.slug}`} className="hover:text-foreground">
-            {lesson.unit.title}
-          </Link>
-          <span>/</span>
-          <span>{lesson.title}</span>
-        </div>
-        <h1 className="text-4xl font-bold mb-2">{lesson.title}</h1>
-        <p className="text-lg text-muted-foreground">{lesson.description}</p>
-      </div>
+      <AnimatedLessonHeader
+        unitTitle={lesson.unit.title}
+        unitSlug={lesson.unit.slug}
+        lessonTitle={lesson.title}
+        description={lesson.description}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           {/* Video Section */}
           {lesson.type === "VIDEO" && (youtubeId || lesson.khanUrl) && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Play className="h-5 w-5" />
-                  Video Lesson
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {youtubeId ? (
-                  <div className="aspect-video w-full rounded-lg overflow-hidden">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${youtubeId}`}
-                      title={lesson.title}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                ) : lesson.khanUrl ? (
-                  <div className="aspect-video w-full rounded-lg overflow-hidden">
-                    <iframe
-                      src={lesson.khanUrl}
-                      title={lesson.title}
-                      className="w-full h-full"
-                      allowFullScreen
-                    />
-                  </div>
-                ) : null}
-                {lesson.khanUrl && (
-                  <Button
-                    variant="outline"
-                    className="mt-4"
-                    asChild
-                  >
-                    <a href={lesson.khanUrl} target="_blank" rel="noopener noreferrer">
-                      Open on Khan Academy
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </a>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+            <ScrollReveal>
+              <AnimatedVideoCard
+                title={lesson.title}
+                youtubeId={youtubeId}
+                khanUrl={lesson.khanUrl}
+              />
+            </ScrollReveal>
           )}
 
           {/* Reading Section */}
@@ -264,7 +225,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
                 <CardDescription>Review key terms and concepts</CardDescription>
               </CardHeader>
               <CardContent>
-                {lesson.flashcardSets.map((set) => (
+                {lesson.flashcardSets.map((set: typeof lesson.flashcardSets[0]) => (
                   <Button
                     key={set.id}
                     variant="outline"

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { reviews, users } from '../../../../drizzle/schema';
+import { reviews, users } from '@/lib/schema';
 import { eq, desc } from '@/lib/drizzle-helpers';
 import { z } from 'zod';
 
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating review:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request body', details: error.errors },
+        { error: 'Invalid request body', details: error.issues },
         { status: 400 }
       );
     }
