@@ -65,7 +65,7 @@ export default async function TutoringPage() {
               View available time slots and reserve your spot for personalized help.
             </p>
             {session ? (
-              <TutoringSchedule />
+              <TutoringCalendar />
             ) : (
               <p className="text-sm text-muted-foreground">
                 Please sign in to schedule a session.
