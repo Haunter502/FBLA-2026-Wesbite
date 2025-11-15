@@ -7,53 +7,53 @@ import weekday from "dayjs/plugin/weekday"
 
 dayjs.extend(weekday)
 
-  // Generate slots for the next 60 days (weekdays only) with rotating teachers
+// Generate slots for the next 60 days, every other weekday, 3 times a day with rotating teachers
 async function generateSlotsIfNeeded() {
   const now = new Date()
-  const nowTimestamp = now.getTime() // Milliseconds
-  const sixtyDaysFromNow = dayjs(now).add(60, 'days')
+  const nowTimestamp = Math.floor(now.getTime() / 1000) // Unix seconds
   
   // Get all teachers
   const allTeachers = await db.select().from(teachers)
   
   if (allTeachers.length === 0) {
+    console.log('No teachers found, skipping slot generation')
     return // No teachers to create slots for
   }
 
-  // Check if we have slots for the next week
-  // If not, generate slots for the next 60 days
-  const nextWeekStart = dayjs(now).add(7, 'days').startOf('day').unix()
-  const slotsForNextWeek = await db
+  // Check if we have enough slots for the next 30 days
+  const thirtyDaysFromNow = dayjs(now).add(30, 'days').startOf('day').unix()
+  const existingSlots = await db
     .select()
     .from(tutoringSlots)
-    .where(gte(tutoringSlots.start, nextWeekStart))
-    .limit(1)
+    .where(gte(tutoringSlots.start, nowTimestamp))
+    .limit(100)
 
-  // If we have slots for next week, check if we have enough for 60 days
-  if (slotsForNextWeek.length > 0) {
-    const allFutureSlots = await db
-      .select()
-      .from(tutoringSlots)
-      .where(gte(tutoringSlots.start, nowTimestamp))
-    
-    // Calculate expected slots: ~43 weekdays * 3 time slots * number of teachers
-    const expectedWeekdays = Math.floor(60 * 5 / 7) // ~43 weekdays in 60 days
-    const expectedSlots = expectedWeekdays * 3 * allTeachers.length
-    
-    // If we have at least 80% of expected slots, don't regenerate
-    if (allFutureSlots.length >= expectedSlots * 0.8) {
-      return
-    }
+  // Calculate expected slots: ~15 weekdays (every other day in 30 days) * 3 time slots
+  // Every other day means: day 0, day 2, day 4, etc. (skip day 1, 3, 5)
+  const expectedWeekdays = Math.floor(30 * 5 / 7 / 2) // ~10-11 weekdays (every other)
+  const expectedSlots = expectedWeekdays * 3 // 3 sessions per day
+  
+  // If we have at least 80% of expected slots, don't regenerate
+  if (existingSlots.length >= expectedSlots * 0.8) {
+    console.log(`Have ${existingSlots.length} slots, expected ~${expectedSlots}, skipping generation`)
+    return
   }
   
-  // If we get here, we need to generate slots
+  // Clear existing future slots to regenerate fresh
+  console.log(`Clearing existing future slots and generating new ones...`)
+  try {
+    await db.delete(tutoringSlots).where(gte(tutoringSlots.start, nowTimestamp))
+  } catch (error) {
+    console.error('Error clearing slots:', error)
+  }
+  
+  // Generate slots for next 60 days, every other weekday
   console.log(`Generating tutoring slots for ${allTeachers.length} teachers...`)
 
-  // Generate slots for next 60 weekdays (more sessions)
   const newSlots: Array<{
     teacherId: string
-    start: Date | number
-    end: Date | number
+    start: number
+    end: number
     capacity: number
     spotsLeft: number
   }> = []
@@ -65,8 +65,8 @@ async function generateSlotsIfNeeded() {
     { hour: 18, minute: 0, label: 'evening' },
   ]
 
-  // Generate slots for each weekday, but only every other day
-  let dayIndex = 0 // Track which weekday we're on (for every other day)
+  // Track weekday count (for every other day logic)
+  let weekdayCount = 0
   
   for (let day = 0; day < 60; day++) {
     const date = dayjs(now).add(day, 'day')
@@ -77,30 +77,34 @@ async function generateSlotsIfNeeded() {
       continue
     }
 
-    // Only create slots every other weekday (dayIndex 0, 2, 4, 6, etc.)
-    if (dayIndex % 2 !== 0) {
-      dayIndex++
+    // Only create slots every other weekday
+    // weekdayCount 0, 2, 4, 6... (skip 1, 3, 5, 7...)
+    if (weekdayCount % 2 !== 0) {
+      weekdayCount++
       continue
     }
     
-    dayIndex++
+    weekdayCount++
 
     // Create 3 sessions per day (morning, afternoon, evening) with rotating teachers
-    // Each time slot gets a different teacher, rotating through all teachers
     timeSlots.forEach((timeSlot, timeSlotIndex) => {
-      // Calculate which teacher should teach this time slot
-      // Rotates based on dayIndex and time slot index
-      // This ensures teachers rotate: Day 0: Teacher 0, 1, 2; Day 2: Teacher 2, 0, 1; etc.
-      const teacherIndex = (dayIndex - 1 + timeSlotIndex) % allTeachers.length
+      // Rotate teachers: each day gets different teachers for each time slot
+      // Formula: (weekdayCount/2 + timeSlotIndex) % teacherCount
+      // This ensures rotation: Day 0 (weekdayCount=0): teachers 0,1,2; Day 2 (weekdayCount=2): teachers 1,2,0; etc.
+      const teacherIndex = (Math.floor(weekdayCount / 2) + timeSlotIndex) % allTeachers.length
       const teacher = allTeachers[teacherIndex]
       
       const start = date.hour(timeSlot.hour).minute(timeSlot.minute).second(0).millisecond(0)
       const end = start.add(1, 'hour')
 
+      // Convert to Unix seconds (schema uses mode: 'timestamp')
+      const startUnix = start.unix()
+      const endUnix = end.unix()
+
       newSlots.push({
         teacherId: teacher.id,
-        start: start.toDate(), // Date object (milliseconds)
-        end: end.toDate(),
+        start: startUnix,
+        end: endUnix,
         capacity: 5,
         spotsLeft: 5,
       })
@@ -115,10 +119,10 @@ async function generateSlotsIfNeeded() {
         const batch = newSlots.slice(i, i + batchSize)
         await db.insert(tutoringSlots).values(batch)
       }
-      console.log(`✓ Generated ${newSlots.length} tutoring slots`)
+      console.log(`✓ Generated ${newSlots.length} tutoring slots (every other day, 3 sessions/day, rotating teachers)`)
     } catch (error) {
       console.error('Error inserting slots:', error)
-      // Continue anyway - some slots might already exist
+      throw error
     }
   }
 }
