@@ -9,9 +9,6 @@ import Link from "next/link"
 import { eq, asc } from "@/lib/drizzle-helpers"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
 import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
-import { ParticleBackground } from "@/components/animations/particle-background"
-import { FadeInUp } from "@/components/animations/fade-in-up"
-import { GlowEffect } from "@/components/animations/glow-effect"
 import { AnimatedUnitHeader } from "@/components/units/animated-unit-header"
 import { AnimatedLessonItem } from "@/components/units/animated-lesson-item"
 import { AnimatedQuizTestItem } from "@/components/units/animated-quiz-test-item"
@@ -137,35 +134,24 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* Enhanced background theme */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
-      <div className="absolute inset-0">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
-      </div>
-      <ParticleBackground count={20} />
-      
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
-        <FadeInUp delay={0.1}>
-          <div className="mb-8">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-              <Link href="/units" className="hover:text-foreground transition-colors">
-                Units
-              </Link>
-              <span>/</span>
-              <span>{unit.title}</span>
-            </div>
-            <AnimatedUnitHeader title={unit.title} description={unit.description} />
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <ScrollReveal>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+            <Link href="/units" className="hover:text-foreground transition-colors">
+              Units
+            </Link>
+            <span>/</span>
+            <span>{unit.title}</span>
           </div>
-        </FadeInUp>
+          <AnimatedUnitHeader title={unit.title} description={unit.description} />
+        </div>
+      </ScrollReveal>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Lessons */}
-            <FadeInUp delay={0.2}>
-              <GlowEffect intensity="low">
-                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Lessons */}
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />
@@ -183,24 +169,26 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
                     <StaggerItem key={lesson.id}>
                       <AnimatedLessonItem
                         href={`/lessons/${lesson.slug}`}
-                        lesson={lesson}
+                        lesson={{
+                          order: lesson.order,
+                          title: lesson.title,
+                          description: lesson.description,
+                          duration: lesson.duration,
+                          type: lesson.type,
+                        }}
                         isCompleted={isCompleted}
                         delay={index * 0.1}
                       />
                     </StaggerItem>
                   )
                 })}
-                </StaggerChildren>
-              </CardContent>
-            </Card>
-            </GlowEffect>
-          </FadeInUp>
+              </StaggerChildren>
+            </CardContent>
+          </Card>
 
           {/* Quizzes & Tests */}
           {(unit.quizzes.length > 0 || unit.tests.length > 0) && (
-            <FadeInUp delay={0.3}>
-              <GlowEffect intensity="low">
-                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+            <Card>
               <CardHeader>
                 <CardTitle>Assessments</CardTitle>
                 <CardDescription>Test your knowledge</CardDescription>
@@ -252,38 +240,59 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
                 </StaggerChildren>
               </CardContent>
             </Card>
-            </GlowEffect>
-          </FadeInUp>
           )}
-          </div>
+        </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <FadeInUp delay={0.4}>
-              <GlowEffect intensity="low">
-                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
-            <CardHeader>
-              <CardTitle>Key Skills</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {unit.skills.map((skill: Skill) => (
-                  <div
-                    key={skill.id}
-                    className="px-3 py-2 bg-muted rounded-md text-sm"
-                  >
-                    {skill.name}
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Progress Bar */}
+          {session?.user?.id && unit.lessons.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-muted-foreground">Lessons Completed</span>
+                    <span className="font-semibold">
+                      {Object.values(unit.lessonProgress).filter(Boolean).length} / {unit.lessons.length}
+                    </span>
                   </div>
-                ))}
+                  <div className="w-full bg-muted rounded-full h-2.5">
+                    <div
+                      className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${(Object.values(unit.lessonProgress).filter(Boolean).length / unit.lessons.length) * 100}%`
+                      }}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
-            </GlowEffect>
-          </FadeInUp>
+          )}
 
-          <FadeInUp delay={0.5}>
-            <GlowEffect intensity="low">
-              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+          {unit.skills.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Key Skills</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {unit.skills.map((skill: Skill) => (
+                    <div
+                      key={skill.id}
+                      className="px-3 py-2 bg-muted rounded-md text-sm"
+                    >
+                      {skill.name}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
             <CardHeader>
               <CardTitle>Learning Outcomes</CardTitle>
             </CardHeader>
@@ -301,12 +310,9 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
                   <span className="text-primary mt-1">✓</span>
                   <span>Demonstrate understanding through assessments</span>
                 </li>
-                </ul>
-              </CardContent>
-            </Card>
-            </GlowEffect>
-          </FadeInUp>
-          </div>
+              </ul>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

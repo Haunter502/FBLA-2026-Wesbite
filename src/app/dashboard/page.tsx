@@ -5,15 +5,12 @@ import { getNextBestLesson, getUserProgressByUnit } from "@/lib/recommendations"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ProgressRing } from "@/components/dashboard/progress-ring"
-import { BookOpen, Award, Flame, ArrowRight, TrendingUp } from "lucide-react"
+import { BookOpen, Award, Flame, ArrowRight, TrendingUp, Trophy } from "lucide-react"
 import Link from "next/link"
 import { units, progress, userBadges, badges, streaks } from "@/lib/schema"
 import { eq, and, desc, asc } from "@/lib/drizzle-helpers"
 import { FadeInUp } from "@/components/animations/fade-in-up"
 import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
-import { GlowEffect } from "@/components/animations/glow-effect"
-import { GradientText } from "@/components/animations/gradient-text"
-import { ParticleBackground } from "@/components/animations/particle-background"
 import { AnimatedStatCard } from "@/components/dashboard/animated-stat-card"
 import { AnimatedNumber } from "@/components/dashboard/animated-number"
 import { AnimatedUnitCard } from "@/components/dashboard/animated-unit-card"
@@ -83,46 +80,38 @@ export default async function DashboardPage() {
   const data = await getDashboardData(session.user.id)
 
   return (
-    <div className="relative min-h-screen">
-      <ParticleBackground count={15} />
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
-        <FadeInUp delay={0.1}>
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">
-              Welcome back, <GradientText variant="primary">{session.user.name || "Student"}</GradientText>!
-            </h1>
-            <p className="text-muted-foreground">Continue your Algebra 1 learning journey</p>
-          </div>
-        </FadeInUp>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2">Welcome back, {session.user.name || "Student"}!</h1>
+        <p className="text-muted-foreground">Continue your Algebra 1 learning journey</p>
+      </div>
 
       {/* Stats Grid */}
       <StaggerChildren className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <StaggerItem>
-          <GlowEffect intensity="medium">
-            <AnimatedStatCard>
-              <Card className="h-full hover:shadow-lg hover:shadow-primary/20 transition-all">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    Overall Progress
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-center">
-                    <ProgressRing progress={data.overallProgress} size={120} />
-                  </div>
-                </CardContent>
-              </Card>
-            </AnimatedStatCard>
-          </GlowEffect>
-        </StaggerItem>
-
         <StaggerItem>
           <AnimatedStatCard>
             <Card className="h-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-blue-500" />
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Overall Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-center">
+                  <ProgressRing progress={data.overallProgress} size={120} />
+                </div>
+              </CardContent>
+            </Card>
+          </AnimatedStatCard>
+        </StaggerItem>
+
+        <StaggerItem>
+          <AnimatedStatCard>
+            <Card className="h-full border-2 border-blue-500/50 bg-gradient-to-br from-blue-500/10 via-background to-background">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-blue-500" />
                   Overall Grade
                 </CardTitle>
               </CardHeader>
@@ -131,13 +120,15 @@ export default async function DashboardPage() {
                   {data.overallGrade !== null ? (
                     <>
                       <AnimatedNumber>
-                        <div className="text-4xl font-bold text-blue-500 mb-2">
+                        <div className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent mb-2">
                           {data.overallGrade}%
                         </div>
                       </AnimatedNumber>
-                      <p className="text-sm text-muted-foreground">
-                        {getLetterGrade(data.overallGrade)}
-                      </p>
+                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/30">
+                        <span className="text-lg font-bold text-blue-600">
+                          {getLetterGrade(data.overallGrade)}
+                        </span>
+                      </div>
                     </>
                   ) : (
                     <div className="text-2xl text-muted-foreground">
@@ -274,7 +265,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       )}
-      </div>
     </div>
   )
 }
