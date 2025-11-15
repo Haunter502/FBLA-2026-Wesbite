@@ -11,6 +11,9 @@ import { eq, asc, and } from "@/lib/drizzle-helpers"
 import { CompleteLessonButton } from "@/components/lessons/complete-lesson-button"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
 import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
+import { ParticleBackground } from "@/components/animations/particle-background"
+import { FadeInUp } from "@/components/animations/fade-in-up"
+import { GlowEffect } from "@/components/animations/glow-effect"
 import { AnimatedLessonHeader } from "@/components/lessons/animated-lesson-header"
 import { AnimatedVideoCard } from "@/components/lessons/animated-video-card"
 import { AnimatedLessonCard } from "@/components/lessons/animated-lesson-card"
@@ -77,30 +80,43 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
   const youtubeId = lesson.youtubeId || (lesson.khanUrl ? extractYouTubeId(lesson.khanUrl) : null)
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <AnimatedLessonHeader
-        unitTitle={lesson.unit.title}
-        unitSlug={lesson.unit.slug}
-        lessonTitle={lesson.title}
-        description={lesson.description}
-      />
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Enhanced background theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
+      <div className="absolute inset-0">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+      <ParticleBackground count={20} />
+      
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+        <FadeInUp delay={0.1}>
+          <AnimatedLessonHeader
+            unitTitle={lesson.unit.title}
+            unitSlug={lesson.unit.slug}
+            lessonTitle={lesson.title}
+            description={lesson.description}
+          />
+        </FadeInUp>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Video Section */}
-          {lesson.type === "VIDEO" && (youtubeId || lesson.khanUrl) && (
-            <ScrollReveal>
-              <AnimatedVideoCard
-                title={lesson.title}
-                youtubeId={youtubeId}
-                khanUrl={lesson.khanUrl}
-              />
-            </ScrollReveal>
-          )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Video Section */}
+            {lesson.type === "VIDEO" && (youtubeId || lesson.khanUrl) && (
+              <FadeInUp delay={0.2}>
+                <AnimatedVideoCard
+                  title={lesson.title}
+                  youtubeId={youtubeId}
+                  khanUrl={lesson.khanUrl}
+                />
+              </FadeInUp>
+            )}
 
-          {/* Reading Section */}
-          {lesson.type === "READING" && (
-            <Card>
+            {/* Reading Section */}
+            {lesson.type === "READING" && (
+              <FadeInUp delay={0.2}>
+                <GlowEffect intensity="low">
+                  <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />
@@ -122,14 +138,18 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
                       </a>
                     </Button>
                   )}
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
+              </GlowEffect>
+            </FadeInUp>
           )}
 
           {/* Practice Section */}
           {lesson.type === "EXERCISE" && (
-            <Card>
+            <FadeInUp delay={0.2}>
+              <GlowEffect intensity="low">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
               <CardHeader>
                 <CardTitle>Practice Problems</CardTitle>
                 <CardDescription>
@@ -148,13 +168,17 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
                   <p className="text-muted-foreground">
                     Practice problems will be available soon.
                   </p>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+              </GlowEffect>
+            </FadeInUp>
           )}
 
           {/* Key Concepts */}
-          <Card>
+          <FadeInUp delay={0.3}>
+            <GlowEffect intensity="low">
+              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lightbulb className="h-5 w-5" />
@@ -178,11 +202,15 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
               </ul>
             </CardContent>
           </Card>
-        </div>
+          </GlowEffect>
+        </FadeInUp>
+          </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <Card>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <FadeInUp delay={0.4}>
+              <GlowEffect intensity="low">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
             <CardHeader>
               <CardTitle>Lesson Info</CardTitle>
             </CardHeader>
@@ -214,12 +242,16 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
                   {lesson.unit.title}
                 </Link>
               </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+            </GlowEffect>
+          </FadeInUp>
 
           {/* Flashcards */}
           {lesson.flashcardSets.length > 0 && (
-            <Card>
+            <FadeInUp delay={0.5}>
+              <GlowEffect intensity="low">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
               <CardHeader>
                 <CardTitle>Flashcards</CardTitle>
                 <CardDescription>Review key terms and concepts</CardDescription>
@@ -236,10 +268,13 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
                       {set.title}
                     </Link>
                   </Button>
-                ))}
-              </CardContent>
-            </Card>
+                  ))}
+                </CardContent>
+              </Card>
+              </GlowEffect>
+            </FadeInUp>
           )}
+          </div>
         </div>
       </div>
     </div>

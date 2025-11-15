@@ -28,7 +28,7 @@ export const colors = {
 
 // Numera brand
 export const brand = {
-  name: 'Numera', // Use π symbol in UI
+  name: 'πumera', // Use π symbol in UI
   slogan: 'Math Hub for Algebra 1 — Learn, Practice, Track, Win.',
   colors: {
     primary: colors.primary.DEFAULT,

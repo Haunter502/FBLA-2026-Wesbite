@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { tutoringSlots, teachers } from "@/lib/schema"
 import { TutoringSchedule } from "@/components/tutoring/tutoring-schedule"
+import { TutoringCalendar } from "@/components/tutoring/tutoring-calendar"
 import { ImmediateHelp } from "@/components/tutoring/immediate-help"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, MessageCircle, Clock, Users } from "lucide-react"
@@ -65,7 +66,7 @@ export default async function TutoringPage() {
               View available time slots and reserve your spot for personalized help.
             </p>
             {session ? (
-              <TutoringSchedule />
+              <TutoringCalendar />
             ) : (
               <p className="text-sm text-muted-foreground">
                 Please sign in to schedule a session.
@@ -99,48 +100,6 @@ export default async function TutoringPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>How It Works</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-semibold">
-                  1
-                </div>
-                <h3 className="font-semibold">Choose Your Option</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Schedule a session in advance or request immediate help
-              </p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-semibold">
-                  2
-                </div>
-                <h3 className="font-semibold">Get Matched</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                We'll connect you with an available teacher based on your needs
-              </p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-semibold">
-                  3
-                </div>
-                <h3 className="font-semibold">Learn Together</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Join your session and get personalized help with your questions
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

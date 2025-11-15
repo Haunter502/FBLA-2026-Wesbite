@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { tests, progress } from "@/lib/schema"
 import { eq, and } from "@/lib/drizzle-helpers"
 import { z } from "zod"
+import { checkAndAwardBadges } from "@/lib/badges"
 
 const submitSchema = z.object({
   answers: z.record(z.string(), z.number()).transform((val) => {
@@ -78,6 +79,9 @@ export async function POST(
         completedAt: validated.passed ? new Date() : undefined,
       }).returning()
     }
+
+    // Check and award badges
+    await checkAndAwardBadges(session.user.id)
 
     return NextResponse.json({ success: true, score: validated.score, passed: validated.passed })
   } catch (error) {

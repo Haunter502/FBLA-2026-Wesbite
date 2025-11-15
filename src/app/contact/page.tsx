@@ -12,6 +12,8 @@ import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-ch
 import { GlowEffect } from "@/components/animations/glow-effect"
 import { GradientText } from "@/components/animations/gradient-text"
 import { LoadingSpinner } from "@/components/animations/loading-spinner"
+import { ParticleBackground } from "@/components/animations/particle-background"
+import { FadeInUp } from "@/components/animations/fade-in-up"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -46,9 +48,18 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <ScrollReveal>
-        <div className="mb-12 text-center">
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Enhanced background theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
+      <div className="absolute inset-0">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+      <ParticleBackground count={20} />
+      
+      <div className="container mx-auto px-4 py-8 max-w-4xl relative z-10">
+        <FadeInUp delay={0.1}>
+          <div className="mb-12 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -65,8 +76,8 @@ export default function ContactPage() {
           >
             Have questions? We'd love to hear from you
           </motion.p>
-        </div>
-      </ScrollReveal>
+          </div>
+        </FadeInUp>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <StaggerChildren className="space-y-6">
@@ -133,7 +144,7 @@ export default function ContactPage() {
           </StaggerItem>
         </StaggerChildren>
 
-        <StaggerItem>
+        <FadeInUp delay={0.3}>
           <GlowEffect>
             <Card className="h-full border-2 hover:border-primary/50 transition-colors">
               <CardHeader>
@@ -253,7 +264,8 @@ export default function ContactPage() {
               </CardContent>
             </Card>
           </GlowEffect>
-        </StaggerItem>
+        </FadeInUp>
+      </div>
       </div>
     </div>
   )

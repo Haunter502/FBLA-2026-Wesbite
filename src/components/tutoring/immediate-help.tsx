@@ -75,34 +75,75 @@ export function ImmediateHelp({ userId }: ImmediateHelpProps) {
   }
 
   return (
-    <form onSubmit={handleRequest} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="topic">What do you need help with?</Label>
-        <Input
-          id="topic"
-          placeholder="e.g., Solving quadratic equations, Factoring polynomials..."
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          required
-        />
+    <div className="space-y-4">
+      <form onSubmit={handleRequest} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="topic">What do you need help with?</Label>
+          <Input
+            id="topic"
+            placeholder="e.g., Solving quadratic equations, Factoring polynomials..."
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Requesting...
+            </>
+          ) : (
+            <>
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Request Immediate Help
+            </>
+          )}
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          We'll match you with an available teacher as soon as possible.
+        </p>
+      </form>
+      
+      {/* How It Works Section */}
+      <div className="mt-6 pt-6 border-t">
+        <h3 className="font-semibold text-lg mb-4">How It Works</h3>
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-semibold">
+                1
+              </div>
+              <h4 className="font-semibold">Choose Your Option</h4>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Schedule a session in advance or request immediate help
+            </p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-semibold">
+                2
+              </div>
+              <h4 className="font-semibold">Get Matched</h4>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              We'll connect you with an available teacher based on your needs
+            </p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-semibold">
+                3
+              </div>
+              <h4 className="font-semibold">Learn Together</h4>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Join your session and get personalized help with your questions
+            </p>
+          </div>
+        </div>
       </div>
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? (
-          <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Requesting...
-          </>
-        ) : (
-          <>
-            <MessageCircle className="h-4 w-4 mr-2" />
-            Request Immediate Help
-          </>
-        )}
-      </Button>
-      <p className="text-xs text-muted-foreground">
-        We'll match you with an available teacher as soon as possible.
-      </p>
-    </form>
+    </div>
   )
 }
-

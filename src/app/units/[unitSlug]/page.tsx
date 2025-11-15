@@ -9,6 +9,9 @@ import Link from "next/link"
 import { eq, asc } from "@/lib/drizzle-helpers"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
 import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
+import { ParticleBackground } from "@/components/animations/particle-background"
+import { FadeInUp } from "@/components/animations/fade-in-up"
+import { GlowEffect } from "@/components/animations/glow-effect"
 import { AnimatedUnitHeader } from "@/components/units/animated-unit-header"
 import { AnimatedLessonItem } from "@/components/units/animated-lesson-item"
 import { AnimatedQuizTestItem } from "@/components/units/animated-quiz-test-item"
@@ -134,24 +137,35 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <ScrollReveal>
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-            <Link href="/units" className="hover:text-foreground transition-colors">
-              Units
-            </Link>
-            <span>/</span>
-            <span>{unit.title}</span>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Enhanced background theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
+      <div className="absolute inset-0">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+      </div>
+      <ParticleBackground count={20} />
+      
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+        <FadeInUp delay={0.1}>
+          <div className="mb-8">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              <Link href="/units" className="hover:text-foreground transition-colors">
+                Units
+              </Link>
+              <span>/</span>
+              <span>{unit.title}</span>
+            </div>
+            <AnimatedUnitHeader title={unit.title} description={unit.description} />
           </div>
-          <AnimatedUnitHeader title={unit.title} description={unit.description} />
-        </div>
-      </ScrollReveal>
+        </FadeInUp>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Lessons */}
-          <Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Lessons */}
+            <FadeInUp delay={0.2}>
+              <GlowEffect intensity="low">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />
@@ -176,13 +190,17 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
                     </StaggerItem>
                   )
                 })}
-              </StaggerChildren>
-            </CardContent>
-          </Card>
+                </StaggerChildren>
+              </CardContent>
+            </Card>
+            </GlowEffect>
+          </FadeInUp>
 
           {/* Quizzes & Tests */}
           {(unit.quizzes.length > 0 || unit.tests.length > 0) && (
-            <Card>
+            <FadeInUp delay={0.3}>
+              <GlowEffect intensity="low">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
               <CardHeader>
                 <CardTitle>Assessments</CardTitle>
                 <CardDescription>Test your knowledge</CardDescription>
@@ -234,12 +252,16 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
                 </StaggerChildren>
               </CardContent>
             </Card>
+            </GlowEffect>
+          </FadeInUp>
           )}
-        </div>
+          </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <Card>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <FadeInUp delay={0.4}>
+              <GlowEffect intensity="low">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
             <CardHeader>
               <CardTitle>Key Skills</CardTitle>
             </CardHeader>
@@ -253,11 +275,15 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
                     {skill.name}
                   </div>
                 ))}
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
+            </GlowEffect>
+          </FadeInUp>
 
-          <Card>
+          <FadeInUp delay={0.5}>
+            <GlowEffect intensity="low">
+              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
             <CardHeader>
               <CardTitle>Learning Outcomes</CardTitle>
             </CardHeader>
@@ -275,9 +301,12 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
                   <span className="text-primary mt-1">✓</span>
                   <span>Demonstrate understanding through assessments</span>
                 </li>
-              </ul>
-            </CardContent>
-          </Card>
+                </ul>
+              </CardContent>
+            </Card>
+            </GlowEffect>
+          </FadeInUp>
+          </div>
         </div>
       </div>
     </div>

@@ -51,7 +51,7 @@ export default function SignInPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl">Sign In</CardTitle>
-          <CardDescription>Sign in to your Numera account</CardDescription>
+          <CardDescription>Sign in to your πumera account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

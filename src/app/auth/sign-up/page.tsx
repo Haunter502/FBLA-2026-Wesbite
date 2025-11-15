@@ -78,7 +78,7 @@ export default function SignUpPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl">Sign Up</CardTitle>
-          <CardDescription>Create your Numera account</CardDescription>
+          <CardDescription>Create your πumera account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

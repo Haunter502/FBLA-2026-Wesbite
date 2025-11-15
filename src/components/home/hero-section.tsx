@@ -22,7 +22,7 @@ export function HeroSection() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <span className="text-6xl">π</span> Numera
+              <span className="text-6xl">π</span>umera
             </motion.h1>
             <motion.p
               className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto"

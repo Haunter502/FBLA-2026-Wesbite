@@ -12,6 +12,8 @@ import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-ch
 import { GradientText } from "@/components/animations/gradient-text"
 import { LoadingSpinner } from "@/components/animations/loading-spinner"
 import { GlowEffect } from "@/components/animations/glow-effect"
+import { ParticleBackground } from "@/components/animations/particle-background"
+import { FadeInUp } from "@/components/animations/fade-in-up"
 
 export default function SearchPage() {
   const [query, setQuery] = useState("")
@@ -48,9 +50,18 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <ScrollReveal>
-        <div className="mb-12 text-center">
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Enhanced background theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
+      <div className="absolute inset-0">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+      <ParticleBackground count={20} />
+      
+      <div className="container mx-auto px-4 py-8 max-w-4xl relative z-10">
+        <FadeInUp delay={0.1}>
+          <div className="mb-12 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -67,16 +78,17 @@ export default function SearchPage() {
           >
             Find units, lessons, and skills quickly
           </motion.p>
-        </div>
-      </ScrollReveal>
+          </div>
+        </FadeInUp>
 
-      <motion.form
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        onSubmit={handleSearch}
-        className="mb-8"
-      >
+        <FadeInUp delay={0.2}>
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            onSubmit={handleSearch}
+            className="mb-8"
+          >
         <GlowEffect>
           <div className="flex gap-2">
             <Input
@@ -101,7 +113,8 @@ export default function SearchPage() {
             </Button>
           </div>
         </GlowEffect>
-      </motion.form>
+        </motion.form>
+      </FadeInUp>
 
       {results.length > 0 && (
         <StaggerChildren className="space-y-4">
@@ -134,6 +147,7 @@ export default function SearchPage() {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   )
 }
