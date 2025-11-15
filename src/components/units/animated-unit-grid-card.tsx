@@ -34,7 +34,7 @@ export function AnimatedUnitGridCard({
       whileTap={{ scale: 0.98 }}
     >
       <Link href={href}>
-        <Card className="hover:shadow-xl transition-all cursor-pointer h-full border-2 border-border hover:border-primary group">
+        <Card className="hover:shadow-xl transition-all cursor-pointer h-full border-2 border-border hover:border-primary hover:border-primary/80 group">
           <CardHeader>
             <div className="flex items-start justify-between mb-2">
               <motion.span
