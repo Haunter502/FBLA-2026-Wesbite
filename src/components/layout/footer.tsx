@@ -66,8 +66,6 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Documentation
                 </Link>
               </li>
             </ul>
