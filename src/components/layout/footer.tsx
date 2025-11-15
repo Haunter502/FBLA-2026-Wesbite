@@ -21,18 +21,12 @@ export function Footer() {
               <li>
                 <Link href="/units" className="text-muted-foreground hover:text-foreground transition-colors">
                   Units
-                </Link>
-              </li>
               <li>
                 <Link href="/search" className="text-muted-foreground hover:text-foreground transition-colors">
                   Search
-                </Link>
-              </li>
               <li>
                 <Link href="/resources" className="text-muted-foreground hover:text-foreground transition-colors">
                   Resources
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -42,18 +36,12 @@ export function Footer() {
               <li>
                 <Link href="/tutoring" className="text-muted-foreground hover:text-foreground transition-colors">
                   Tutoring
-                </Link>
-              </li>
               <li>
                 <Link href="/teachers" className="text-muted-foreground hover:text-foreground transition-colors">
                   Teachers
-                </Link>
-              </li>
               <li>
                 <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
                   Contact
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -63,11 +51,7 @@ export function Footer() {
               <li>
                 <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
                   About Us
-                </Link>
-              </li>
               <li>
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
