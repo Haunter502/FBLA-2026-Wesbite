@@ -29,7 +29,7 @@ export function getDbSync() {
     
     const { drizzle } = dbModule;
     // Use DATABASE_URL from env, or default to drizzle/local.db
-    let dbPath = process.env.DATABASE_URL || './drizzle/local.db';
+    let dbPath = process.env.DATABASE_URL || './dev.db';
     dbPath = dbPath.replace(/^file:/, '');
     
     // Resolve relative paths to absolute to ensure it works
