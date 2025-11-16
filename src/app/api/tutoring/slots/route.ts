@@ -42,7 +42,7 @@ async function generateSlotsIfNeeded() {
   // Clear existing future slots to regenerate fresh
   console.log(`Clearing existing future slots and generating new ones...`)
   try {
-    await db.delete(tutoringSlots).where(gte(tutoringSlots.start, nowTimestamp))
+    await db.delete(tutoringSlots).where(gte(tutoringSlots.start, nowTimestamp as any))
   } catch (error) {
     console.error('Error clearing slots:', error)
   }
