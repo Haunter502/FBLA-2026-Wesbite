@@ -76,19 +76,58 @@ async function generateTutoringSlots() {
             const teacherIndex = (weekdayCount + timeSlotIndex) % allTeachers.length
             const teacher = allTeachers[teacherIndex]
 
-            const start = currentDate.hour(timeSlot.hour).minute(0).second(0).toDate()
-            const end = currentDate.hour(timeSlot.hour + 1).minute(0).second(0).toDate()
+            const startDate = currentDate.hour(timeSlot.hour).minute(0).second(0).toDate()
+            const endDate = currentDate.hour(timeSlot.hour + 1).minute(0).second(0).toDate()
 
             newSlots.push({
               teacherId: teacher.id,
-              start,
-              end,
+              start: Math.floor(startDate.getTime() / 1000),
+              end: Math.floor(endDate.getTime() / 1000),
               capacity: 5,
               spotsLeft: 5,
             })
-          })
-        }
-        weekdayCount++
+            newSlots.push({
+              teacherId: teacher.id,
+              start: Math.floor(startDate.getTime() / 1000),
+              end: Math.floor(endDate.getTime() / 1000),
+              capacity: 5,
+              spotsLeft: 5,
+            })
+            newSlots.push({
+              teacherId: teacher.id,
+              start: Math.floor(startDate.getTime() / 1000),
+              end: Math.floor(endDate.getTime() / 1000),
+              capacity: 5,
+              spotsLeft: 5,
+            })
+            newSlots.push({
+              teacherId: teacher.id,
+              start: Math.floor(startDate.getTime() / 1000),
+              end: Math.floor(endDate.getTime() / 1000),
+              capacity: 5,
+              spotsLeft: 5,
+            })
+            newSlots.push({
+              teacherId: teacher.id,
+              start: Math.floor(startDate.getTime() / 1000),
+              end: Math.floor(endDate.getTime() / 1000),
+              capacity: 5,
+              spotsLeft: 5,
+            })
+            newSlots.push({
+              teacherId: teacher.id,
+              start: Math.floor(startDate.getTime() / 1000),
+              end: Math.floor(endDate.getTime() / 1000),
+              capacity: 5,
+              spotsLeft: 5,
+            })
+            newSlots.push({
+              teacherId: teacher.id,
+              start: Math.floor(startDate.getTime() / 1000),
+              end: Math.floor(endDate.getTime() / 1000),
+              capacity: 5,
+              spotsLeft: 5,
+            })
       }
       dayIndex++
     }
