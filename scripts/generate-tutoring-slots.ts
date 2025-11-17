@@ -32,10 +32,10 @@ async function generateTutoringSlots() {
 
     // Clear existing future slots
     const now = new Date()
-    const nowTimestamp = Math.floor(now.getTime() / 1000) // Unix seconds
+    const nowDate = new Date() // Date object for comparison
     
     const existingSlots = await db.select().from(schema.tutoringSlots)
-      .where(gte(schema.tutoringSlots.start, nowTimestamp))
+      .where(gte(schema.tutoringSlots.start, nowDate))
     
     if (existingSlots.length > 0) {
       console.log(`🗑️  Clearing ${existingSlots.length} existing future slots...`)
