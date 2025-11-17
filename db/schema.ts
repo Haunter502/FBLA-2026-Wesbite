@@ -7,7 +7,8 @@ import {
   uniqueIndex,
   primaryKey,
 } from "drizzle-orm/sqlite-core";
-import { createId } from "@paralleldrive/cuid2";
+// Using crypto.randomUUID() instead of @paralleldrive/cuid2 for better compatibility
+const createId = () => crypto.randomUUID();
 
 // Helper function for IDs
 const cuid = () => createId();
