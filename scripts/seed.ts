@@ -1223,7 +1223,7 @@ async function seed() {
 
   // Create quizzes for each unit
   console.log('Creating quizzes...');
-  const quizData = insertedUnits.map((unit, idx) => ({
+  const quizData = insertedUnits.map((unit: typeof insertedUnits[0], idx) => ({
     unitId: unit.id,
     title: `${unit.title} - Unit Quiz`,
     description: `Test your understanding of ${unit.title.toLowerCase()} concepts`,
