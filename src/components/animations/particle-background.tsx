@@ -14,8 +14,11 @@ interface Particle {
 
 export function ParticleBackground({ count = 50 }: { count?: number }) {
   const [particles, setParticles] = useState<Particle[]>([])
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // Only generate particles on client side to avoid hydration mismatch
+    setMounted(true)
     const newParticles: Particle[] = Array.from({ length: count }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -27,8 +30,13 @@ export function ParticleBackground({ count = 50 }: { count?: number }) {
     setParticles(newParticles)
   }, [count])
 
+  // Don't render anything on server to avoid hydration mismatch
+  if (!mounted) {
+    return null
+  }
+
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" suppressHydrationWarning>
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
@@ -56,5 +64,3 @@ export function ParticleBackground({ count = 50 }: { count?: number }) {
     </div>
   )
 }
-
-
