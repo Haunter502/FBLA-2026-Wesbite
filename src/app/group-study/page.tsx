@@ -12,7 +12,6 @@ import { GlowEffect } from '@/components/animations/glow-effect'
 import { ParticleBackground } from '@/components/animations/particle-background'
 import { Users, MessageSquare, BookOpen } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { motion } from 'framer-motion'
 
 async function getAllStudents() {
   return await db
@@ -126,13 +125,9 @@ export default async function GroupStudyPage() {
               <GlassCard className="backdrop-blur-xl bg-gradient-to-br from-primary/10 via-background/80 to-background border-2 border-primary/30 hover:border-primary/50 transition-all duration-300">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-4">
-                    <motion.div
-                      whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
-                      transition={{ duration: 0.5 }}
-                      className="p-4 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg"
-                    >
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg">
                       <Users className="h-7 w-7 text-primary" />
-                    </motion.div>
+                    </div>
                     <div>
                       <div className="text-3xl font-bold text-primary">{studentsWithProgress.length}</div>
                       <div className="text-sm text-muted-foreground font-medium">Active Students</div>
@@ -148,13 +143,9 @@ export default async function GroupStudyPage() {
               <GlassCard className="backdrop-blur-xl bg-gradient-to-br from-blue-500/10 via-background/80 to-background border-2 border-blue-500/30 hover:border-blue-500/50 transition-all duration-300">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-4">
-                    <motion.div
-                      whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
-                      transition={{ duration: 0.5 }}
-                      className="p-4 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/10 shadow-lg"
-                    >
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/10 shadow-lg">
                       <MessageSquare className="h-7 w-7 text-blue-500" />
-                    </motion.div>
+                    </div>
                     <div>
                       <div className="text-3xl font-bold text-blue-500">{userGroups.length}</div>
                       <div className="text-sm text-muted-foreground font-medium">Your Groups</div>
@@ -170,13 +161,9 @@ export default async function GroupStudyPage() {
               <GlassCard className="backdrop-blur-xl bg-gradient-to-br from-green-500/10 via-background/80 to-background border-2 border-green-500/30 hover:border-green-500/50 transition-all duration-300">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-4">
-                    <motion.div
-                      whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
-                      transition={{ duration: 0.5 }}
-                      className="p-4 rounded-xl bg-gradient-to-br from-green-500/20 to-green-500/10 shadow-lg"
-                    >
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-green-500/20 to-green-500/10 shadow-lg">
                       <BookOpen className="h-7 w-7 text-green-500" />
-                    </motion.div>
+                    </div>
                     <div>
                       <div className="text-3xl font-bold text-green-500">
                         {studentsWithProgress.reduce((sum, s) => sum + s.unitProgress.length, 0)}
