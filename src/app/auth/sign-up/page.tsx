@@ -14,7 +14,50 @@ import { GlassCard } from "@/components/animations/glass-card"
 import { GlowEffect } from "@/components/animations/glow-effect"
 import { GradientText } from "@/components/animations/gradient-text"
 import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, CheckCircle2, XCircle } from "lucide-react"
+
+type PasswordStrength = "weak" | "fair" | "good" | "strong"
+
+interface PasswordRequirements {
+  minLength: boolean
+  hasUpperCase: boolean
+  hasLowerCase: boolean
+  hasNumber: boolean
+  hasSpecialChar: boolean
+}
+
+function calculatePasswordStrength(password: string): {
+  strength: PasswordStrength
+  score: number
+  requirements: PasswordRequirements
+} {
+  const requirements: PasswordRequirements = {
+    minLength: password.length >= 8,
+    hasUpperCase: /[A-Z]/.test(password),
+    hasLowerCase: /[a-z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecialChar: /[^A-Za-z0-9]/.test(password),
+  }
+
+  let score = 0
+  if (requirements.minLength) score += 1
+  if (requirements.hasUpperCase) score += 1
+  if (requirements.hasLowerCase) score += 1
+  if (requirements.hasNumber) score += 1
+  if (requirements.hasSpecialChar) score += 1
+
+  // Bonus for length
+  if (password.length >= 12) score += 1
+  if (password.length >= 16) score += 1
+
+  let strength: PasswordStrength = "weak"
+  if (score <= 2) strength = "weak"
+  else if (score <= 4) strength = "fair"
+  else if (score <= 6) strength = "good"
+  else strength = "strong"
+
+  return { strength, score, requirements }
+}
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -24,6 +67,8 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+
+  const passwordStrength = calculatePasswordStrength(password)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,6 +81,12 @@ export default function SignUpPage() {
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters")
+      return
+    }
+
+    // Check password strength
+    if (passwordStrength.strength === "weak" || passwordStrength.strength === "fair") {
+      setError("Please use a stronger password. Include uppercase, lowercase, numbers, and special characters.")
       return
     }
 
@@ -195,6 +246,97 @@ export default function SignUpPage() {
                           minLength={8}
                           className="border-primary/30 focus:border-primary focus:ring-primary/20 bg-background/50 backdrop-blur-sm transition-all"
                         />
+                        
+                        {/* Password Strength Indicator */}
+                        {password && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="space-y-2 mt-3"
+                          >
+                            {/* Strength Bar */}
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground font-medium">Password Strength</span>
+                                <span
+                                  className={`font-semibold ${
+                                    passwordStrength.strength === "weak"
+                                      ? "text-red-500"
+                                      : passwordStrength.strength === "fair"
+                                      ? "text-orange-500"
+                                      : passwordStrength.strength === "good"
+                                      ? "text-yellow-500"
+                                      : "text-green-500"
+                                  }`}
+                                >
+                                  {passwordStrength.strength.charAt(0).toUpperCase() + passwordStrength.strength.slice(1)}
+                                </span>
+                              </div>
+                              <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted/50">
+                                <motion.div
+                                  className={`h-full rounded-full transition-colors ${
+                                    passwordStrength.strength === "weak"
+                                      ? "bg-red-500"
+                                      : passwordStrength.strength === "fair"
+                                      ? "bg-orange-500"
+                                      : passwordStrength.strength === "good"
+                                      ? "bg-yellow-500"
+                                      : "bg-green-500"
+                                  }`}
+                                  initial={{ width: 0 }}
+                                  animate={{
+                                    width: `${(passwordStrength.score / 7) * 100}%`,
+                                  }}
+                                  transition={{ duration: 0.3, ease: "easeOut" }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Requirements Checklist */}
+                            <div className="space-y-1.5 pt-1">
+                              <div className="text-xs font-medium text-muted-foreground mb-1">
+                                Requirements:
+                              </div>
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="space-y-1"
+                              >
+                                {[
+                                  { key: "minLength", label: "At least 8 characters", met: passwordStrength.requirements.minLength },
+                                  { key: "hasUpperCase", label: "One uppercase letter", met: passwordStrength.requirements.hasUpperCase },
+                                  { key: "hasLowerCase", label: "One lowercase letter", met: passwordStrength.requirements.hasLowerCase },
+                                  { key: "hasNumber", label: "One number", met: passwordStrength.requirements.hasNumber },
+                                  { key: "hasSpecialChar", label: "One special character", met: passwordStrength.requirements.hasSpecialChar },
+                                ].map((req, index) => (
+                                  <motion.div
+                                    key={req.key}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="flex items-center gap-2 text-xs"
+                                  >
+                                    {req.met ? (
+                                      <CheckCircle2 className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                                    ) : (
+                                      <XCircle className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0" />
+                                    )}
+                                    <span
+                                      className={
+                                        req.met
+                                          ? "text-green-500 font-medium"
+                                          : "text-muted-foreground"
+                                      }
+                                    >
+                                      {req.label}
+                                    </span>
+                                  </motion.div>
+                                ))}
+                              </motion.div>
+                            </div>
+                          </motion.div>
+                        )}
                       </motion.div>
                     </StaggerItem>
 
