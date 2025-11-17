@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
-import { DrizzleAdapter } from "@auth/drizzle-adapter"
+// import { DrizzleAdapter } from "@auth/drizzle-adapter" // Only needed for OAuth providers
 import CredentialsProvider from "next-auth/providers/credentials"
-import GoogleProvider from "next-auth/providers/google"
+//import GoogleProvider from "next-auth/providers/google"
 import { db } from "@/lib/db"
 import { compare } from "bcryptjs"
 import { z } from "zod"
@@ -15,7 +15,7 @@ const credentialsSchema = z.object({
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET || "fallback-secret-change-in-production-min-32-chars",
-  adapter: DrizzleAdapter(db) as any,
+  // adapter: DrizzleAdapter(db) as any, // Only needed for OAuth providers
   trustHost: true, // Allow dynamic host in development - required for Next.js 15
   providers: [
     CredentialsProvider({
@@ -62,10 +62,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           role: user.role,
         }
       },
-    }),
-    GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_ID || "",
-      clientSecret: process.env.AUTH_GOOGLE_SECRET || "",
     }),
   ],
   session: {
