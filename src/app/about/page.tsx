@@ -16,25 +16,25 @@ const values = [
     icon: Target,
     title: "Our Mission",
     description: "To make Algebra 1 learning engaging, collaborative, and accessible for all students.",
-    gradient: "from-blue-500/30 to-cyan-500/30",
-    iconColor: "text-blue-400",
-    glowColor: "shadow-blue-500/50",
+    gradient: "from-blue-500/40 to-cyan-500/40",
+    iconColor: "text-blue-300",
+    glowColor: "shadow-blue-500/60",
   },
   {
     icon: Users,
     title: "Peer-to-Peer Learning",
     description: "We believe in the power of collaborative learning and peer support.",
-    gradient: "from-purple-500/30 to-pink-500/30",
-    iconColor: "text-purple-400",
-    glowColor: "shadow-purple-500/50",
+    gradient: "from-purple-500/40 to-pink-500/40",
+    iconColor: "text-purple-300",
+    glowColor: "shadow-purple-500/60",
   },
   {
     icon: BookOpen,
     title: "Comprehensive Curriculum",
     description: "14 units covering all essential Algebra 1 topics with interactive content.",
-    gradient: "from-teal-500/30 to-green-500/30",
-    iconColor: "text-teal-400",
-    glowColor: "shadow-teal-500/50",
+    gradient: "from-teal-500/40 to-green-500/40",
+    iconColor: "text-teal-300",
+    glowColor: "shadow-teal-500/60",
   },
 ]
 
@@ -88,17 +88,18 @@ const benefits = [
 
 export default function AboutPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-primary/5 to-accent/5">
-      <ParticleBackground count={50} />
-      
-      {/* Animated background gradient orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-primary/10 to-accent/10">
+      {/* VERY VISIBLE Background Effects */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-accent/15" />
+        <ParticleBackground count={60} />
+        {/* Large animated orbs - VERY VISIBLE */}
         <motion.div
-          className="absolute top-20 left-10 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
+          className="absolute top-20 left-10 w-[500px] h-[500px] bg-primary/30 rounded-full blur-3xl"
           animate={{
-            scale: [1, 1.2, 1],
-            x: [0, 50, 0],
-            y: [0, 30, 0],
+            scale: [1, 1.3, 1],
+            x: [0, 100, 0],
+            y: [0, 50, 0],
           }}
           transition={{
             duration: 8,
@@ -107,11 +108,11 @@ export default function AboutPage() {
           }}
         />
         <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-accent/20 rounded-full blur-3xl"
+          className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-accent/30 rounded-full blur-3xl"
           animate={{
-            scale: [1, 1.3, 1],
-            x: [0, -50, 0],
-            y: [0, -30, 0],
+            scale: [1, 1.4, 1],
+            x: [0, -100, 0],
+            y: [0, -50, 0],
           }}
           transition={{
             duration: 10,
@@ -122,7 +123,7 @@ export default function AboutPage() {
         />
       </div>
       
-      <div className="container mx-auto px-4 py-6 max-w-7xl relative z-10">
+      <div className="container mx-auto px-4 py-4 max-w-7xl relative z-10">
         {/* Hero Section */}
         <ScrollReveal>
           <motion.div
@@ -139,10 +140,10 @@ export default function AboutPage() {
             >
               <div className="relative">
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary blur-3xl opacity-50 rounded-full"
+                  className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary blur-3xl opacity-60 rounded-full"
                   animate={{
-                    scale: [1, 1.1, 1],
-                    opacity: [0.3, 0.5, 0.3],
+                    scale: [1, 1.2, 1],
+                    opacity: [0.4, 0.7, 0.4],
                   }}
                   transition={{
                     duration: 3,
@@ -172,10 +173,10 @@ export default function AboutPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-6"
+          className="mb-4"
         >
-          <GlowEffect intensity="medium">
-            <GlassCard className="p-4">
+          <GlowEffect intensity="high">
+            <GlassCard className="p-4 border-primary/50">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {stats.map((stat, index) => {
                   const Icon = stat.icon
@@ -186,12 +187,12 @@ export default function AboutPage() {
                       whileInView={{ opacity: 1, scale: 1 }}
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
-                      whileHover={{ scale: 1.1 }}
-                      className="text-center"
+                      whileHover={{ scale: 1.15, rotate: 5 }}
+                      className="text-center p-3 rounded-xl bg-primary/10 border border-primary/30"
                     >
-                      <Icon className={`h-8 w-8 ${stat.color} mx-auto mb-2`} />
-                      <div className="text-2xl font-bold mb-1">{stat.value}</div>
-                      <div className="text-sm text-muted-foreground">{stat.label}</div>
+                      <Icon className={`h-8 w-8 ${stat.color} mx-auto mb-2 drop-shadow-lg`} />
+                      <div className="text-3xl font-bold mb-1 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{stat.value}</div>
+                      <div className="text-sm text-muted-foreground font-semibold">{stat.label}</div>
                     </motion.div>
                   )
                 })}
@@ -201,7 +202,7 @@ export default function AboutPage() {
         </motion.div>
 
         {/* Values Grid */}
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {values.map((value, index) => {
             const Icon = value.icon
             return (
@@ -211,14 +212,14 @@ export default function AboutPage() {
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
                   <GlowEffect intensity="high">
-                    <GlassCard className="h-full">
+                    <GlassCard className="h-full border-primary/50">
                       <CardHeader className="pb-3">
                         <motion.div
                           whileHover={{ rotate: [0, -15, 15, -15, 0], scale: 1.2 }}
                           transition={{ duration: 0.6 }}
-                          className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${value.gradient} mb-3 shadow-lg ${value.glowColor}`}
+                          className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${value.gradient} mb-3 shadow-lg ${value.glowColor} border-2 border-primary/40`}
                         >
-                          <Icon className={`h-7 w-7 ${value.iconColor} drop-shadow-lg`} />
+                          <Icon className={`h-8 w-8 ${value.iconColor} drop-shadow-lg`} />
                         </motion.div>
                         <CardTitle className="text-xl mb-2 font-bold">{value.title}</CardTitle>
                       </CardHeader>
@@ -241,7 +242,7 @@ export default function AboutPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-6"
+          className="mb-4"
         >
           <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center">
             <GradientText variant="secondary">Key Features</GradientText>
@@ -256,16 +257,16 @@ export default function AboutPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileHover={{ scale: 1.08, y: -5 }}
                 >
                   <GlowEffect>
-                    <GlassCard className="h-full">
+                    <GlassCard className="h-full border-primary/40">
                       <motion.div
                         animate={{ rotate: [0, 10, -10, 0] }}
                         transition={{ duration: 4, repeat: Infinity, delay: index * 0.5 }}
-                        className="inline-flex p-3 rounded-xl bg-primary/20 mb-3"
+                        className="inline-flex p-3 rounded-xl bg-primary/30 mb-3 border border-primary/50"
                       >
-                        <Icon className="h-6 w-6 text-primary" />
+                        <Icon className="h-7 w-7 text-primary drop-shadow-lg" />
                       </motion.div>
                       <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
                       <p className="text-sm text-muted-foreground">{feature.description}</p>
@@ -283,7 +284,7 @@ export default function AboutPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-6"
+          className="mb-4"
         >
           <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center">
             <GradientText variant="accent">Why Choose Numera?</GradientText>
@@ -301,15 +302,15 @@ export default function AboutPage() {
                   whileHover={{ scale: 1.02, x: index % 2 === 0 ? 5 : -5 }}
                 >
                   <GlowEffect>
-                    <GlassCard>
+                    <GlassCard className="border-primary/40">
                       <div className="flex gap-4">
                         <motion.div
-                          whileHover={{ scale: 1.2, rotate: 360 }}
+                          whileHover={{ scale: 1.3, rotate: 360 }}
                           transition={{ duration: 0.5 }}
                           className="flex-shrink-0"
                         >
-                          <div className="p-3 rounded-xl bg-primary/20">
-                            <Icon className="h-6 w-6 text-primary" />
+                          <div className="p-3 rounded-xl bg-primary/30 border border-primary/50">
+                            <Icon className="h-6 w-6 text-primary drop-shadow-lg" />
                           </div>
                         </motion.div>
                         <div>
@@ -332,7 +333,7 @@ export default function AboutPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="mb-6"
+            className="mb-4"
           >
             <GlowEffect intensity="high">
               <GlassCard className="border-primary/50">
@@ -372,9 +373,9 @@ export default function AboutPage() {
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.6 + i * 0.1 }}
-                        whileHover={{ scale: 1.1 }}
+                        whileHover={{ scale: 1.15, rotate: 5 }}
                       >
-                        <Badge variant="secondary" className="px-3 py-1 bg-primary/20 border-primary/40 text-primary">
+                        <Badge variant="secondary" className="px-4 py-2 bg-primary/30 border-primary/50 text-primary font-semibold text-sm">
                           {tag}
                         </Badge>
                       </motion.div>
