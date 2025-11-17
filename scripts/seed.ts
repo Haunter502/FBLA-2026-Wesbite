@@ -1258,7 +1258,7 @@ async function seed() {
 
   // Create tests (one for each unit)
   console.log('Creating tests...');
-  const testData = insertedUnits.map((unit, idx) => ({
+  const testData = insertedUnits.map((unit: typeof insertedUnits[0], idx) => ({
     unitId: unit.id,
     title: `${unit.title} - Comprehensive Test`,
     description: `Final assessment for ${unit.title.toLowerCase()}`,
