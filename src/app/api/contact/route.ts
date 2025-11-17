@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { db } from "@/lib/db"
 import { contacts } from "@/lib/schema"
-import { sendContactFormNotification } from "@/lib/email"
+// import { sendContactFormNotification } from "@/lib/email"
 
 const contactSchema = z.object({
   name: z.string().min(1),
