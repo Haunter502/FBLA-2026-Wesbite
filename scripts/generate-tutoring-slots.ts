@@ -80,50 +80,50 @@ async function generateTutoringSlots() {
 
             newSlots.push({
               teacherId: teacher.id,
-              start: Math.floor(startDate.getTime() / 1000),
-              end: Math.floor(endDate.getTime() / 1000),
+              start: startDate,
+              end: endDate,
               capacity: 5,
               spotsLeft: 5,
             })
             newSlots.push({
               teacherId: teacher.id,
-              start: Math.floor(startDate.getTime() / 1000),
-              end: Math.floor(endDate.getTime() / 1000),
+              start: startDate,
+              end: endDate,
               capacity: 5,
               spotsLeft: 5,
             })
             newSlots.push({
               teacherId: teacher.id,
-              start: Math.floor(startDate.getTime() / 1000),
-              end: Math.floor(endDate.getTime() / 1000),
+              start: startDate,
+              end: endDate,
               capacity: 5,
               spotsLeft: 5,
             })
             newSlots.push({
               teacherId: teacher.id,
-              start: Math.floor(startDate.getTime() / 1000),
-              end: Math.floor(endDate.getTime() / 1000),
+              start: startDate,
+              end: endDate,
               capacity: 5,
               spotsLeft: 5,
             })
             newSlots.push({
               teacherId: teacher.id,
-              start: Math.floor(startDate.getTime() / 1000),
-              end: Math.floor(endDate.getTime() / 1000),
+              start: startDate,
+              end: endDate,
               capacity: 5,
               spotsLeft: 5,
             })
             newSlots.push({
               teacherId: teacher.id,
-              start: Math.floor(startDate.getTime() / 1000),
-              end: Math.floor(endDate.getTime() / 1000),
+              start: startDate,
+              end: endDate,
               capacity: 5,
               spotsLeft: 5,
             })
             newSlots.push({
               teacherId: teacher.id,
-              start: Math.floor(startDate.getTime() / 1000),
-              end: Math.floor(endDate.getTime() / 1000),
+              start: startDate,
+              end: endDate,
               capacity: 5,
               spotsLeft: 5,
             })
