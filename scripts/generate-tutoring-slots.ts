@@ -85,48 +85,10 @@ async function generateTutoringSlots() {
               capacity: 5,
               spotsLeft: 5,
             })
-            newSlots.push({
-              teacherId: teacher.id,
-              start: startDate,
-              end: endDate,
-              capacity: 5,
-              spotsLeft: 5,
-            })
-            newSlots.push({
-              teacherId: teacher.id,
-              start: startDate,
-              end: endDate,
-              capacity: 5,
-              spotsLeft: 5,
-            })
-            newSlots.push({
-              teacherId: teacher.id,
-              start: startDate,
-              end: endDate,
-              capacity: 5,
-              spotsLeft: 5,
-            })
-            newSlots.push({
-              teacherId: teacher.id,
-              start: startDate,
-              end: endDate,
-              capacity: 5,
-              spotsLeft: 5,
-            })
-            newSlots.push({
-              teacherId: teacher.id,
-              start: startDate,
-              end: endDate,
-              capacity: 5,
-              spotsLeft: 5,
-            })
-            newSlots.push({
-              teacherId: teacher.id,
-              start: startDate,
-              end: endDate,
-              capacity: 5,
-              spotsLeft: 5,
-            })
+          })
+          
+          weekdayCount++
+        }
       }
       dayIndex++
     }
