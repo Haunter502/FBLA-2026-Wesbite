@@ -31,7 +31,6 @@ async function generateTutoringSlots() {
     console.log(`✓ Found ${allTeachers.length} teachers`)
 
     // Clear existing future slots
-    const now = new Date()
     const nowDate = new Date() // Date object for comparison
     
     const existingSlots = await db.select().from(schema.tutoringSlots)
