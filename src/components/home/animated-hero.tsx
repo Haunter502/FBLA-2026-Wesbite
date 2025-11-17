@@ -55,12 +55,12 @@ export function AnimatedHero() {
               <motion.span
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
-                className="inline-block text-6xl mr-2"
+                className="inline-block text-6xl"
               >
                 π
               </motion.span>
               <GradientText variant="primary" className="text-5xl md:text-6xl">
-                Numera
+                umera
               </GradientText>
             </motion.h1>
             <motion.p

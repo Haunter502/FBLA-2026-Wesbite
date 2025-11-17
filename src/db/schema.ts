@@ -1,15 +1,22 @@
 import {
-  sqliteTable,
+  pgTable,
+  sqlite3Table,
   text,
   integer,
+  boolean,
+  timestamp,
+  json,
   uniqueIndex,
   index,
   primaryKey,
 } from "drizzle-orm/sqlite-core";
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 
-// Database table factory - using SQLite
-const table = sqliteTable;
+// Detect database type from environment
+const isPostgres = process.env.DATABASE_URL?.includes("postgresql");
+
+// Database table factory
+const table = isPostgres ? pgTable : sqlite3Table;
 
 // ========== AUTH TABLES (NextAuth/Auth.js) ==========
 
@@ -17,12 +24,12 @@ export const users = table("user", {
   id: text("id").primaryKey(),
   name: text("name"),
   email: text("email").unique().notNull(),
-  emailVerified: integer("emailVerified", { mode: "timestamp" }),
+  emailVerified: timestamp("emailVerified"),
   image: text("image"),
   password: text("password"), // For credentials auth
   role: text("role", { enum: ["STUDENT", "TEACHER", "ADMIN"] }).default("STUDENT"),
-  createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -73,7 +80,7 @@ export const sessions = table(
     userId: text("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    expires: integer("expires", { mode: "timestamp" }).notNull(),
+    expires: timestamp("expires").notNull(),
   },
   (session) => [index("session_userId_idx").on(session.userId)]
 );
@@ -90,7 +97,7 @@ export const verificationTokens = table(
   {
     identifier: text("identifier").notNull(),
     token: text("token").notNull().unique(),
-    expires: integer("expires", { mode: "timestamp" }).notNull(),
+    expires: timestamp("expires").notNull(),
   },
   (vt) => [primaryKey({ columns: [vt.identifier, vt.token] })]
 );
@@ -106,8 +113,8 @@ export const units = table(
     description: text("description").notNull(),
     order: integer("order").notNull(),
     heroImage: text("heroImage"),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (unit) => [
     index("unit_slug_idx").on(unit.slug),
@@ -139,8 +146,8 @@ export const lessons = table(
     youtubeId: text("youtubeId"),
     duration: integer("duration"), // minutes
     order: integer("order").notNull(),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (lesson) => [
     index("lesson_unitId_idx").on(lesson.unitId),
@@ -170,8 +177,8 @@ export const quizzes = table(
     timeLimit: integer("timeLimit"), // minutes
     questions: text("questions").notNull(), // JSON string
     passingScore: integer("passingScore").default(70).notNull(),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (quiz) => [index("quiz_unitId_idx").on(quiz.unitId)]
 );
@@ -196,8 +203,8 @@ export const tests = table(
     timeLimit: integer("timeLimit"), // minutes
     questions: text("questions").notNull(), // JSON string
     passingScore: integer("passingScore").default(70).notNull(),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (test) => [index("test_unitId_idx").on(test.unitId)]
 );
@@ -220,7 +227,7 @@ export const skills = table(
       .notNull()
       .references(() => units.id, { onDelete: "cascade" }),
     description: text("description"),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   (skill) => [
     index("skill_slug_idx").on(skill.slug),
@@ -245,8 +252,8 @@ export const flashcardSets = table(
     unitId: text("unitId").references(() => units.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     description: text("description"),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (fcs) => [
     index("flashcardSet_lessonId_idx").on(fcs.lessonId),
@@ -277,7 +284,7 @@ export const flashcards = table(
     back: text("back").notNull(),
     hint: text("hint"),
     order: integer("order").default(0).notNull(),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   (fc) => [index("flashcard_setId_idx").on(fc.setId)]
 );
@@ -310,10 +317,10 @@ export const progress = table(
       .default("NOT_STARTED")
       .notNull(),
     score: integer("score"),
-    lastViewedAt: integer("lastViewedAt", { mode: "timestamp" }).default(sql`(unixepoch())`),
-    completedAt: integer("completedAt", { mode: "timestamp" }),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    lastViewedAt: timestamp("lastViewedAt").defaultNow(),
+    completedAt: timestamp("completedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (p) => [
     index("progress_userId_idx").on(p.userId),
@@ -357,7 +364,7 @@ export const badges = table(
     name: text("name").notNull(),
     description: text("description").notNull(),
     icon: text("icon"), // icon name or URL
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   (badge) => [index("badge_slug_idx").on(badge.slug)]
 );
@@ -376,7 +383,7 @@ export const userBadges = table(
     badgeId: text("badgeId")
       .notNull()
       .references(() => badges.id, { onDelete: "cascade" }),
-    awardedAt: integer("awardedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    awardedAt: timestamp("awardedAt").defaultNow().notNull(),
     reason: text("reason"),
   },
   (ub) => [
@@ -407,7 +414,7 @@ export const streaks = table(
       .references(() => users.id, { onDelete: "cascade" }),
     current: integer("current").default(0).notNull(),
     longest: integer("longest").default(0).notNull(),
-    lastActiveAt: integer("lastActiveAt", { mode: "timestamp" }).default(sql`(unixepoch())`),
+    lastActiveAt: timestamp("lastActiveAt").defaultNow(),
   },
   (streak) => [index("streak_userId_idx").on(streak.userId)]
 );
@@ -430,9 +437,9 @@ export const reviews = table(
       .references(() => users.id, { onDelete: "cascade" }),
     rating: integer("rating").notNull(), // 1-5
     comment: text("comment"),
-    moderated: integer("moderated", { mode: "boolean" }).default(false).notNull(),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    moderated: boolean("moderated").default(false).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (review) => [
     index("review_userId_idx").on(review.userId),
@@ -458,8 +465,8 @@ export const teachers = table(
     bio: text("bio").notNull(),
     email: text("email").notNull(),
     officeHours: text("officeHours"),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (teacher) => [index("teacher_email_idx").on(teacher.email)]
 );
@@ -475,12 +482,12 @@ export const tutoringSlots = table(
     teacherId: text("teacherId")
       .notNull()
       .references(() => teachers.id, { onDelete: "cascade" }),
-    start: integer("start", { mode: "timestamp" }).notNull(),
-    end: integer("end", { mode: "timestamp" }).notNull(),
+    start: timestamp("start").notNull(),
+    end: timestamp("end").notNull(),
     capacity: integer("capacity").default(5).notNull(),
     spotsLeft: integer("spotsLeft").default(5).notNull(),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (slot) => [
     index("tutoringSlot_teacherId_idx").on(slot.teacherId),
@@ -510,8 +517,8 @@ export const tutoringRequests = table(
       .default("PENDING")
       .notNull(),
     scheduledSlotId: text("scheduledSlotId"),
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updatedAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },
   (tr) => [
     index("tutoringRequest_userId_idx").on(tr.userId),
@@ -538,7 +545,7 @@ export const eventLogs = table(
       .references(() => users.id, { onDelete: "cascade" }),
     type: text("type").notNull(), // e.g., "lesson_completed", "quiz_attempted"
     payload: text("payload").notNull(), // JSON string
-    createdAt: integer("createdAt", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   (el) => [
     index("eventLog_userId_idx").on(el.userId),

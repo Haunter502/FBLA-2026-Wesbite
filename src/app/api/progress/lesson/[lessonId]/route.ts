@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { progress, lessons, units, streaks, eventLogs } from '@/lib/schema';
 import { eq, and } from '@/lib/drizzle-helpers';
 import { z } from 'zod';
+import { checkAndAwardBadges } from '@/lib/badges';
 
 const progressSchema = z.object({
   status: z.enum(['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED']),
@@ -128,6 +129,9 @@ export async function POST(
         type: 'lesson_completed',
         payload: { progressId: progressEntry.id, lessonId },
       });
+
+      // Check and award badges
+      await checkAndAwardBadges(session.user.id);
     }
 
     return NextResponse.json(progressEntry);

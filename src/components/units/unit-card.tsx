@@ -48,7 +48,7 @@ export function UnitCard({
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="secondary">Unit {unit.order}</Badge>
                   {isComplete && (
-                    <Badge variant="default" className="flex items-center gap-1 bg-green-500 hover:bg-green-600">
+                    <Badge variant="success" className="flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
                       Complete
                     </Badge>

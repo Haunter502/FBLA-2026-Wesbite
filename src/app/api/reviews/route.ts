@@ -2,17 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { reviews, users } from '@/lib/schema';
-import { eq, desc } from '@/lib/drizzle-helpers';
+import { eq, desc, and, isNull } from '@/lib/drizzle-helpers';
 import { z } from 'zod';
 
 const reviewSchema = z.object({
   rating: z.number().min(1).max(5),
-  comment: z.string().min(10).max(500).optional(),
+  comment: z.string().max(500).optional().or(z.literal('')),
+  teacherId: z.string().optional(),
 });
 
-// GET all moderated reviews
+// GET all moderated reviews (website reviews only, not teacher-specific)
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const teacherId = searchParams.get('teacherId');
+    
+    // Build query condition
+    const conditions = [eq(reviews.moderated, true)];
+    
+    // If teacherId is provided, filter by teacher; otherwise, only show website reviews (teacherId is null)
+    if (teacherId) {
+      conditions.push(eq(reviews.teacherId, teacherId));
+    } else {
+      conditions.push(isNull(reviews.teacherId));
+    }
+    
     const allReviews = await db
       .select({
         id: reviews.id,
@@ -24,7 +38,7 @@ export async function GET(request: NextRequest) {
       })
       .from(reviews)
       .leftJoin(users, eq(reviews.userId, users.id))
-      .where(eq(reviews.moderated, true))
+      .where(and(...conditions))
       .orderBy(desc(reviews.createdAt))
       .limit(20);
 
@@ -59,6 +73,7 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         rating: validated.rating,
         comment: validated.comment || null,
+        teacherId: validated.teacherId || null,
         moderated: false, // Requires admin approval
       })
       .returning();

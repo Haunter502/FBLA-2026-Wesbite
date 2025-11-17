@@ -7,8 +7,7 @@ let _db: any = null;
 
 // Synchronous version for server components
 export function getDbSync() {
-  // Always create fresh connection to ensure correct database path
-  _db = null;
+  if (_db) return _db;
   
   if (typeof window !== 'undefined') {
     throw new Error('Database can only be accessed on the server');
@@ -29,17 +28,16 @@ export function getDbSync() {
     const Database = createRequire(sqlitePath);
     
     const { drizzle } = dbModule;
-    // Use DATABASE_URL from env, or default to dev.db
+    // Use DATABASE_URL from env, or default to drizzle/local.db
     let dbPath = process.env.DATABASE_URL || './dev.db';
     dbPath = dbPath.replace(/^file:/, '');
     
-    // Always resolve to absolute path to ensure correct database
-    const path = require('path');
-    if (!path.isAbsolute(dbPath)) {
+    // Resolve relative paths to absolute to ensure it works
+    if (!dbPath.startsWith('/') && !process.env.DATABASE_URL) {
+      const path = require('path');
       dbPath = path.resolve(process.cwd(), dbPath);
     }
     
-    console.log('[DB] Connecting to database:', dbPath);
     const sqlite = new Database(dbPath);
     _db = drizzle(sqlite, { schema });
     return _db;
