@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Target, Users, BookOpen, Sparkles, GraduationCap, Heart } from "lucide-react"
+import { Target, Users, BookOpen, Sparkles, GraduationCap, Heart, Award, Zap, TrendingUp, Clock, CheckCircle2, Star } from "lucide-react"
 import { motion } from "framer-motion"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
 import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
@@ -9,6 +9,7 @@ import { GradientText } from "@/components/animations/gradient-text"
 import { GlassCard } from "@/components/animations/glass-card"
 import { ParticleBackground } from "@/components/animations/particle-background"
 import { GlowEffect } from "@/components/animations/glow-effect"
+import { Badge } from "@/components/ui/badge"
 
 const values = [
   {
@@ -55,10 +56,40 @@ const features = [
   },
 ]
 
+const stats = [
+  { icon: BookOpen, label: "Units", value: "14", color: "text-blue-400" },
+  { icon: Zap, label: "Lessons", value: "100+", color: "text-purple-400" },
+  { icon: Users, label: "Students", value: "1,000+", color: "text-teal-400" },
+  { icon: Award, label: "Badges", value: "50+", color: "text-yellow-400" },
+]
+
+const benefits = [
+  {
+    icon: CheckCircle2,
+    title: "Self-Paced Learning",
+    description: "Learn at your own speed with flexible scheduling and on-demand content.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Progress Tracking",
+    description: "Monitor your improvement with detailed analytics and personalized insights.",
+  },
+  {
+    icon: Clock,
+    title: "24/7 Access",
+    description: "Study anytime, anywhere with our always-available platform.",
+  },
+  {
+    icon: Star,
+    title: "Achievement System",
+    description: "Earn badges and rewards as you complete lessons and master concepts.",
+  },
+]
+
 export default function AboutPage() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-primary/5 to-accent/5">
-      <ParticleBackground count={40} />
+      <ParticleBackground count={50} />
       
       {/* Animated background gradient orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -91,20 +122,20 @@ export default function AboutPage() {
         />
       </div>
       
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+      <div className="container mx-auto px-4 py-6 max-w-7xl relative z-10">
         {/* Hero Section */}
         <ScrollReveal>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-            className="mb-8 text-center"
+            className="mb-6 text-center"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="inline-block mb-4"
+              className="inline-block mb-3"
             >
               <div className="relative">
                 <motion.div
@@ -119,7 +150,7 @@ export default function AboutPage() {
                     ease: "easeInOut",
                   }}
                 />
-                <h1 className="relative text-4xl md:text-6xl font-bold mb-3">
+                <h1 className="relative text-4xl md:text-6xl font-bold mb-2">
                   <GradientText variant="primary">About Numera</GradientText>
                 </h1>
               </div>
@@ -135,8 +166,42 @@ export default function AboutPage() {
           </motion.div>
         </ScrollReveal>
 
+        {/* Stats Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mb-6"
+        >
+          <GlowEffect intensity="medium">
+            <GlassCard className="p-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {stats.map((stat, index) => {
+                  const Icon = stat.icon
+                  return (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ scale: 1.1 }}
+                      className="text-center"
+                    >
+                      <Icon className={`h-8 w-8 ${stat.color} mx-auto mb-2`} />
+                      <div className="text-2xl font-bold mb-1">{stat.value}</div>
+                      <div className="text-sm text-muted-foreground">{stat.label}</div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </GlassCard>
+          </GlowEffect>
+        </motion.div>
+
         {/* Values Grid */}
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {values.map((value, index) => {
             const Icon = value.icon
             return (
@@ -170,6 +235,96 @@ export default function AboutPage() {
           })}
         </StaggerChildren>
 
+        {/* Features Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mb-6"
+        >
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center">
+            <GradientText variant="secondary">Key Features</GradientText>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {features.map((feature, index) => {
+              const Icon = feature.icon
+              return (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.05, y: -5 }}
+                >
+                  <GlowEffect>
+                    <GlassCard className="h-full">
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 4, repeat: Infinity, delay: index * 0.5 }}
+                        className="inline-flex p-3 rounded-xl bg-primary/20 mb-3"
+                      >
+                        <Icon className="h-6 w-6 text-primary" />
+                      </motion.div>
+                      <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    </GlassCard>
+                  </GlowEffect>
+                </motion.div>
+              )
+            })}
+          </div>
+        </motion.div>
+
+        {/* Benefits Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mb-6"
+        >
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center">
+            <GradientText variant="accent">Why Choose Numera?</GradientText>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {benefits.map((benefit, index) => {
+              const Icon = benefit.icon
+              return (
+                <motion.div
+                  key={benefit.title}
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02, x: index % 2 === 0 ? 5 : -5 }}
+                >
+                  <GlowEffect>
+                    <GlassCard>
+                      <div className="flex gap-4">
+                        <motion.div
+                          whileHover={{ scale: 1.2, rotate: 360 }}
+                          transition={{ duration: 0.5 }}
+                          className="flex-shrink-0"
+                        >
+                          <div className="p-3 rounded-xl bg-primary/20">
+                            <Icon className="h-6 w-6 text-primary" />
+                          </div>
+                        </motion.div>
+                        <div>
+                          <h3 className="font-bold text-lg mb-2">{benefit.title}</h3>
+                          <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </GlowEffect>
+                </motion.div>
+              )
+            })}
+          </div>
+        </motion.div>
+
         {/* Approach Section */}
         <ScrollReveal>
           <motion.div
@@ -177,6 +332,7 @@ export default function AboutPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
+            className="mb-6"
           >
             <GlowEffect intensity="high">
               <GlassCard className="border-primary/50">
@@ -208,31 +364,21 @@ export default function AboutPage() {
                     personalized recommendations to help you learn at your own pace.
                   </motion.p>
                   
-                  {/* Features Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                    {features.map((feature, index) => {
-                      const Icon = feature.icon
-                      return (
-                        <motion.div
-                          key={feature.title}
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: 0.6 + index * 0.1 }}
-                          whileHover={{ scale: 1.08, y: -5 }}
-                          className="p-5 rounded-xl bg-gradient-to-br from-primary/20 via-background/50 to-accent/20 backdrop-blur-sm border-2 border-primary/30 hover:border-primary/60 transition-all shadow-lg hover:shadow-primary/30"
-                        >
-                          <motion.div
-                            animate={{ rotate: [0, 10, -10, 0] }}
-                            transition={{ duration: 4, repeat: Infinity, delay: index * 0.5 }}
-                          >
-                            <Icon className="h-8 w-8 text-primary mb-3 drop-shadow-lg" />
-                          </motion.div>
-                          <h3 className="font-bold text-base mb-2">{feature.title}</h3>
-                          <p className="text-sm text-muted-foreground">{feature.description}</p>
-                        </motion.div>
-                      )
-                    })}
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {["Self-Paced", "Interactive", "Gamified", "Personalized", "Comprehensive"].map((tag, i) => (
+                      <motion.div
+                        key={tag}
+                        initial={{ opacity: 0, scale: 0 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.6 + i * 0.1 }}
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        <Badge variant="secondary" className="px-3 py-1 bg-primary/20 border-primary/40 text-primary">
+                          {tag}
+                        </Badge>
+                      </motion.div>
+                    ))}
                   </div>
                 </CardContent>
               </GlassCard>
