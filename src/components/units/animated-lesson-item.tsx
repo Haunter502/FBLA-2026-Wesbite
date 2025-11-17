@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Clock, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { Clock, ArrowRight, CheckCircle2, Play, BookOpen, FileText } from 'lucide-react'
 
 interface AnimatedLessonItemProps {
   href: string
@@ -11,6 +11,7 @@ interface AnimatedLessonItemProps {
     title: string
     description: string
     duration?: number | null
+    type?: 'VIDEO' | 'READING' | 'EXERCISE'
   }
   isCompleted: boolean
   delay?: number
@@ -42,6 +43,12 @@ export function AnimatedLessonItem({
           }`}>
             {isCompleted ? (
               <CheckCircle2 className="h-5 w-5" />
+            ) : lesson.type === 'VIDEO' ? (
+              <Play className="h-5 w-5" />
+            ) : lesson.type === 'READING' ? (
+              <BookOpen className="h-5 w-5" />
+            ) : lesson.type === 'EXERCISE' ? (
+              <FileText className="h-5 w-5" />
             ) : (
               lesson.order
             )}

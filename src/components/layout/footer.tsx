@@ -7,8 +7,9 @@ export function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold">π</span><span className="text-xl font-bold">umera</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl font-bold">π</span>
+              <span className="text-xl font-bold">Numera</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Math Hub for Algebra 1 — Learn, Practice, Track, Win.
@@ -65,18 +66,13 @@ export function Footer() {
                   About Us
                 </Link>
               </li>
-              <li>
-                <Link href="/docs" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Documentation
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-8 pt-8 border-t flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} πumera. All rights reserved.
+            © {new Date().getFullYear()} Numera. All rights reserved.
           </p>
           <div className="flex space-x-4 mt-4 sm:mt-0">
             <a href="mailto:contact@numera.com" className="text-muted-foreground hover:text-foreground transition-colors">

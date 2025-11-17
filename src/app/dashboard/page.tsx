@@ -11,9 +11,6 @@ import { units, progress, userBadges, badges, streaks } from "@/lib/schema"
 import { eq, and, desc, asc } from "@/lib/drizzle-helpers"
 import { FadeInUp } from "@/components/animations/fade-in-up"
 import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
-import { GlowEffect } from "@/components/animations/glow-effect"
-import { GradientText } from "@/components/animations/gradient-text"
-import { ParticleBackground } from "@/components/animations/particle-background"
 import { AnimatedStatCard } from "@/components/dashboard/animated-stat-card"
 import { AnimatedNumber } from "@/components/dashboard/animated-number"
 import { AnimatedUnitCard } from "@/components/dashboard/animated-unit-card"
@@ -83,38 +80,30 @@ export default async function DashboardPage() {
   const data = await getDashboardData(session.user.id)
 
   return (
-    <div className="relative min-h-screen">
-      <ParticleBackground count={15} />
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
-        <FadeInUp delay={0.1}>
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">
-              Welcome back, <GradientText variant="primary">{session.user.name || "Student"}</GradientText>!
-            </h1>
-            <p className="text-muted-foreground">Continue your Algebra 1 learning journey</p>
-          </div>
-        </FadeInUp>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2">Welcome back, {session.user.name || "Student"}!</h1>
+        <p className="text-muted-foreground">Continue your Algebra 1 learning journey</p>
+      </div>
 
       {/* Stats Grid */}
       <StaggerChildren className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <StaggerItem>
-          <GlowEffect intensity="medium">
-            <AnimatedStatCard>
-              <Card className="h-full hover:shadow-lg hover:shadow-primary/20 transition-all">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    Overall Progress
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-center">
-                    <ProgressRing progress={data.overallProgress} size={120} />
-                  </div>
-                </CardContent>
-              </Card>
-            </AnimatedStatCard>
-          </GlowEffect>
+          <AnimatedStatCard>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Overall Progress
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-center">
+                  <ProgressRing progress={data.overallProgress} size={120} />
+                </div>
+              </CardContent>
+            </Card>
+          </AnimatedStatCard>
         </StaggerItem>
 
         <StaggerItem>
@@ -274,7 +263,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       )}
-      </div>
     </div>
   )
 }

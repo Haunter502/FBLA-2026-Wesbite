@@ -29,7 +29,6 @@ export const users = sqliteTable('users', {
   emailVerified: integer('email_verified', { mode: 'timestamp' }),
   image: text('image'),
   password: text('password'),
-  bio: text('bio'),
   role: text('role', { enum: userRoles }).notNull().default('STUDENT'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
@@ -236,14 +235,12 @@ export const streaks = sqliteTable('streaks', {
 export const reviews = sqliteTable('reviews', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  teacherId: text('teacher_id').references(() => teachers.id, { onDelete: 'cascade' }),
   rating: integer('rating').notNull(), // 1-5
   comment: text('comment'),
   moderated: integer('moderated', { mode: 'boolean' }).notNull().default(false),
   ...timestamps,
 }, (table) => ({
   userIdIdx: index('reviews_user_id_idx').on(table.userId),
-  teacherIdIdx: index('reviews_teacher_id_idx').on(table.teacherId),
   moderatedIdx: index('reviews_moderated_idx').on(table.moderated),
 }));
 
@@ -359,44 +356,6 @@ export const contacts = sqliteTable('contacts', {
   readIdx: index('contacts_read_idx').on(table.read),
 }));
 
-// Group Study tables
-export const groupMemberRoles = ['MEMBER', 'ADMIN'] as const;
-export type GroupMemberRole = typeof groupMemberRoles[number];
-
-export const studyGroups = sqliteTable('study_groups', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  name: text('name').notNull(),
-  description: text('description'),
-  createdBy: text('created_by').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  ...timestamps,
-}, (table) => ({
-  createdByIdx: index('study_groups_created_by_idx').on(table.createdBy),
-}));
-
-export const groupMembers = sqliteTable('group_members', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  groupId: text('group_id').notNull().references(() => studyGroups.id, { onDelete: 'cascade' }),
-  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  role: text('role', { enum: groupMemberRoles }).notNull().default('MEMBER'),
-  ...timestamps,
-}, (table) => ({
-  groupIdIdx: index('group_members_group_id_idx').on(table.groupId),
-  userIdIdx: index('group_members_user_id_idx').on(table.userId),
-  uniqueMember: uniqueIndex('group_members_unique_idx').on(table.groupId, table.userId),
-}));
-
-export const groupMessages = sqliteTable('group_messages', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  groupId: text('group_id').notNull().references(() => studyGroups.id, { onDelete: 'cascade' }),
-  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  message: text('message').notNull(),
-  ...timestamps,
-}, (table) => ({
-  groupIdIdx: index('group_messages_group_id_idx').on(table.groupId),
-  userIdIdx: index('group_messages_user_id_idx').on(table.userId),
-  createdAtIdx: index('group_messages_created_at_idx').on(table.createdAt),
-}));
-
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
@@ -407,9 +366,6 @@ export const usersRelations = relations(users, ({ many }) => ({
   reviews: many(reviews),
   tutoringRequests: many(tutoringRequests),
   eventLogs: many(eventLogs),
-  createdGroups: many(studyGroups),
-  groupMemberships: many(groupMembers),
-  groupMessages: many(groupMessages),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -513,21 +469,5 @@ export const studyGuidesRelations = relations(studyGuides, ({ one }) => ({
 
 export const videoResourcesRelations = relations(videoResources, ({ one }) => ({
   unit: one(units, { fields: [videoResources.unitId], references: [units.id] }),
-}));
-
-export const studyGroupsRelations = relations(studyGroups, ({ one, many }) => ({
-  creator: one(users, { fields: [studyGroups.createdBy], references: [users.id] }),
-  members: many(groupMembers),
-  messages: many(groupMessages),
-}));
-
-export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
-  group: one(studyGroups, { fields: [groupMembers.groupId], references: [studyGroups.id] }),
-  user: one(users, { fields: [groupMembers.userId], references: [users.id] }),
-}));
-
-export const groupMessagesRelations = relations(groupMessages, ({ one }) => ({
-  group: one(studyGroups, { fields: [groupMessages.groupId], references: [studyGroups.id] }),
-  user: one(users, { fields: [groupMessages.userId], references: [users.id] }),
 }));
 

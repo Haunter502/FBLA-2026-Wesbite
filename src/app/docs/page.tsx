@@ -44,7 +44,7 @@ export default function DocsPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Step-by-step guide for presenting πumera to judges, including key talking points and anticipated questions.
+              Step-by-step guide for presenting Numera to judges, including key talking points and anticipated questions.
             </p>
           </CardContent>
         </Card>
@@ -56,7 +56,7 @@ export default function DocsPage() {
               Student Handbook
             </CardTitle>
             <CardDescription>
-              Guide for using πumera
+              Guide for using Numera
             </CardDescription>
           </CardHeader>
           <CardContent>
