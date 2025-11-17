@@ -5,7 +5,7 @@ import { getNextBestLesson, getUserProgressByUnit } from "@/lib/recommendations"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ProgressRing } from "@/components/dashboard/progress-ring"
-import { BookOpen, Award, Flame, ArrowRight, TrendingUp } from "lucide-react"
+import { BookOpen, Award, Flame, ArrowRight, TrendingUp, Trophy } from "lucide-react"
 import Link from "next/link"
 import { units, progress, userBadges, badges, streaks } from "@/lib/schema"
 import { eq, and, desc, asc } from "@/lib/drizzle-helpers"
@@ -108,10 +108,10 @@ export default async function DashboardPage() {
 
         <StaggerItem>
           <AnimatedStatCard>
-            <Card className="h-full">
+            <Card className="h-full border-2 border-blue-500/50 bg-gradient-to-br from-blue-500/10 via-background to-background">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-blue-500" />
+                  <Trophy className="h-5 w-5 text-blue-500" />
                   Overall Grade
                 </CardTitle>
               </CardHeader>
@@ -120,13 +120,15 @@ export default async function DashboardPage() {
                   {data.overallGrade !== null ? (
                     <>
                       <AnimatedNumber>
-                        <div className="text-4xl font-bold text-blue-500 mb-2">
+                        <div className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent mb-2">
                           {data.overallGrade}%
                         </div>
                       </AnimatedNumber>
-                      <p className="text-sm text-muted-foreground">
-                        {getLetterGrade(data.overallGrade)}
-                      </p>
+                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/20 border border-blue-500/30">
+                        <span className="text-lg font-bold text-blue-600">
+                          {getLetterGrade(data.overallGrade)}
+                        </span>
+                      </div>
                     </>
                   ) : (
                     <div className="text-2xl text-muted-foreground">
