@@ -96,26 +96,35 @@ export function TutoringCalendar() {
   // Get days in current month (weekdays only)
   const daysInMonth = currentMonth.daysInMonth()
   
-  // Get all weekdays in the month with their position
-  const weekdays: { day: number; date: dayjs.Dayjs; weekIndex: number }[] = []
-  let weekIndex = 0
+  // Create a map of all weekdays in the month, keyed by their day of week (0-4 for Mon-Fri)
+  // We'll use this to properly position dates in the grid
+  const weekdaysByDayOfWeek: Record<number, { day: number; date: dayjs.Dayjs }[]> = {
+    0: [], // Monday
+    1: [], // Tuesday
+    2: [], // Wednesday
+    3: [], // Thursday
+    4: [], // Friday
+  }
   
   for (let i = 1; i <= daysInMonth; i++) {
     const date = currentMonth.date(i)
-    const dayOfWeek = date.day()
+    const dayOfWeek = date.day() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     
     // Skip weekends
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       continue
     }
     
-    // dayOfWeek is 1-5 for Mon-Fri (we skip weekends)
-    const dayInWeek = dayOfWeek - 1 // Convert to 0-4 for Mon-Fri
+    // dayOfWeek is 1-5 for Mon-Fri, convert to 0-4 for array index
+    const weekdayIndex = dayOfWeek - 1
     
-    weekdays.push({
+    if (!weekdaysByDayOfWeek[weekdayIndex]) {
+      weekdaysByDayOfWeek[weekdayIndex] = []
+    }
+    
+    weekdaysByDayOfWeek[weekdayIndex].push({
       day: i,
       date,
-      weekIndex: dayInWeek, // Will be used for positioning
     })
   }
 
@@ -197,74 +206,70 @@ export function TutoringCalendar() {
 
       {/* Calendar Grid - Weekdays Only */}
       <div className="grid grid-cols-5 gap-2 mb-4">
-        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day) => (
-          <div key={day} className="text-center text-sm font-medium text-muted-foreground p-2">
-            {day}
+        {/* Header row with weekday labels */}
+        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((dayLabel, colIndex) => (
+          <div key={dayLabel} className="text-center text-sm font-medium text-muted-foreground p-2">
+            {dayLabel}
           </div>
         ))}
-        {/* Create empty cells for days before first weekday */}
-        {(() => {
-          const firstDayOfMonth = currentMonth.startOf('month')
-          const firstDayWeekday = firstDayOfMonth.day() // 0 = Sunday, 1 = Monday, etc.
-          const emptyCells = []
-          // Calculate how many empty cells needed before first weekday
-          // If first day is Sunday (0), skip to Monday (need 0 empty cells, Monday is first)
-          // If first day is Monday (1), need 0 empty cells
-          // If first day is Tuesday (2), need 1 empty cell, etc.
-          // If first day is Saturday (6), need 4 empty cells
-          let daysToSkip = 0
-          if (firstDayWeekday === 0) {
-            daysToSkip = 0 // Sunday, Monday is next
-          } else if (firstDayWeekday === 6) {
-            daysToSkip = 4 // Saturday, need 4 empty cells
-          } else {
-            daysToSkip = firstDayWeekday - 1 // Mon-Fri, need (dayOfWeek - 1) empty cells
-          }
-          for (let i = 0; i < daysToSkip; i++) {
-            emptyCells.push(<div key={`empty-${i}`} />)
-          }
-          return emptyCells
-        })()}
-        {weekdays.map(({ day, date }) => {
-          const dateSlots = getSlotsForDate(day)
-          const isToday = dayjs().isSame(date, 'day')
-          const hasSlots = dateSlots.length > 0
-          const dateKey = date.format('YYYY-MM-DD')
-          const isSelected = selectedDate === dateKey
-
+        
+        {/* Calendar cells - organized by weekday columns */}
+        {[0, 1, 2, 3, 4].map((weekdayIndex) => {
+          const daysInThisColumn = weekdaysByDayOfWeek[weekdayIndex] || []
+          const maxDaysInAnyColumn = Math.max(...[0, 1, 2, 3, 4].map(i => (weekdaysByDayOfWeek[i] || []).length))
+          
           return (
-            <div
-              key={day}
-              className={`min-h-[80px] p-2 border-2 rounded-lg cursor-pointer transition-all ${
-                isToday ? 'bg-primary/20 border-primary shadow-md shadow-primary/20' : 'border-border bg-card'
-              } ${isSelected ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : ''} ${
-                hasSlots ? 'hover:bg-muted/50 hover:border-primary/50 hover:shadow-sm' : 'opacity-60'
-              }`}
-              onClick={() => handleDateClick(day)}
-            >
-              <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-primary' : 'text-foreground'}`}>
-                {day}
-              </div>
-              {hasSlots ? (
-                <div className="space-y-1">
-                  {dateSlots.slice(0, 3).map((slot: Slot) => (
-                    <div
-                      key={slot.id}
-                      className={`text-xs ${getTimeSlotColor(slot)} px-1.5 py-0.5 rounded font-medium truncate`}
-                      title={`${getTimeSlotLabel(slot)}: ${dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start).format('h:mm A')} - ${slot.teacher?.name || 'Teacher'}`}
-                    >
-                      {getTimeSlotLabel(slot)}
+            <div key={weekdayIndex} className="flex flex-col gap-2">
+              {Array.from({ length: maxDaysInAnyColumn }).map((_, rowIndex) => {
+                const weekdayData = daysInThisColumn[rowIndex]
+                
+                if (!weekdayData) {
+                  return <div key={`empty-${weekdayIndex}-${rowIndex}`} className="min-h-[80px]"></div>
+                }
+                
+                const { day, date } = weekdayData
+                const dateSlots = getSlotsForDate(day)
+                const isToday = dayjs().isSame(date, 'day')
+                const hasSlots = dateSlots.length > 0
+                const dateKey = date.format('YYYY-MM-DD')
+                const isSelected = selectedDate === dateKey
+
+                return (
+                  <div
+                    key={day}
+                    className={`min-h-[80px] p-2 border-2 rounded-lg cursor-pointer transition-all ${
+                      isToday ? 'bg-primary/20 border-primary shadow-md shadow-primary/20' : 'border-border bg-card'
+                    } ${isSelected ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : ''} ${
+                      hasSlots ? 'hover:bg-muted/50 hover:border-primary/50 hover:shadow-sm' : 'opacity-60'
+                    }`}
+                    onClick={() => handleDateClick(day)}
+                  >
+                    <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-primary' : 'text-foreground'}`}>
+                      {day}
                     </div>
-                  ))}
-                  {dateSlots.length > 3 && (
-                    <div className="text-xs text-muted-foreground font-medium">
-                      +{dateSlots.length - 3} more
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-xs text-muted-foreground/50">No slots</div>
-              )}
+                    {hasSlots ? (
+                      <div className="space-y-1">
+                        {dateSlots.slice(0, 3).map((slot: Slot) => (
+                          <div
+                            key={slot.id}
+                            className={`text-xs ${getTimeSlotColor(slot)} px-1.5 py-0.5 rounded font-medium truncate`}
+                            title={`${getTimeSlotLabel(slot)}: ${dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start).format('h:mm A')} - ${slot.teacher?.name || 'Teacher'}`}
+                          >
+                            {getTimeSlotLabel(slot)}
+                          </div>
+                        ))}
+                        {dateSlots.length > 3 && (
+                          <div className="text-xs text-muted-foreground font-medium">
+                            +{dateSlots.length - 3} more
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-muted-foreground/50">No slots</div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           )
         })}
