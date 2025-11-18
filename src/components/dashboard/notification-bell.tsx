@@ -90,33 +90,34 @@ export function NotificationBell() {
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          ref={bellRef}
-          variant="ghost"
-          size="sm"
-          className="relative"
-        >
-          <motion.div
-            animate={unreadCount > 0 ? { scale: [1, 1.1, 1] } : {}}
-            transition={{ duration: 0.5, repeat: unreadCount > 0 ? Infinity : 0, repeatDelay: 2 }}
+    <div className="relative">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            ref={bellRef}
+            variant="ghost"
+            size="default"
+            className="relative h-10 w-10 p-0"
           >
-            <Bell className="h-5 w-5" />
-          </motion.div>
-          {unreadCount > 0 && (
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center"
+              animate={unreadCount > 0 ? { scale: [1, 1.1, 1] } : {}}
+              transition={{ duration: 0.5, repeat: unreadCount > 0 ? Infinity : 0, repeatDelay: 2 }}
             >
-              <span className="text-xs font-bold text-primary-foreground">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
+              <Bell className="h-6 w-6 text-foreground" />
             </motion.div>
-          )}
-        </Button>
-      </PopoverTrigger>
+            {unreadCount > 0 && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center"
+              >
+                <span className="text-xs font-bold text-primary-foreground">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              </motion.div>
+            )}
+          </Button>
+        </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">

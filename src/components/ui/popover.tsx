@@ -34,11 +34,9 @@ export function Popover({ children, open: controlledOpen, onOpenChange }: Popove
   }
 
   return (
-    <div className="relative">
-      <PopoverContext.Provider value={{ open, onOpenChange: handleOpenChange }}>
-        {children}
-      </PopoverContext.Provider>
-    </div>
+    <PopoverContext.Provider value={{ open, onOpenChange: handleOpenChange }}>
+      {children}
+    </PopoverContext.Provider>
   )
 }
 

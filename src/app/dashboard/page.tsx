@@ -82,12 +82,14 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div className="flex-1">
           <h1 className="text-4xl font-bold mb-2">Welcome back, {session.user.name || "Student"}!</h1>
           <p className="text-muted-foreground">Continue your Algebra 1 learning journey</p>
         </div>
-        <NotificationBell />
+        <div className="flex-shrink-0">
+          <NotificationBell />
+        </div>
       </div>
 
       {/* Stats Grid */}
