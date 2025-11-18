@@ -15,6 +15,7 @@ import { AnimatedHeading } from "@/components/animations/animated-heading"
 import { FeatureShowcase } from "@/components/features/feature-showcase"
 import { StatsShowcase } from "@/components/features/stats-showcase"
 import { ParticleBackground } from "@/components/animations/particle-background"
+import { GodRays } from "@/components/animations/god-rays"
 import { ToastContainer } from "@/components/animations/toast-notification"
 import { AnimatedSectionHeader } from "@/components/home/animated-section-header"
 import { AnimatedCTASection } from "@/components/home/animated-cta-section"
@@ -47,6 +48,7 @@ export default async function Home() {
     <div className="flex flex-col relative">
       <ToastContainer />
       <ParticleBackground count={30} />
+      <GodRays count={5} />
       
       {/* Hero Section */}
       <AnimatedHero />
