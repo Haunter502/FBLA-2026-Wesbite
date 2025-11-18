@@ -32,6 +32,11 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
+  // Debug: Log when component mounts
+  useEffect(() => {
+    console.log('NotificationBell component mounted')
+  }, [])
+
   const fetchNotifications = async () => {
     try {
       const response = await fetch('/api/notifications')
@@ -189,6 +194,7 @@ export function NotificationBell() {
         )}
       </PopoverContent>
     </Popover>
+    </div>
   )
 }
 
