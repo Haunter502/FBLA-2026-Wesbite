@@ -14,6 +14,7 @@ import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-ch
 import { AnimatedStatCard } from "@/components/dashboard/animated-stat-card"
 import { AnimatedNumber } from "@/components/dashboard/animated-number"
 import { AnimatedUnitCard } from "@/components/dashboard/animated-unit-card"
+import { NotificationBell } from "@/components/dashboard/notification-bell"
 
 function getLetterGrade(score: number): string {
   if (score >= 90) return 'A'
@@ -81,9 +82,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Welcome back, {session.user.name || "Student"}!</h1>
-        <p className="text-muted-foreground">Continue your Algebra 1 learning journey</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Welcome back, {session.user.name || "Student"}!</h1>
+          <p className="text-muted-foreground">Continue your Algebra 1 learning journey</p>
+        </div>
+        <NotificationBell />
       </div>
 
       {/* Stats Grid */}
