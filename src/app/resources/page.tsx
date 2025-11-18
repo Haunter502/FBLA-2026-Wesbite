@@ -26,7 +26,7 @@ export default async function ResourcesPage() {
   const { worksheetsCount, studyGuidesCount, videosCount } = await getResourceCounts()
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative overflow-hidden">
       {/* Enhanced background theme */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
       <div className="absolute inset-0">
@@ -35,7 +35,7 @@ export default async function ResourcesPage() {
       </div>
       <ParticleBackground count={20} />
       
-      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10 pb-16">
         <FadeInUp delay={0.1}>
           <div className="mb-8 text-center">
             <h1 className="text-5xl font-bold mb-2">
