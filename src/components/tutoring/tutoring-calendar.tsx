@@ -152,26 +152,40 @@ export function TutoringCalendar() {
   }
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading calendar...</p>
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+          <div className="h-6 w-32 bg-muted animate-pulse rounded" />
+          <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+        </div>
+        <div className="grid grid-cols-5 gap-1 mb-4">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={i} className="min-h-[80px] bg-muted animate-pulse rounded-md" />
+          ))}
+        </div>
+        <p className="text-sm text-muted-foreground text-center">Loading calendar...</p>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-4">
       {/* Calendar Header */}
-      <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" onClick={previousMonth}>
+      <div className="flex items-center justify-between border-b border-border pb-2">
+        <Button variant="outline" size="sm" onClick={previousMonth} className="border-primary/30 hover:border-primary">
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <h3 className="text-lg font-semibold">
+        <h3 className="text-lg font-semibold text-foreground">
           {currentMonth.format('MMMM YYYY')}
         </h3>
-        <Button variant="outline" size="sm" onClick={nextMonth}>
+        <Button variant="outline" size="sm" onClick={nextMonth} className="border-primary/30 hover:border-primary">
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Calendar Grid - Weekdays Only */}
-      <div className="grid grid-cols-5 gap-1 mb-4">
+      <div className="grid grid-cols-5 gap-2 mb-4">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day) => (
           <div key={day} className="text-center text-sm font-medium text-muted-foreground p-2">
             {day}
@@ -210,31 +224,35 @@ export function TutoringCalendar() {
           return (
             <div
               key={day}
-              className={`min-h-[80px] p-1 border rounded-md cursor-pointer transition-all ${
-                isToday ? 'bg-primary/10 border-primary' : 'border-border'
-              } ${isSelected ? 'ring-2 ring-primary' : ''} ${
-                hasSlots ? 'hover:bg-muted/50' : 'opacity-50'
+              className={`min-h-[80px] p-2 border-2 rounded-lg cursor-pointer transition-all ${
+                isToday ? 'bg-primary/20 border-primary shadow-md shadow-primary/20' : 'border-border bg-card'
+              } ${isSelected ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : ''} ${
+                hasSlots ? 'hover:bg-muted/50 hover:border-primary/50 hover:shadow-sm' : 'opacity-60'
               }`}
               onClick={() => handleDateClick(day)}
             >
-              <div className="text-sm font-medium mb-1">{day}</div>
-              {hasSlots && (
+              <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-primary' : 'text-foreground'}`}>
+                {day}
+              </div>
+              {hasSlots ? (
                 <div className="space-y-1">
                   {dateSlots.slice(0, 3).map((slot: Slot) => (
                     <div
                       key={slot.id}
-                      className={`text-xs ${getTimeSlotColor(slot)} px-1 rounded truncate`}
+                      className={`text-xs ${getTimeSlotColor(slot)} px-1.5 py-0.5 rounded font-medium truncate`}
                       title={`${getTimeSlotLabel(slot)}: ${dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start).format('h:mm A')} - ${slot.teacher?.name || 'Teacher'}`}
                     >
                       {getTimeSlotLabel(slot)}
                     </div>
                   ))}
                   {dateSlots.length > 3 && (
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground font-medium">
                       +{dateSlots.length - 3} more
                     </div>
                   )}
                 </div>
+              ) : (
+                <div className="text-xs text-muted-foreground/50">No slots</div>
               )}
             </div>
           )
@@ -315,9 +333,12 @@ export function TutoringCalendar() {
       )}
 
       {slots.length === 0 && !selectedDate && (
-        <p className="text-sm text-muted-foreground text-center py-4">
-          No upcoming sessions available. Check back later!
-        </p>
+        <div className="border-2 border-dashed border-muted rounded-lg p-6 text-center">
+          <Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+          <p className="text-sm text-muted-foreground font-medium">
+            No upcoming sessions available. Check back later!
+          </p>
+        </div>
       )}
     </div>
   )
