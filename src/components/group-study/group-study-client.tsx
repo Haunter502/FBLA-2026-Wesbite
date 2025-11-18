@@ -14,6 +14,7 @@ import { GlassCard } from '@/components/animations/glass-card'
 import { GlowEffect } from '@/components/animations/glow-effect'
 import { ScrollReveal } from '@/components/animations/scroll-reveal'
 import { StaggerChildren, StaggerItem } from '@/components/animations/stagger-children'
+import { StudentProfileModal } from './student-profile-modal'
 
 interface Student {
   id: string
@@ -22,6 +23,7 @@ interface Student {
   image: string | null
   bio: string | null
   unitProgress: { id: string; title: string }[]
+  inProgressUnits?: { id: string; title: string }[]
 }
 
 interface Group {
@@ -46,6 +48,8 @@ export function GroupStudyClient({ students, userGroups, currentUserId }: GroupS
   const [newGroupDescription, setNewGroupDescription] = useState('')
   const [selectedStudents, setSelectedStudents] = useState<string[]>([])
   const [creating, setCreating] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+  const [showProfileModal, setShowProfileModal] = useState(false)
 
   const filteredStudents = students.filter((student) => {
     if (student.id === currentUserId) return false
@@ -338,7 +342,13 @@ export function GroupStudyClient({ students, userGroups, currentUserId }: GroupS
                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                   >
                     <GlowEffect intensity="low">
-                      <GlassCard className="h-full backdrop-blur-xl bg-gradient-to-br from-primary/5 via-background/90 to-background border-2 border-primary/20 hover:border-primary/40 transition-all duration-300">
+                      <GlassCard 
+                        className="h-full backdrop-blur-xl bg-gradient-to-br from-primary/5 via-background/90 to-background border-2 border-primary/20 hover:border-primary/40 transition-all duration-300 cursor-pointer"
+                        onClick={() => {
+                          setSelectedStudent(student)
+                          setShowProfileModal(true)
+                        }}
+                      >
                         <CardContent className="pt-6">
                           <div className="flex items-start gap-4">
                             <motion.div
@@ -359,6 +369,26 @@ export function GroupStudyClient({ students, userGroups, currentUserId }: GroupS
                                 <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
                                   {student.bio}
                                 </p>
+                              )}
+                              {student.inProgressUnits && student.inProgressUnits.length > 0 && (
+                                <div className="mt-3 space-y-1.5">
+                                  <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+                                    <BookOpen className="h-3 w-3 text-yellow-500" />
+                                    In Progress:
+                                  </div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {student.inProgressUnits.slice(0, 2).map((unit) => (
+                                      <Badge key={unit.id} variant="secondary" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                                        {unit.title}
+                                      </Badge>
+                                    ))}
+                                    {student.inProgressUnits.length > 2 && (
+                                      <Badge variant="secondary" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                                        +{student.inProgressUnits.length - 2}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
                               )}
                               {student.unitProgress.length > 0 && (
                                 <div className="mt-4 space-y-2">
@@ -398,6 +428,14 @@ export function GroupStudyClient({ students, userGroups, currentUserId }: GroupS
           )}
         </div>
       </ScrollReveal>
+
+      {/* Student Profile Modal */}
+      <StudentProfileModal
+        student={selectedStudent}
+        open={showProfileModal}
+        onOpenChange={setShowProfileModal}
+        currentUserId={currentUserId}
+      />
     </div>
   )
 }

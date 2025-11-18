@@ -34,19 +34,24 @@ async function getUserUnitProgress(userId: string) {
       status: progress.status,
     })
     .from(progress)
-    .where(and(eq(progress.userId, userId), eq(progress.status, 'COMPLETED')))
+    .where(eq(progress.userId, userId))
 
   const allUnits = await db.select().from(units)
-  const unitProgressMap = new Map<string, string>()
+  const completedUnits: { id: string; title: string }[] = []
+  const inProgressUnits: { id: string; title: string }[] = []
 
   allUnits.forEach((unit: typeof allUnits[0]) => {
     const unitProg = userProgress.find((p: typeof userProgress[0]) => p.unitId === unit.id)
     if (unitProg) {
-      unitProgressMap.set(unit.id, unit.title)
+      if (unitProg.status === 'COMPLETED') {
+        completedUnits.push({ id: unit.id, title: unit.title })
+      } else if (unitProg.status === 'IN_PROGRESS') {
+        inProgressUnits.push({ id: unit.id, title: unit.title })
+      }
     }
   })
 
-  return Array.from(unitProgressMap.entries()).map(([id, title]) => ({ id, title }))
+  return { completed: completedUnits, inProgress: inProgressUnits }
 }
 
 async function getStudyGroups(userId: string) {
@@ -93,7 +98,8 @@ export default async function GroupStudyPage() {
       const unitProgress = await getUserUnitProgress(student.id)
       return {
         ...student,
-        unitProgress,
+        unitProgress: unitProgress.completed,
+        inProgressUnits: unitProgress.inProgress,
       }
     })
   )
@@ -166,7 +172,7 @@ export default async function GroupStudyPage() {
                     </div>
                     <div>
                       <div className="text-3xl font-bold text-green-500">
-                        {studentsWithProgress.reduce((sum, s) => sum + s.unitProgress.length, 0)}
+                        {studentsWithProgress.reduce((sum, s) => sum + (s.unitProgress?.length || 0), 0)}
                       </div>
                       <div className="text-sm text-muted-foreground font-medium">Units Completed</div>
                     </div>

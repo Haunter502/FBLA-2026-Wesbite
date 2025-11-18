@@ -397,6 +397,21 @@ export const groupMessages = sqliteTable('group_messages', {
   createdAtIdx: index('group_messages_created_at_idx').on(table.createdAt),
 }));
 
+// Direct Messages table (for individual chat between users)
+export const directMessages = sqliteTable('direct_messages', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  senderId: text('sender_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  receiverId: text('receiver_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  message: text('message').notNull(),
+  read: integer('read', { mode: 'boolean' }).notNull().default(false),
+  ...timestamps,
+}, (table) => ({
+  senderIdIdx: index('direct_messages_sender_id_idx').on(table.senderId),
+  receiverIdIdx: index('direct_messages_receiver_id_idx').on(table.receiverId),
+  createdAtIdx: index('direct_messages_created_at_idx').on(table.createdAt),
+  conversationIdx: index('direct_messages_conversation_idx').on(table.senderId, table.receiverId),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
@@ -410,6 +425,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   createdGroups: many(studyGroups),
   groupMemberships: many(groupMembers),
   groupMessages: many(groupMessages),
+  sentMessages: many(directMessages, { relationName: 'sentMessages' }),
+  receivedMessages: many(directMessages, { relationName: 'receivedMessages' }),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -529,5 +546,10 @@ export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
 export const groupMessagesRelations = relations(groupMessages, ({ one }) => ({
   group: one(studyGroups, { fields: [groupMessages.groupId], references: [studyGroups.id] }),
   user: one(users, { fields: [groupMessages.userId], references: [users.id] }),
+}));
+
+export const directMessagesRelations = relations(directMessages, ({ one }) => ({
+  sender: one(users, { fields: [directMessages.senderId], references: [users.id], relationName: 'sentMessages' }),
+  receiver: one(users, { fields: [directMessages.receiverId], references: [users.id], relationName: 'receivedMessages' }),
 }));
 
