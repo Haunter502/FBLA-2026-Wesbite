@@ -116,6 +116,11 @@ export async function POST(
       })
       .returning()
 
+    if (!newMessage) {
+      console.error('Failed to create message - no message returned')
+      return NextResponse.json({ error: 'Failed to create message' }, { status: 500 })
+    }
+
     // Get sender info
     const [sender] = await db
       .select({
@@ -143,7 +148,12 @@ export async function POST(
     })
   } catch (error) {
     console.error('Error sending message:', error)
-    return NextResponse.json({ error: 'Failed to send message' }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error('Error details:', errorMessage)
+    return NextResponse.json({ 
+      error: 'Failed to send message',
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+    }, { status: 500 })
   }
 }
 

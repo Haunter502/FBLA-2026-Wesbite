@@ -90,6 +90,7 @@ export function DirectChatClient({ otherUser, currentUserId }: DirectChatClientP
       })
 
       if (response.ok) {
+        const data = await response.json()
         setNewMessage('')
         await fetchMessages()
         // Scroll to bottom after sending
@@ -98,11 +99,13 @@ export function DirectChatClient({ otherUser, currentUserId }: DirectChatClientP
         }, 100)
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to send message')
+        console.error('API Error:', error)
+        alert(error.details || error.error || 'Failed to send message')
       }
     } catch (error) {
       console.error('Error sending message:', error)
-      alert('Failed to send message. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      alert(`Failed to send message: ${errorMessage}`)
     } finally {
       setSending(false)
     }
