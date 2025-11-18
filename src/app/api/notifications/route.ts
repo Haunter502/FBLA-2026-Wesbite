@@ -57,20 +57,9 @@ export async function GET(request: NextRequest) {
       const groupIds = userGroups.map((ug: typeof userGroups[0]) => ug.groupId)
       
       if (groupIds.length > 0) {
-        const oneDayAgo = Math.floor(Date.now() / 1000) - 86400 // 24 hours ago
-        recentGroupMessages = await db
-          .select({
-            id: groupMessages.id,
-            message: groupMessages.message,
-            createdAt: groupMessages.createdAt,
-            groupId: groupMessages.groupId,
-          })
-          .from(groupMessages)
-          .where(
-            // For now, just get recent messages - can filter by groupIds later if needed
-            // This is a simplified version
-          )
-          .limit(5)
+        // For now, skip group messages to avoid complex query
+        // Can be enhanced later with proper filtering
+        recentGroupMessages = []
       }
     } catch (error) {
       // Group messages might not be available, skip them
