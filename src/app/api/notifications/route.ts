@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { directMessages, tutoringRequests, groupMessages, groupMembers } from '@/lib/schema'
+import { directMessages, tutoringRequests } from '@/lib/schema'
 import { eq, and, or } from '@/lib/drizzle-helpers'
 
 export async function GET(request: NextRequest) {
@@ -45,26 +45,8 @@ export async function GET(request: NextRequest) {
       ))
       .limit(5)
 
-    // Get recent group messages (messages in groups the user is part of, from last 24 hours)
-    // Note: Simplified for now - can be enhanced later
-    let recentGroupMessages: any[] = []
-    try {
-      const userGroups = await db
-        .select({ groupId: groupMembers.groupId })
-        .from(groupMembers)
-        .where(eq(groupMembers.userId, userId))
-
-      const groupIds = userGroups.map((ug: typeof userGroups[0]) => ug.groupId)
-      
-      if (groupIds.length > 0) {
-        // For now, skip group messages to avoid complex query
-        // Can be enhanced later with proper filtering
-        recentGroupMessages = []
-      }
-    } catch (error) {
-      // Group messages might not be available, skip them
-      console.log('Group messages not available:', error)
-    }
+    // Group messages - can be added later when group chat is fully implemented
+    const recentGroupMessages: any[] = []
 
     // Format notifications
     const notifications = [
