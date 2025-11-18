@@ -27,6 +27,7 @@ interface Slot {
 export function TutoringCalendar() {
   const [slots, setSlots] = useState<Slot[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [booked, setBooked] = useState<Set<string>>(new Set())
   const [currentMonth, setCurrentMonth] = useState(dayjs())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -48,11 +49,17 @@ export function TutoringCalendar() {
 
   const fetchSlots = async () => {
     try {
+      setError(null)
       const response = await fetch('/api/tutoring/slots')
+      if (!response.ok) {
+        throw new Error('Failed to fetch slots')
+      }
       const data = await response.json()
       setSlots(data.slots || [])
     } catch (error) {
       console.error('Error fetching slots:', error)
+      setError('Failed to load calendar. Please refresh the page.')
+      setSlots([]) // Ensure slots is always an array
     } finally {
       setLoading(false)
     }
@@ -151,26 +158,30 @@ export function TutoringCalendar() {
     return 'bg-purple-500/20 text-purple-600'
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="h-8 w-8 bg-muted animate-pulse rounded" />
-          <div className="h-6 w-32 bg-muted animate-pulse rounded" />
-          <div className="h-8 w-8 bg-muted animate-pulse rounded" />
-        </div>
-        <div className="grid grid-cols-5 gap-1 mb-4">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} className="min-h-[80px] bg-muted animate-pulse rounded-md" />
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground text-center">Loading calendar...</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-h-[400px] w-full bg-background border-2 border-primary/20 rounded-lg p-4">
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-lg mb-4">
+          {error}
+        </div>
+      )}
+      
+      {loading ? (
+        <>
+          <div className="flex items-center justify-between border-b border-border pb-2">
+            <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+            <div className="h-6 w-32 bg-muted animate-pulse rounded" />
+            <div className="h-8 w-8 bg-muted animate-pulse rounded" />
+          </div>
+          <div className="grid grid-cols-5 gap-2 mb-4">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div key={i} className="min-h-[80px] bg-muted animate-pulse rounded-lg" />
+            ))}
+          </div>
+          <p className="text-sm text-muted-foreground text-center">Loading calendar...</p>
+        </>
+      ) : (
+        <>
       {/* Calendar Header */}
       <div className="flex items-center justify-between border-b border-border pb-2">
         <Button variant="outline" size="sm" onClick={previousMonth} className="border-primary/30 hover:border-primary">
@@ -332,13 +343,15 @@ export function TutoringCalendar() {
         </Card>
       )}
 
-      {slots.length === 0 && !selectedDate && (
-        <div className="border-2 border-dashed border-muted rounded-lg p-6 text-center">
-          <Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-          <p className="text-sm text-muted-foreground font-medium">
-            No upcoming sessions available. Check back later!
-          </p>
-        </div>
+          {slots.length === 0 && !selectedDate && (
+            <div className="border-2 border-dashed border-muted rounded-lg p-6 text-center mt-4">
+              <Calendar className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+              <p className="text-sm text-muted-foreground font-medium">
+                No upcoming sessions available. Check back later!
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
