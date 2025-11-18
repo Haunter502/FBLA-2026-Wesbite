@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavBar } from "@/components/layout/navbar";
@@ -20,16 +20,17 @@ export const metadata: Metadata = {
   title: "Numera - Math Hub for Algebra 1",
   description: "Learn, Practice, Track, Win. A comprehensive learning hub for Algebra 1 students.",
   manifest: "/manifest.json",
-  themeColor: "#00A799",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
   icons: {
     icon: "/favicon.ico",
     apple: "/icon-192.png",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#00A799",
 };
 
 export default function RootLayout({
