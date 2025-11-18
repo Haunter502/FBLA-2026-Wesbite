@@ -87,7 +87,7 @@ export default async function DashboardPage() {
           <h1 className="text-4xl font-bold mb-2">Welcome back, {session.user.name || "Student"}!</h1>
           <p className="text-muted-foreground">Continue your Algebra 1 learning journey</p>
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 flex items-center">
           <NotificationBell />
         </div>
       </div>

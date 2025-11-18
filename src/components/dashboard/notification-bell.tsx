@@ -34,7 +34,7 @@ export function NotificationBell() {
 
   // Debug: Log when component mounts
   useEffect(() => {
-    console.log('NotificationBell component mounted')
+    console.log('NotificationBell component mounted', { unreadCount, notifications: notifications.length })
   }, [])
 
   const fetchNotifications = async () => {
@@ -95,20 +95,27 @@ export function NotificationBell() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative z-50" style={{ display: 'block', visibility: 'visible' }}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             ref={bellRef}
-            variant="ghost"
+            variant="outline"
             size="default"
-            className="relative h-10 w-10 p-0"
+            className="relative h-12 w-12 p-0 border-2 border-primary/50 hover:bg-accent bg-background"
+            style={{ 
+              minWidth: '48px', 
+              minHeight: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
           >
             <motion.div
               animate={unreadCount > 0 ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.5, repeat: unreadCount > 0 ? Infinity : 0, repeatDelay: 2 }}
             >
-              <Bell className="h-6 w-6 text-foreground" />
+              <Bell className="h-7 w-7 text-primary" strokeWidth={2.5} fill="none" />
             </motion.div>
             {unreadCount > 0 && (
               <motion.div
