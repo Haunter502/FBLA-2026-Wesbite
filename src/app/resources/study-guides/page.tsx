@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { studyGuides, units } from "@/lib/schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -32,6 +34,12 @@ async function getStudyGuides() {
 }
 
 export default async function StudyGuidesPage() {
+  const session = await auth()
+
+  if (!session || !session.user?.id) {
+    redirect("/auth/sign-in")
+  }
+
   const studyGuidesList = await getStudyGuides()
 
   return (

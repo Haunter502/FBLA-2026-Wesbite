@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { worksheets, units } from "@/lib/schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -33,6 +35,12 @@ async function getWorksheets() {
 }
 
 export default async function WorksheetsPage() {
+  const session = await auth()
+
+  if (!session || !session.user?.id) {
+    redirect("/auth/sign-in")
+  }
+
   const worksheetsList = await getWorksheets()
 
   return (

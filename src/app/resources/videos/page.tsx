@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { videoResources, units } from "@/lib/schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -41,6 +43,12 @@ function getYouTubeThumbnail(videoId: string | null): string {
 }
 
 export default async function VideosPage() {
+  const session = await auth()
+
+  if (!session || !session.user?.id) {
+    redirect("/auth/sign-in")
+  }
+
   const videosList = await getVideoResources()
 
   return (
