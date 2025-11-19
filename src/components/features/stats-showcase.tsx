@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { AnimatedStat } from '@/components/animations/animated-stats'
-import { Users, BookOpen, Award, TrendingUp } from 'lucide-react'
+import { Users, BookOpen, Award, TrendingUp, Video } from 'lucide-react'
 
 const stats = [
   {
@@ -13,7 +13,7 @@ const stats = [
     color: 'from-blue-500 to-cyan-500',
   },
   {
-    icon: BookOpen,
+    icon: Video,
     value: 112,
     label: 'Video Lessons',
     suffix: '+',
