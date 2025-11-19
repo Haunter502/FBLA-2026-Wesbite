@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, BookOpen, Video } from "lucide-react"
 import Link from "next/link"
@@ -23,6 +25,12 @@ async function getResourceCounts() {
 }
 
 export default async function ResourcesPage() {
+  const session = await auth()
+
+  if (!session || !session.user?.id) {
+    redirect("/auth/sign-in")
+  }
+
   const { worksheetsCount, studyGuidesCount, videosCount } = await getResourceCounts()
 
   return (
