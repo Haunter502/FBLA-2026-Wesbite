@@ -76,6 +76,8 @@ export function QuickPractice() {
   const [isActive, setIsActive] = useState(false)
   const [showResult, setShowResult] = useState(false)
   const [hasStarted, setHasStarted] = useState(false) // New state to track if practice has started
+  const [questionNumber, setQuestionNumber] = useState(1)
+  const [previousProblems, setPreviousProblems] = useState<Problem[]>([])
 
   useEffect(() => {
     if (isActive && timeLeft > 0 && hasStarted) {
@@ -86,13 +88,6 @@ export function QuickPractice() {
     }
   }, [isActive, timeLeft, hasStarted])
 
-  useEffect(() => {
-    // Only generate problem after practice has started
-    if (hasStarted && currentProblem === null && isActive) {
-      setCurrentProblem(generateProblem(difficulty))
-    }
-  }, [difficulty, currentProblem, hasStarted, isActive])
-
   const handleStart = () => {
     setHasStarted(true)
     setIsActive(true)
@@ -101,10 +96,9 @@ export function QuickPractice() {
     setTotal(0)
     setSelectedAnswer(null)
     setShowResult(false)
-    // Don't generate problem immediately - wait a moment for timer to start
-    setTimeout(() => {
-      setCurrentProblem(generateProblem(difficulty))
-    }, 500)
+    setQuestionNumber(1)
+    setPreviousProblems([])
+    setCurrentProblem(generateProblem(difficulty))
   }
 
   const handleAnswer = (answerIndex: number) => {
@@ -117,18 +111,39 @@ export function QuickPractice() {
     if (answerIndex === currentProblem.correctAnswer) {
       setScore((prev) => prev + 1)
     }
+  }
 
-    setTimeout(() => {
-      setCurrentProblem(generateProblem(difficulty))
-      setSelectedAnswer(null)
-      setShowResult(false)
-    }, 2000)
+  const handleNextQuestion = () => {
+    if (selectedAnswer === null) return
+
+    // Store current problem before moving on
+    setPreviousProblems((prev) => [...prev, currentProblem])
+
+    setCurrentProblem(generateProblem(difficulty))
+    setSelectedAnswer(null)
+    setShowResult(false)
+    setQuestionNumber((prev) => prev + 1)
+  }
+
+  const handlePreviousQuestion = () => {
+    if (previousProblems.length === 0 || selectedAnswer !== null) return
+
+    const previous = previousProblems[previousProblems.length - 1]
+    setPreviousProblems((prev) => prev.slice(0, -1))
+    setCurrentProblem(previous)
+    setSelectedAnswer(null)
+    setShowResult(false)
+    setQuestionNumber((prev) => Math.max(1, prev - 1))
   }
 
   const handleTimeUp = () => {
     setIsActive(false)
     setCurrentProblem(null)
     setHasStarted(false)
+    setSelectedAnswer(null)
+    setShowResult(false)
+    setQuestionNumber(1)
+    setPreviousProblems([])
   }
 
   const formatTime = (seconds: number) => {
@@ -218,7 +233,7 @@ export function QuickPractice() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Question {total + 1}</CardTitle>
+                  <CardTitle>Question {questionNumber}</CardTitle>
                   <Badge variant="outline" className="w-fit capitalize">
                     {difficulty}
                   </Badge>
@@ -256,18 +271,36 @@ export function QuickPractice() {
                     })}
                   </div>
                   {showResult && (
-                    <AnimatePresence>
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="p-3 rounded-md bg-muted"
-                      >
-                        <p className="text-sm">
-                          <strong>Explanation:</strong> {currentProblem.explanation}
-                        </p>
-                      </motion.div>
-                    </AnimatePresence>
+                    <div className="space-y-3">
+                      <AnimatePresence>
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, y: 0, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="p-3 rounded-md bg-muted"
+                        >
+                          <p className="text-sm">
+                            <strong>Explanation:</strong> {currentProblem.explanation}
+                          </p>
+                        </motion.div>
+                      </AnimatePresence>
+                      <div className="grid grid-cols-2 gap-4">
+                        <Button
+                          variant="outline"
+                          onClick={handlePreviousQuestion}
+                          disabled={previousProblems.length === 0 || selectedAnswer !== null}
+                        >
+                          Previous Question
+                        </Button>
+                        <Button
+                          onClick={handleNextQuestion}
+                          disabled={selectedAnswer === null}
+                          className="w-full"
+                        >
+                          Next Question
+                        </Button>
+                      </div>
+                    </div>
                   )}
                 </CardContent>
               </Card>
