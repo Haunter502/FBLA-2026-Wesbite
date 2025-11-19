@@ -1,3 +1,5 @@
+import { redirect, notFound } from "next/navigation"
+import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { studyGuides, units } from "@/lib/schema"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -5,7 +7,6 @@ import { BookOpen, Download, ArrowLeft } from "lucide-react"
 import { eq } from "@/lib/drizzle-helpers"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { notFound } from "next/navigation"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
 
 async function getStudyGuide(id: string) {
@@ -32,6 +33,12 @@ async function getStudyGuide(id: string) {
 }
 
 export default async function StudyGuidePage({ params }: { params: Promise<{ id: string }> }) {
+  const session = await auth()
+
+  if (!session || !session.user?.id) {
+    redirect("/auth/sign-in")
+  }
+
   const { id } = await params
   const guide = await getStudyGuide(id)
 
