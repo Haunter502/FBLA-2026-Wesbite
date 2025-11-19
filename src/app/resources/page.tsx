@@ -56,9 +56,9 @@ export default async function ResourcesPage() {
         </FadeInUp>
 
       <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-        <StaggerItem>
-          <FadeInUp delay={0.2}>
-            <GlowEffect intensity="medium">
+        <StaggerItem className="h-full">
+          <FadeInUp delay={0.2} className="h-full">
+            <GlowEffect intensity="medium" className="h-full">
               <AnimatedResourceCard>
                 <Card className="h-full flex flex-col border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
               <CardHeader>
@@ -84,9 +84,9 @@ export default async function ResourcesPage() {
       </FadeInUp>
     </StaggerItem>
 
-    <StaggerItem>
-      <FadeInUp delay={0.3}>
-        <GlowEffect intensity="medium">
+    <StaggerItem className="h-full">
+      <FadeInUp delay={0.3} className="h-full">
+        <GlowEffect intensity="medium" className="h-full">
           <AnimatedResourceCard>
             <Card className="h-full flex flex-col border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
               <CardHeader>
@@ -112,9 +112,9 @@ export default async function ResourcesPage() {
       </FadeInUp>
     </StaggerItem>
 
-    <StaggerItem>
-      <FadeInUp delay={0.4}>
-        <GlowEffect intensity="medium">
+    <StaggerItem className="h-full">
+      <FadeInUp delay={0.4} className="h-full">
+        <GlowEffect intensity="medium" className="h-full">
           <AnimatedResourceCard>
             <Card className="h-full flex flex-col border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
               <CardHeader>

@@ -102,6 +102,46 @@ export function ImmediateHelp({ userId }: ImmediateHelpProps) {
       <p className="text-xs text-muted-foreground">
         We'll match you with an available teacher as soon as possible.
       </p>
+
+      {/* How It Works Section */}
+      <div className="mt-6 pt-6 border-t border-border">
+        <h4 className="font-semibold text-sm mb-4">How It Works</h4>
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground font-semibold text-xs flex-shrink-0">
+                1
+              </div>
+              <h5 className="font-semibold text-sm">Choose Your Option</h5>
+            </div>
+            <p className="text-xs text-muted-foreground ml-8">
+              Schedule a session in advance or request immediate help
+            </p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground font-semibold text-xs flex-shrink-0">
+                2
+              </div>
+              <h5 className="font-semibold text-sm">Get Matched</h5>
+            </div>
+            <p className="text-xs text-muted-foreground ml-8">
+              We'll connect you with an available teacher based on your needs
+            </p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground font-semibold text-xs flex-shrink-0">
+                3
+              </div>
+              <h5 className="font-semibold text-sm">Learn Together</h5>
+            </div>
+            <p className="text-xs text-muted-foreground ml-8">
+              Join your session and get personalized help with your questions
+            </p>
+          </div>
+        </div>
+      </div>
     </form>
   )
 }

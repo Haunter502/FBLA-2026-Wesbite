@@ -334,22 +334,23 @@ export function GroupStudyClient({ students, userGroups, currentUserId }: GroupS
               </CardContent>
             </GlassCard>
           ) : (
-            <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.05}>
+            <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch" staggerDelay={0.05}>
               {filteredStudents.map((student, index) => (
                 <StaggerItem key={student.id}>
                   <motion.div
+                    className="h-full"
                     whileHover={{ y: -8, scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                   >
                     <GlowEffect intensity="low">
                       <GlassCard 
-                        className="h-full backdrop-blur-xl bg-gradient-to-br from-primary/5 via-background/90 to-background border-2 border-primary/20 hover:border-primary/40 transition-all duration-300 cursor-pointer"
+                        className="h-full flex flex-col backdrop-blur-xl bg-gradient-to-br from-primary/5 via-background/90 to-background border-2 border-primary/20 hover:border-primary/40 transition-all duration-300 cursor-pointer"
                         onClick={() => {
                           setSelectedStudent(student)
                           setShowProfileModal(true)
                         }}
                       >
-                        <CardContent className="pt-6">
+                        <CardContent className="pt-6 flex-1 flex flex-col justify-between">
                           <div className="flex items-start gap-4">
                             <motion.div
                               whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
@@ -366,57 +367,54 @@ export function GroupStudyClient({ students, userGroups, currentUserId }: GroupS
                               <div className="font-bold text-lg mb-1">{student.name || 'Student'}</div>
                               <div className="text-xs text-muted-foreground truncate mb-2">{student.email}</div>
                               {student.bio && (
-                                <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
+                                <p className="text-sm text-muted-foreground mt-2 mb-3 leading-relaxed">
                                   {student.bio}
                                 </p>
                               )}
-                              {student.inProgressUnits && student.inProgressUnits.length > 0 && (
-                                <div className="mt-3 space-y-1.5">
-                                  <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                                    <BookOpen className="h-3 w-3 text-yellow-500" />
-                                    In Progress:
-                                  </div>
-                                  <div className="flex flex-wrap gap-1">
-                                    {student.inProgressUnits.slice(0, 2).map((unit) => (
-                                      <Badge key={unit.id} variant="secondary" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
-                                        {unit.title}
-                                      </Badge>
-                                    ))}
-                                    {student.inProgressUnits.length > 2 && (
-                                      <Badge variant="secondary" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
-                                        +{student.inProgressUnits.length - 2}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                              {student.unitProgress.length > 0 && (
-                                <div className="mt-4 space-y-2">
-                                  <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                                    <BookOpen className="h-3.5 w-3.5 text-primary" />
-                                    Completed Units:
-                                  </div>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {student.unitProgress.slice(0, 3).map((unit) => (
-                                      <motion.div
-                                        key={unit.id}
-                                        whileHover={{ scale: 1.1 }}
-                                        transition={{ duration: 0.2 }}
-                                      >
-                                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
-                                          {unit.title}
-                                        </Badge>
-                                      </motion.div>
-                                    ))}
-                                    {student.unitProgress.length > 3 && (
-                                      <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
-                                        +{student.unitProgress.length - 3} more
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </div>
+                              {!student.bio && (
+                                <p className="text-sm text-muted-foreground/60 mt-2 mb-3 italic">
+                                  No bio available
+                                </p>
                               )}
                             </div>
+                          </div>
+                          <div className="mt-auto pt-4">
+                            {student.inProgressUnits && student.inProgressUnits.length > 0 ? (
+                              <div className="space-y-2">
+                                <div className="text-xs font-semibold text-primary flex items-center gap-1.5">
+                                  <BookOpen className="h-3.5 w-3.5 text-yellow-500" />
+                                  In Progress Units:
+                                </div>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {student.inProgressUnits.slice(0, 3).map((unit) => (
+                                    <motion.div
+                                      key={unit.id}
+                                      whileHover={{ scale: 1.05 }}
+                                      transition={{ duration: 0.2 }}
+                                    >
+                                      <Badge variant="secondary" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                                        {unit.title}
+                                      </Badge>
+                                    </motion.div>
+                                  ))}
+                                  {student.inProgressUnits.length > 3 && (
+                                    <Badge variant="secondary" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                                      +{student.inProgressUnits.length - 3} more
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                                  <BookOpen className="h-3.5 w-3.5 text-muted-foreground/40" />
+                                  In Progress Units:
+                                </div>
+                                <p className="text-xs text-muted-foreground/60 italic">
+                                  No units in progress
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </CardContent>
                       </GlassCard>

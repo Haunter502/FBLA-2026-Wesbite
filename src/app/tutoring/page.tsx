@@ -49,8 +49,8 @@ export default async function TutoringPage() {
         </div>
       </ScrollReveal>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8 items-stretch">
+        <Card className="h-full flex flex-col lg:col-span-3">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
@@ -60,21 +60,23 @@ export default async function TutoringPage() {
               Book a tutoring session with an available teacher
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col">
             <p className="text-sm text-muted-foreground mb-4">
               View available time slots and reserve your spot for personalized help.
             </p>
-            {session ? (
-              <TutoringCalendar />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Please sign in to schedule a session.
-              </p>
-            )}
+            <div className="flex-1">
+              {session ? (
+                <TutoringCalendar />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Please sign in to schedule a session.
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="h-full flex flex-col lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
@@ -84,63 +86,22 @@ export default async function TutoringPage() {
               Request immediate assistance when you need it
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col">
             <p className="text-sm text-muted-foreground mb-4">
               Get matched with an available teacher for on-demand help.
             </p>
-            {session?.user?.id ? (
-              <ImmediateHelp userId={session.user.id} />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Please sign in to request immediate help.
-              </p>
-            )}
+            <div className="flex-1">
+              {session?.user?.id ? (
+                <ImmediateHelp userId={session.user.id} />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Please sign in to request immediate help.
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>How It Works</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-semibold">
-                  1
-                </div>
-                <h3 className="font-semibold">Choose Your Option</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Schedule a session in advance or request immediate help
-              </p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-semibold">
-                  2
-                </div>
-                <h3 className="font-semibold">Get Matched</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                We'll connect you with an available teacher based on your needs
-              </p>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-semibold">
-                  3
-                </div>
-                <h3 className="font-semibold">Learn Together</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Join your session and get personalized help with your questions
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

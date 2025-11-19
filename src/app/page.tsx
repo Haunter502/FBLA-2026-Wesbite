@@ -49,6 +49,8 @@ export default async function Home() {
       <ToastContainer />
       <ParticleBackground count={30} />
       <GodRays count={5} />
+      {/* CSS-based god rays layer */}
+      <div className="god-rays-css fixed inset-0 pointer-events-none z-0" />
       
       {/* Hero Section */}
       <AnimatedHero />

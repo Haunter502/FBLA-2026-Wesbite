@@ -85,9 +85,9 @@ export default async function TeachersPage() {
 
         <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch" staggerDelay={0.1}>
           {teachers.map((teacher: typeof teachers[0] & { reviews: any[], averageRating: number | null, reviewCount: number }, index: number) => (
-            <StaggerItem key={teacher.id}>
-              <GlowEffect intensity="medium">
-                <GlassCard className="h-full backdrop-blur-xl bg-gradient-to-br from-primary/10 via-background/90 to-background border-2 border-primary/30 hover:border-primary/50 transition-all duration-300">
+            <StaggerItem key={teacher.id} className="h-full">
+              <GlowEffect intensity="medium" className="h-full">
+                <GlassCard className="h-full flex flex-col backdrop-blur-xl bg-gradient-to-br from-primary/10 via-background/90 to-background border-2 border-primary/30 hover:border-primary/50 transition-all duration-300">
                   <Card className="h-full flex flex-col border-0 bg-transparent shadow-none">
                     <CardHeader>
                       <div className="flex items-center gap-4 mb-4">
@@ -109,19 +109,21 @@ export default async function TeachersPage() {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="flex-1 flex flex-col justify-between">
-                      <CardDescription className="mb-4 text-base leading-relaxed">{teacher.bio}</CardDescription>
-                      <div className="space-y-3 text-sm mb-4">
-                        <div className="flex items-center gap-2 text-muted-foreground p-2 rounded-lg bg-primary/5 border border-primary/10">
-                          <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-                          <span className="truncate">{teacher.email}</span>
-                        </div>
-                        {teacher.officeHours && (
-                          <div className="flex items-start gap-2 text-muted-foreground p-2 rounded-lg bg-primary/5 border border-primary/10">
-                            <Clock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                            <span>{teacher.officeHours}</span>
+                    <CardContent className="flex-1 flex flex-col">
+                      <div className="flex-1">
+                        <CardDescription className="mb-4 text-base leading-relaxed">{teacher.bio}</CardDescription>
+                        <div className="space-y-3 text-sm mb-4">
+                          <div className="flex items-center gap-2 text-muted-foreground p-2 rounded-lg bg-primary/5 border border-primary/10">
+                            <Mail className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="truncate">{teacher.email}</span>
                           </div>
-                        )}
+                          {teacher.officeHours && (
+                            <div className="flex items-start gap-2 text-muted-foreground p-2 rounded-lg bg-primary/5 border border-primary/10">
+                              <Clock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <span>{teacher.officeHours}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Reviews Section */}
