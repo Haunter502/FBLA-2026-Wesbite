@@ -30,6 +30,7 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
+  const bellRef = useRef<HTMLButtonElement>(null)
   const router = useRouter()
 
   // Debug: Log when component mounts
