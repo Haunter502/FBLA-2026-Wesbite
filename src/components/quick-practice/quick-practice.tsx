@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Zap, CheckCircle2, XCircle, Clock, TrendingUp } from 'lucide-react'
+import { Zap, CheckCircle2, XCircle, Clock, TrendingUp, ArrowLeft } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 type Difficulty = 'easy' | 'medium' | 'hard'
@@ -67,6 +68,7 @@ const generateProblem = (difficulty: Difficulty): Problem => {
 }
 
 export function QuickPractice() {
+  const router = useRouter()
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
   const [currentProblem, setCurrentProblem] = useState<Problem | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
@@ -152,6 +154,13 @@ export function QuickPractice() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <div className="mb-4">
+        <Button variant="outline" onClick={() => router.back()} className="flex items-center gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+      </div>
+
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-bold mb-2 flex items-center justify-center gap-2">
           <Zap className="h-8 w-8 text-primary" />
