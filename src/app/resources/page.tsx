@@ -47,12 +47,12 @@ export default async function ResourcesPage() {
           </div>
         </FadeInUp>
 
-      <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
         <StaggerItem>
           <FadeInUp delay={0.2}>
             <GlowEffect intensity="medium">
               <AnimatedResourceCard>
-                <Card className="h-full border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
+                <Card className="h-full flex flex-col border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
@@ -60,12 +60,12 @@ export default async function ResourcesPage() {
                 </CardTitle>
                 <CardDescription>Practice problems and exercises</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex flex-col justify-between">
                 <p className="text-sm text-muted-foreground mb-4">
                   Download printable worksheets for extra practice. {worksheetsCount > 0 && `(${worksheetsCount} available)`}
                 </p>
                 <Link href="/resources/worksheets">
-                  <Button className="w-full">
+                  <Button className="w-full mt-auto">
                     Browse Worksheets
                   </Button>
                 </Link>
@@ -80,7 +80,7 @@ export default async function ResourcesPage() {
       <FadeInUp delay={0.3}>
         <GlowEffect intensity="medium">
           <AnimatedResourceCard>
-            <Card className="h-full border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
+            <Card className="h-full flex flex-col border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />
@@ -88,12 +88,12 @@ export default async function ResourcesPage() {
                 </CardTitle>
                 <CardDescription>Comprehensive review materials</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex flex-col justify-between">
                 <p className="text-sm text-muted-foreground mb-4">
                   Access study guides for each unit. {studyGuidesCount > 0 && `(${studyGuidesCount} available)`}
                 </p>
                 <Link href="/resources/study-guides">
-                  <Button className="w-full">
+                  <Button className="w-full mt-auto">
                     View Study Guides
                   </Button>
                 </Link>
@@ -108,7 +108,7 @@ export default async function ResourcesPage() {
       <FadeInUp delay={0.4}>
         <GlowEffect intensity="medium">
           <AnimatedResourceCard>
-            <Card className="h-full border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
+            <Card className="h-full flex flex-col border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Video className="h-5 w-5" />
@@ -116,12 +116,12 @@ export default async function ResourcesPage() {
                 </CardTitle>
                 <CardDescription>Additional video content</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex flex-col justify-between">
                 <p className="text-sm text-muted-foreground mb-4">
                   Explore supplementary video lessons. {videosCount > 0 && `(${videosCount} available)`}
                 </p>
                 <Link href="/resources/videos">
-                  <Button className="w-full">
+                  <Button className="w-full mt-auto">
                     Watch Videos
                   </Button>
                 </Link>

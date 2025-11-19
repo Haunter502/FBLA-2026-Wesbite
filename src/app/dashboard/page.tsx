@@ -93,17 +93,17 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <StaggerChildren className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <StaggerChildren className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 items-stretch">
         <StaggerItem>
           <AnimatedStatCard>
-            <Card className="h-full">
+            <Card className="h-full flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
                   Overall Progress
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex items-center justify-center">
                 <div className="flex justify-center">
                   <ProgressRing progress={data.overallProgress} size={120} />
                 </div>
@@ -114,14 +114,14 @@ export default async function DashboardPage() {
 
         <StaggerItem>
           <AnimatedStatCard>
-            <Card className="h-full border-2 border-blue-500/50 bg-gradient-to-br from-blue-500/10 via-background to-background">
+            <Card className="h-full flex flex-col border-2 border-blue-500/50 bg-gradient-to-br from-blue-500/10 via-background to-background">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Trophy className="h-5 w-5 text-blue-500" />
                   Overall Grade
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                   {data.overallGrade !== null ? (
                     <>
@@ -149,14 +149,14 @@ export default async function DashboardPage() {
 
         <StaggerItem>
           <AnimatedStatCard>
-            <Card className="h-full">
+            <Card className="h-full flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Flame className="h-5 w-5 text-orange-500" />
                   Streak
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                   <AnimatedNumber>
                     <div className="text-4xl font-bold text-orange-500 mb-2">
@@ -174,14 +174,14 @@ export default async function DashboardPage() {
 
         <StaggerItem>
           <AnimatedStatCard>
-            <Card className="h-full">
+            <Card className="h-full flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="h-5 w-5 text-yellow-500" />
                   Badges Earned
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                   <AnimatedNumber>
                     <div className="text-4xl font-bold text-yellow-500 mb-2">
