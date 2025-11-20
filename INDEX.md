@@ -385,6 +385,6 @@ You have **complete documentation** for:
 ---
 
 **Numera - Math Hub for Algebra 1**  
-*Learn, Practice, Track, Win.*  
+*Learn, Practice, Track.*  
 v0.1.0 | November 2025
 

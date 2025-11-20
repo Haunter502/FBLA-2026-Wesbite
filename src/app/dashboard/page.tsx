@@ -96,7 +96,7 @@ export default async function DashboardPage() {
       <StaggerChildren className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 items-stretch">
         <StaggerItem>
           <AnimatedStatCard>
-            <Card className="h-full flex flex-col">
+            <Card className="min-h-[219px] flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
@@ -114,7 +114,7 @@ export default async function DashboardPage() {
 
         <StaggerItem>
           <AnimatedStatCard>
-            <Card className="h-full flex flex-col border-2 border-blue-500/50 bg-gradient-to-br from-blue-500/10 via-background to-background">
+            <Card className="min-h-[219px] flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Trophy className="h-5 w-5 text-blue-500" />
@@ -149,7 +149,7 @@ export default async function DashboardPage() {
 
         <StaggerItem>
           <AnimatedStatCard>
-            <Card className="h-full flex flex-col">
+            <Card className="min-h-[219px] flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Flame className="h-5 w-5 text-orange-500" />
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
 
         <StaggerItem>
           <AnimatedStatCard>
-            <Card className="h-full flex flex-col">
+            <Card className="min-h-[219px] flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="h-5 w-5 text-yellow-500" />

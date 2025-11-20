@@ -462,6 +462,6 @@ This is a **complete, professional, competition-ready project**.
 ---
 
 **Numera - Math Hub for Algebra 1**  
-*Learn, Practice, Track, Win.*  
+*Learn, Practice, Track.*  
 v0.1.0 | November 2025 | FBLA Website Design 2025-2026
 

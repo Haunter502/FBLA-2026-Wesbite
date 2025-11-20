@@ -631,7 +631,7 @@ If you need help:
 ---
 
 **Project**: Numera - Math Hub for Algebra 1  
-**Slogan**: "Learn, Practice, Track, Win."  
+**Slogan**: "Learn, Practice, Track"  
 **Version**: 0.1.0  
 **Last Updated**: November 2025  
 **Status**: ✅ Complete

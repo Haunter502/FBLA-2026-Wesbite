@@ -1,7 +1,7 @@
 {
   "name": "Numera - Math Hub for Algebra 1",
   "short_name": "Numera",
-  "description": "Learn, Practice, Track, Win. Complete Algebra 1 learning platform with lessons, quizzes, flashcards, and live tutoring.",
+  "description": "Learn, Practice, Track. Complete Algebra 1 learning platform with lessons, quizzes, flashcards, and live tutoring.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
