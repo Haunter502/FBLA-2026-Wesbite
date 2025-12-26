@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Target, Users, BookOpen, Sparkles, LineChart, Clock } from "lucide-react"
+import { Target, Users, BookOpen, Zap, Award, TrendingUp, Clock, CheckCircle2 } from "lucide-react"
 import { ParticleBackground } from "@/components/animations/particle-background"
 import { FadeInUp } from "@/components/animations/fade-in-up"
 import { GlowEffect } from "@/components/animations/glow-effect"
@@ -13,211 +13,229 @@ export default function AboutPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
       <div className="absolute inset-0">
         <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "1.5s" }}
-        />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
       </div>
       <ParticleBackground count={20} />
-
+      
       <div className="container mx-auto px-4 py-6 max-w-7xl relative z-10">
         <FadeInUp delay={0.1}>
-          <div className="mb-10 text-center">
+          <div className="mb-8 text-center">
             <h1 className="text-5xl font-bold mb-2">
               <span className="text-foreground">About </span>
-              <span className="inline-block text-6xl">π</span>
-              <GradientText variant="primary" className="text-5xl md:text-6xl">
-                umera
-              </GradientText>
+              <span className="inline-block text-6xl">π</span><GradientText variant="primary" className="text-5xl md:text-6xl">umera</GradientText>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              A comprehensive learning hub for Algebra&nbsp;1, created by students, for students.
+              A comprehensive learning hub for Algebra 1, created by students, for students
             </p>
           </div>
         </FadeInUp>
 
-        {/* Top content row – bottoms aligned */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 items-stretch">
-          {/* Left column: mission cards */}
-          <div className="flex flex-col gap-4 h-full justify-between">
-            <GlowEffect intensity="medium">
-              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    Our Mission
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>
-                    To make Algebra&nbsp;1 learning engaging, collaborative, and accessible for all students.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </GlowEffect>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-6">
+            <StaggerChildren className="space-y-6">
+              <StaggerItem>
+                <FadeInUp delay={0.2}>
+                  <GlowEffect intensity="medium">
+                    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="h-5 w-5" />
+                          Our Mission
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <CardDescription>
+                          To make Algebra 1 learning engaging, collaborative, and accessible for all students.
+                        </CardDescription>
+                      </CardContent>
+                    </Card>
+                  </GlowEffect>
+                </FadeInUp>
+              </StaggerItem>
 
-            <GlowEffect intensity="medium">
-              <Card className="bg-gradient-to-br from-background via-background to-primary/5">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Peer-to-Peer Learning
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>
-                    We believe in the power of collaborative learning and peer support through group study,
-                    tutoring, and shared resources.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </GlowEffect>
+              <StaggerItem>
+                <FadeInUp delay={0.3}>
+                  <GlowEffect intensity="medium">
+                    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="h-5 w-5" />
+                          Peer-to-Peer Learning
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <CardDescription>
+                          We believe in the power of collaborative learning and peer support.
+                        </CardDescription>
+                      </CardContent>
+                    </Card>
+                  </GlowEffect>
+                </FadeInUp>
+              </StaggerItem>
 
-            <GlowEffect intensity="medium">
-              <Card className="bg-gradient-to-br from-background via-background to-secondary/5">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5" />
-                    Comprehensive Curriculum
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>
-                    14 units covering all essential Algebra&nbsp;1 topics with videos, practice, quizzes, and
-                    challenge problems.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </GlowEffect>
+              <StaggerItem>
+                <FadeInUp delay={0.4}>
+                  <GlowEffect intensity="medium">
+                    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BookOpen className="h-5 w-5" />
+                          Comprehensive Curriculum
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <CardDescription>
+                          14 units covering all essential Algebra 1 topics with interactive content.
+                        </CardDescription>
+                      </CardContent>
+                    </Card>
+                  </GlowEffect>
+                </FadeInUp>
+              </StaggerItem>
+
+              <StaggerItem>
+                <FadeInUp delay={0.5}>
+                  <GlowEffect intensity="low">
+                    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+                      <CardHeader>
+                        <CardTitle>Our Approach</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-muted-foreground mb-4">
+                          πumera is designed to support students at every stage of their Algebra 1 journey.
+                          We combine video lessons, interactive exercises, quizzes, and live tutoring to
+                          create a comprehensive learning experience.
+                        </p>
+                        <p className="text-muted-foreground">
+                          Our platform tracks your progress, celebrates your achievements, and provides
+                          personalized recommendations to help you learn at your own pace.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </GlowEffect>
+                </FadeInUp>
+              </StaggerItem>
+            </StaggerChildren>
           </div>
 
-          {/* Right column: extra info */}
-          <div className="h-full">
-            <GlowEffect intensity="medium">
-              <Card className="h-full flex flex-col border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" />
-                    Why πumera works
-                  </CardTitle>
-                  <CardDescription>
-                    Built around how students actually study, not how textbooks expect them to.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-muted-foreground">
-                    πumera was started by students who struggled with Algebra&nbsp;1 and wanted a space that felt
-                    less like homework and more like having a study team by your side. Every feature is designed to
-                    reduce stress and make it easier to ask questions, get help, and track progress.
-                  </p>
-
-                  <div className="space-y-3">
-                    <div className="flex gap-3">
-                      <Clock className="h-5 w-5 mt-1 shrink-0" />
+          {/* Right Column */}
+          <div className="space-y-6">
+            <FadeInUp delay={0.3}>
+              <GlowEffect intensity="medium">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+                  <CardHeader>
+                    <CardTitle>Key Features</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Zap className="h-5 w-5 text-primary" />
+                      </div>
                       <div>
-                        <p className="font-medium">Study on your schedule</p>
+                        <h3 className="font-semibold mb-1">Interactive Learning</h3>
                         <p className="text-sm text-muted-foreground">
-                          Quick practice, focused timers, and bite-sized lessons help you fit learning into busy days.
+                          Engage with video lessons, practice problems, and interactive quizzes that adapt to your learning style.
                         </p>
                       </div>
                     </div>
-
-                    <div className="flex gap-3">
-                      <Users className="h-5 w-5 mt-1 shrink-0" />
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Award className="h-5 w-5 text-primary" />
+                      </div>
                       <div>
-                        <p className="font-medium">Support from real people</p>
+                        <h3 className="font-semibold mb-1">Achievement System</h3>
                         <p className="text-sm text-muted-foreground">
-                          Connect with tutors and classmates, request immediate help, and learn from others’ strategies.
+                          Earn badges and track your progress with our gamified learning system that motivates you to keep going.
                         </p>
                       </div>
                     </div>
-
-                    <div className="flex gap-3">
-                      <LineChart className="h-5 w-5 mt-1 shrink-0" />
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <TrendingUp className="h-5 w-5 text-primary" />
+                      </div>
                       <div>
-                        <p className="font-medium">Data-driven coaching</p>
+                        <h3 className="font-semibold mb-1">Progress Tracking</h3>
                         <p className="text-sm text-muted-foreground">
-                          Analytics turn your progress into clear next steps so you always know what to review and what
-                          to learn next.
+                          Monitor your learning journey with detailed analytics and personalized recommendations.
                         </p>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </GlowEffect>
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <Users className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-1">Live Tutoring</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Connect with expert teachers through scheduled sessions or get immediate help when you need it.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </GlowEffect>
+            </FadeInUp>
+
+            <FadeInUp delay={0.4}>
+              <GlowEffect intensity="medium">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+                  <CardHeader>
+                    <CardTitle>What You'll Learn</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm">Linear equations and inequalities</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm">Systems of equations</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm">Polynomials and factoring</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm">Quadratic equations</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm">Functions and relations</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="text-sm">Exponential and radical expressions</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </GlowEffect>
+            </FadeInUp>
+
+            <FadeInUp delay={0.5}>
+              <GlowEffect intensity="low">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5" />
+                      Learning at Your Pace
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Whether you're reviewing concepts or exploring new topics, πumera adapts to your schedule. 
+                      Study when it works for you, track your progress, and get personalized recommendations 
+                      to help you achieve your learning goals.
+                    </p>
+                  </CardContent>
+                </Card>
+              </GlowEffect>
+            </FadeInUp>
           </div>
         </div>
-
-        {/* Our approach */}
-        <FadeInUp delay={0.5}>
-          <GlowEffect intensity="low">
-            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
-              <CardHeader>
-                <CardTitle>Our Approach</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  πumera is designed to support students at every stage of their Algebra&nbsp;1 journey. We combine video
-                  lessons, interactive exercises, quizzes, and live tutoring to create a comprehensive learning
-                  experience.
-                </p>
-                <p className="text-muted-foreground">
-                  Our platform tracks your progress, celebrates your achievements, and provides personalized
-                  recommendations to help you learn at your own pace.
-                </p>
-              </CardContent>
-            </Card>
-          </GlowEffect>
-        </FadeInUp>
-
-        {/* Who we support */}
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 mb-4">
-          <StaggerItem>
-            <FadeInUp delay={0.6}>
-              <Card className="bg-card/60 backdrop-blur border-border/40">
-                <CardHeader>
-                  <CardTitle className="text-base">Students</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>
-                    Stay on top of class, prep for quizzes, and turn confusing topics into clear step-by-step strategies.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </FadeInUp>
-          </StaggerItem>
-
-          <StaggerItem>
-            <FadeInUp delay={0.7}>
-              <Card className="bg-card/60 backdrop-blur border-border/40">
-                <CardHeader>
-                  <CardTitle className="text-base">Tutors &amp; Teachers</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>
-                    Get insight into what students are stuck on, assign targeted practice, and track growth over time.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </FadeInUp>
-          </StaggerItem>
-
-          <StaggerItem>
-            <FadeInUp delay={0.8}>
-              <Card className="bg-card/60 backdrop-blur border-border/40">
-                <CardHeader>
-                  <CardTitle className="text-base">Schools &amp; Clubs</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>
-                    Use πumera as a hub for Algebra&nbsp;1 support programs, math clubs, and peer-tutoring initiatives.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </FadeInUp>
-          </StaggerItem>
-        </StaggerChildren>
       </div>
     </div>
   )

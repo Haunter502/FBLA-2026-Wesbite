@@ -38,6 +38,7 @@ async function getUnit(slug: string, userId?: string) {
     db.select().from(skills).where(eq(skills.unitId, unit.id)).orderBy(asc(skills.name)),
   ])
 
+
   // Filter out practice problem quizzes from assessments (they're accessed via lessons)
   const unitQuizzes = allUnitQuizzes.filter((q: Quiz) => !q.title.includes('Practice Problems'))
 
@@ -158,7 +159,7 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
                 Lessons
               </CardTitle>
               <CardDescription>
-                8 lessons covering key concepts
+                6 lessons covering key concepts
               </CardDescription>
             </CardHeader>
             <CardContent>

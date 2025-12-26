@@ -98,6 +98,7 @@ export const lessons = sqliteTable('lessons', {
   type: text('type', { enum: lessonTypes }).notNull(),
   khanUrl: text('khan_url'),
   youtubeId: text('youtube_id'),
+  content: text('content'), // HTML or Markdown content for reading lessons
   duration: integer('duration'), // minutes
   order: integer('order').notNull(),
   ...timestamps,
@@ -412,6 +413,23 @@ export const directMessages = sqliteTable('direct_messages', {
   conversationIdx: index('direct_messages_conversation_idx').on(table.senderId, table.receiverId),
 }));
 
+// Notifications table
+export const notifications = sqliteTable('notifications', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  type: text('type').notNull(), // 'direct_message', 'tutoring_request', 'group_message'
+  title: text('title').notNull(),
+  message: text('message').notNull(),
+  link: text('link'), // URL to navigate to when clicked
+  read: integer('read', { mode: 'boolean' }).notNull().default(false),
+  ...timestamps,
+}, (table) => ({
+  userIdIdx: index('notifications_user_id_idx').on(table.userId),
+  typeIdx: index('notifications_type_idx').on(table.type),
+  readIdx: index('notifications_read_idx').on(table.read),
+  createdAtIdx: index('notifications_created_at_idx').on(table.createdAt),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
@@ -427,6 +445,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   groupMessages: many(groupMessages),
   sentMessages: many(directMessages, { relationName: 'sentMessages' }),
   receivedMessages: many(directMessages, { relationName: 'receivedMessages' }),
+  notifications: many(notifications),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -551,5 +570,9 @@ export const groupMessagesRelations = relations(groupMessages, ({ one }) => ({
 export const directMessagesRelations = relations(directMessages, ({ one }) => ({
   sender: one(users, { fields: [directMessages.senderId], references: [users.id], relationName: 'sentMessages' }),
   receiver: one(users, { fields: [directMessages.receiverId], references: [users.id], relationName: 'receivedMessages' }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, { fields: [notifications.userId], references: [users.id] }),
 }));
 

@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Numera - Math Hub for Algebra 1",
+  title: "Numera - The Online Learning Hub for Math",
   description: "Learn, Practice, Track. A comprehensive learning hub for Algebra 1 students.",
   manifest: "/manifest.json",
   themeColor: "#00A799",
@@ -41,6 +41,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        suppressHydrationWarning
       >
         <SessionProvider>
           <ScrollProgressWrapper />

@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, BookOpen, Video } from "lucide-react"
+import { FileText, BookOpen, Video, Layers } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { db } from "@/lib/db"
-import { worksheets, studyGuides, videoResources } from "@/lib/schema"
+import { worksheets, studyGuides, videoResources, flashcardSets } from "@/lib/schema"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
 import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
 import { ParticleBackground } from "@/components/animations/particle-background"
@@ -15,13 +15,14 @@ import { GlowEffect } from "@/components/animations/glow-effect"
 import { AnimatedResourceCard } from "@/components/resources/animated-resource-card"
 
 async function getResourceCounts() {
-  const [worksheetsCount, studyGuidesCount, videosCount] = await Promise.all([
+  const [worksheetsCount, studyGuidesCount, videosCount, flashcardsCount] = await Promise.all([
     db.select().from(worksheets).then((rows: typeof worksheets.$inferSelect[]) => rows.length),
     db.select().from(studyGuides).then((rows: typeof studyGuides.$inferSelect[]) => rows.length),
     db.select().from(videoResources).then((rows: typeof videoResources.$inferSelect[]) => rows.length),
+    db.select().from(flashcardSets).then((rows: typeof flashcardSets.$inferSelect[]) => rows.length),
   ])
 
-  return { worksheetsCount, studyGuidesCount, videosCount }
+  return { worksheetsCount, studyGuidesCount, videosCount, flashcardsCount }
 }
 
 export default async function ResourcesPage() {
@@ -31,7 +32,7 @@ export default async function ResourcesPage() {
     redirect("/auth/sign-in")
   }
 
-  const { worksheetsCount, studyGuidesCount, videosCount } = await getResourceCounts()
+  const { worksheetsCount, studyGuidesCount, videosCount, flashcardsCount } = await getResourceCounts()
 
   return (
     <div className="relative overflow-hidden">
@@ -55,7 +56,7 @@ export default async function ResourcesPage() {
           </div>
         </FadeInUp>
 
-      <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+      <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
         <StaggerItem className="h-full">
           <FadeInUp delay={0.2} className="h-full">
             <GlowEffect intensity="medium" className="h-full">
@@ -131,6 +132,34 @@ export default async function ResourcesPage() {
                 <Link href="/resources/videos">
                   <Button className="w-full mt-auto">
                     Watch Videos
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </AnimatedResourceCard>
+        </GlowEffect>
+      </FadeInUp>
+    </StaggerItem>
+
+    <StaggerItem className="h-full">
+      <FadeInUp delay={0.5} className="h-full">
+        <GlowEffect intensity="medium" className="h-full">
+          <AnimatedResourceCard>
+            <Card className="h-full flex flex-col border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background hover:border-primary/40 transition-all">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Layers className="h-5 w-5" />
+                  Flashcards
+                </CardTitle>
+                <CardDescription>Review key terms and concepts</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col justify-between">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Study with interactive flashcards. {flashcardsCount > 0 && `(${flashcardsCount} sets available)`}
+                </p>
+                <Link href="/resources/flashcards">
+                  <Button className="w-full mt-auto">
+                    View Flashcards
                   </Button>
                 </Link>
               </CardContent>

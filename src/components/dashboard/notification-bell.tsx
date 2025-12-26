@@ -23,6 +23,7 @@ interface Notification {
   message: string
   createdAt: number
   link: string
+  read: boolean
 }
 
 export function NotificationBell() {
@@ -89,9 +90,51 @@ export function NotificationBell() {
     return date.toLocaleDateString()
   }
 
-  const handleNotificationClick = (link: string) => {
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId, read: true }),
+      })
+
+      if (response.ok) {
+        // Update local state
+        setNotifications(prev =>
+          prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+        )
+        setUnreadCount(prev => Math.max(0, prev - 1))
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error)
+    }
+  }
+
+  const markAllAsRead = async () => {
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markAllAsRead: true }),
+      })
+
+      if (response.ok) {
+        // Update local state
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+        setUnreadCount(0)
+      }
+    } catch (error) {
+      console.error('Error marking all as read:', error)
+    }
+  }
+
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read if not already read
+    if (!notification.read) {
+      await markAsRead(notification.id)
+    }
     setOpen(false)
-    router.push(link)
+    router.push(notification.link)
     router.refresh()
   }
 
@@ -133,7 +176,7 @@ export function NotificationBell() {
         </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="p-4 border-b">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-lg">Notifications</h3>
             {unreadCount > 0 && (
               <Badge variant="secondary" className="bg-primary/10 text-primary">
@@ -141,6 +184,14 @@ export function NotificationBell() {
               </Badge>
             )}
           </div>
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="text-xs text-primary hover:underline"
+            >
+              Mark all as read
+            </button>
+          )}
         </div>
         <ScrollArea className="h-[400px]">
           {loading ? (
@@ -164,16 +215,27 @@ export function NotificationBell() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ delay: index * 0.05 }}
-                    onClick={() => handleNotificationClick(notification.link)}
-                    className="p-4 hover:bg-muted/50 cursor-pointer transition-colors"
+                    onClick={() => handleNotificationClick(notification)}
+                    className={cn(
+                      "p-4 hover:bg-muted/50 cursor-pointer transition-colors relative",
+                      !notification.read && "bg-primary/5"
+                    )}
                   >
+                    {!notification.read && (
+                      <div className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary" />
+                    )}
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5">
                         {getNotificationIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
-                          <p className="text-sm font-semibold">{notification.title}</p>
+                          <p className={cn(
+                            "text-sm",
+                            notification.read ? "font-medium" : "font-semibold"
+                          )}>
+                            {notification.title}
+                          </p>
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
                             {formatTime(notification.createdAt)}
                           </span>

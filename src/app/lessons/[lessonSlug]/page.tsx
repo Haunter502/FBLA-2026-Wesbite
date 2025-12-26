@@ -17,6 +17,7 @@ import { GlowEffect } from "@/components/animations/glow-effect"
 import { AnimatedLessonHeader } from "@/components/lessons/animated-lesson-header"
 import { AnimatedVideoCard } from "@/components/lessons/animated-video-card"
 import { AnimatedLessonCard } from "@/components/lessons/animated-lesson-card"
+import { KhanAcademyEmbed } from "@/components/lessons/khan-academy-embed"
 
 function getKeyConcepts(title: string, type: string, unitTitle?: string): string[] {
   const titleLower = title.toLowerCase()
@@ -144,7 +145,25 @@ function getKeyConcepts(title: string, type: string, unitTitle?: string): string
 }
 
 async function getLesson(slug: string, userId?: string) {
-  const [lesson] = await db.select().from(lessons).where(eq(lessons.slug, slug)).limit(1)
+  const [lesson] = await db
+    .select({
+      id: lessons.id,
+      slug: lessons.slug,
+      unitId: lessons.unitId,
+      title: lessons.title,
+      description: lessons.description,
+      type: lessons.type,
+      khanUrl: lessons.khanUrl,
+      youtubeId: lessons.youtubeId,
+      content: lessons.content,
+      duration: lessons.duration,
+      order: lessons.order,
+      createdAt: lessons.createdAt,
+      updatedAt: lessons.updatedAt,
+    })
+    .from(lessons)
+    .where(eq(lessons.slug, slug))
+    .limit(1)
 
   if (!lesson) return null
 
@@ -202,6 +221,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
     notFound()
   }
 
+
   const youtubeId = lesson.youtubeId || (lesson.khanUrl ? extractYouTubeId(lesson.khanUrl) : null)
 
   return (
@@ -238,37 +258,38 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
             )}
 
             {/* Reading Section */}
-            {lesson.type === "READING" && (
+            {lesson.type === "READING" && lesson.khanUrl && (
               <FadeInUp delay={0.2}>
                 <GlowEffect intensity="low">
                   <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" />
-                  Reading Material
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose max-w-none">
-                  <p className="text-muted-foreground">{lesson.description}</p>
-                  {lesson.khanUrl && (
-                    <Button
-                      variant="outline"
-                      className="mt-4"
-                      asChild
-                    >
-                      <a href={lesson.khanUrl} target="_blank" rel="noopener noreferrer">
-                        Read Full Article
-                        <ExternalLink className="ml-2 h-4 w-4" />
-                      </a>
-                    </Button>
-                  )}
-                  </div>
-                </CardContent>
-              </Card>
-              </GlowEffect>
-            </FadeInUp>
-          )}
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="h-5 w-5" />
+                        Reading Material
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="prose max-w-none">
+                        <p className="text-muted-foreground mb-4">{lesson.description}</p>
+                        <div className="mt-6">
+                          <a 
+                            href={lesson.khanUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Button className="w-full sm:w-auto">
+                              <BookOpen className="mr-2 h-4 w-4" />
+                              Read Article
+                              <ExternalLink className="ml-2 h-4 w-4" />
+                            </Button>
+                          </a>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </GlowEffect>
+              </FadeInUp>
+            )}
 
           {/* Practice Section */}
           {lesson.type === "EXERCISE" && (
@@ -366,33 +387,6 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
             </GlowEffect>
           </FadeInUp>
 
-          {/* Flashcards */}
-          {lesson.flashcardSets.length > 0 && (
-            <FadeInUp delay={0.5}>
-              <GlowEffect intensity="low">
-                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
-              <CardHeader>
-                <CardTitle>Flashcards</CardTitle>
-                <CardDescription>Review key terms and concepts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {lesson.flashcardSets.map((set: typeof lesson.flashcardSets[0]) => (
-                  <Button
-                    key={set.id}
-                    variant="outline"
-                    className="w-full mb-2"
-                    asChild
-                  >
-                    <Link href={`/lessons/${lesson.slug}/flashcards/${set.id}`}>
-                      {set.title}
-                    </Link>
-                  </Button>
-                  ))}
-                </CardContent>
-              </Card>
-              </GlowEffect>
-            </FadeInUp>
-          )}
           </div>
         </div>
       </div>

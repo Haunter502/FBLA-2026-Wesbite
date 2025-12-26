@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { groupMessages, groupMembers, users } from '@/lib/schema'
+import { groupMessages, groupMembers, users, notifications, studyGroups } from '@/lib/schema'
 import { eq, and, desc } from '@/lib/drizzle-helpers'
 import { filterProfanity } from '@/lib/profanity-filter'
 
@@ -117,6 +117,39 @@ export async function POST(
       .from(users)
       .where(eq(users.id, session.user.id))
       .limit(1)
+
+    // Get group info and all members
+    const [group] = await db
+      .select()
+      .from(studyGroups)
+      .where(eq(studyGroups.id, groupId))
+      .limit(1)
+
+    const allMembers = await db
+      .select({ userId: groupMembers.userId })
+      .from(groupMembers)
+      .where(eq(groupMembers.groupId, groupId))
+
+    // Create notifications for all members except the sender
+    try {
+      const notificationPromises = allMembers
+        .filter(m => m.userId !== session.user.id)
+        .map(member =>
+          db.insert(notifications).values({
+            userId: member.userId,
+            type: 'group_message',
+            title: `New message in ${group?.name || 'group'}`,
+            message: `${user?.name || 'Someone'}: ${filteredMessage.length > 80 ? filteredMessage.substring(0, 80) + '...' : filteredMessage}`,
+            link: `/groups/${groupId}`,
+            read: false,
+          })
+        )
+
+      await Promise.all(notificationPromises)
+    } catch (notifError) {
+      console.error('Error creating notifications:', notifError)
+      // Don't fail the message send if notification creation fails
+    }
 
     // Convert createdAt to Unix seconds
     const createdAt =

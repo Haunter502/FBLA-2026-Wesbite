@@ -129,9 +129,8 @@ export default function SignUpPage() {
   const handleGoogleSignIn = async () => {
     setLoading(true)
     await signIn("google", { callbackUrl: "/dashboard" })
-  }
 
-  <Button
+<Button
                     type="button"
                     variant="outline"
                     className="w-full border-primary/30 hover:border-primary/50 hover:bg-primary/5 transition-all"
@@ -158,6 +157,10 @@ export default function SignUpPage() {
                     </svg>
                     Google
                   </Button>
+
+  }
+
+
 */
   return (
     <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
@@ -426,8 +429,6 @@ export default function SignUpPage() {
                   whileTap={{ scale: 0.98 }}
                 >
                 </motion.div>
-
-                <div style={{ height: "0.5em" }} />
 
                 <motion.p
                   initial={{ opacity: 0 }}

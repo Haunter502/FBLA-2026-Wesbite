@@ -5,10 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Send, ArrowLeft } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Send, ArrowLeft, Users, MessageCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ParticleBackground } from '@/components/animations/particle-background'
+import { GlassCard } from '@/components/animations/glass-card'
+import { GlowEffect } from '@/components/animations/glow-effect'
+import { FadeInUp } from '@/components/animations/fade-in-up'
 
 interface Group {
   id: string
@@ -152,96 +156,176 @@ export function GroupChatClient({ group, currentUserId }: GroupChatClientProps) 
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <div className="mb-6">
-        <Link href="/group-study">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Group Study
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold">{group.name}</h1>
-        {group.description && <p className="text-muted-foreground mt-2">{group.description}</p>}
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Enhanced Background */}
+      <ParticleBackground count={25} />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
+      <div className="absolute inset-0">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-      <Card className="h-[600px] flex flex-col">
-        <CardHeader className="border-b">
-          <CardTitle className="flex items-center gap-2">
-            <span>Group Chat</span>
-            <span className="text-sm font-normal text-muted-foreground">
-              ({group.members.length} members)
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col p-0">
-          {/* Messages */}
-          <div
-            id="messages-container"
-            ref={messagesContainerRef}
-            className="flex-1 overflow-y-auto p-4 space-y-4"
-          >
-            {messages.length === 0 ? (
-              <div className="text-center text-muted-foreground py-12">
-                <p>No messages yet. Start the conversation!</p>
+      <div className="container mx-auto px-4 py-8 max-w-5xl relative z-10">
+        {/* Header Section */}
+        <FadeInUp delay={0.1}>
+          <div className="mb-6">
+            <Link href="/group-study">
+              <Button variant="ghost" size="sm" className="mb-4 hover:bg-primary/10 transition-colors">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Group Study
+              </Button>
+            </Link>
+            <GlowEffect intensity="medium">
+              <GlassCard className="backdrop-blur-xl bg-gradient-to-br from-primary/10 via-background/90 to-background border-2 border-primary/30 p-6 mb-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                      {group.name}
+                    </h1>
+                    {group.description && (
+                      <p className="text-muted-foreground text-lg">{group.description}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                    <Users className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-semibold text-primary">
+                      {group.members.length} {group.members.length === 1 ? 'member' : 'members'}
+                    </span>
+                  </div>
+                </div>
+              </GlassCard>
+            </GlowEffect>
+          </div>
+        </FadeInUp>
+
+        {/* Chat Container */}
+        <GlowEffect intensity="low">
+          <GlassCard className="backdrop-blur-xl bg-gradient-to-br from-primary/5 via-background/95 to-background border-2 border-primary/20 h-[700px] flex flex-col shadow-2xl">
+            {/* Chat Header */}
+            <div className="border-b border-primary/20 p-4 bg-gradient-to-r from-primary/5 to-transparent">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <MessageCircle className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Group Chat</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {messages.length} {messages.length === 1 ? 'message' : 'messages'}
+                  </p>
+                </div>
               </div>
-            ) : (
-              messages.map((message) => {
-                const isOwn = message.user.id === currentUserId
-                return (
+            </div>
+
+            {/* Messages Container */}
+            <div
+              id="messages-container"
+              ref={messagesContainerRef}
+              className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-background/50 to-background custom-scrollbar"
+            >
+              <AnimatePresence>
+                {messages.length === 0 ? (
                   <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex items-start gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center justify-center h-full"
                   >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={message.user.image || undefined} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                        {getInitials(message.user.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className={`flex-1 max-w-[70%] ${isOwn ? 'text-right' : ''}`}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium">
-                          {isOwn ? 'You' : message.user.name || 'User'}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatTime(message.createdAt)}
-                        </span>
+                    <div className="text-center">
+                      <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                        <MessageCircle className="h-8 w-8 text-primary/50" />
                       </div>
-                      <div
-                        className={`inline-block p-3 rounded-lg ${
-                          isOwn
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-foreground'
-                        }`}
-                      >
-                        {message.message}
-                      </div>
+                      <p className="text-muted-foreground text-lg">No messages yet</p>
+                      <p className="text-sm text-muted-foreground/70 mt-2">Start the conversation!</p>
                     </div>
                   </motion.div>
-                )
-              })
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <form onSubmit={handleSendMessage} className="border-t p-4">
-            <div className="flex gap-2">
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1"
-              />
-              <Button type="submit" disabled={sending || !newMessage.trim()}>
-                <Send className="h-4 w-4" />
-              </Button>
+                ) : (
+                  messages.map((message, index) => {
+                    const isOwn = message.user.id === currentUserId
+                    return (
+                      <motion.div
+                        key={message.id}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ delay: index * 0.02 }}
+                        className={`flex items-end gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}
+                      >
+                        {!isOwn && (
+                          <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-primary/20">
+                            <AvatarImage src={message.user.image || undefined} />
+                            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
+                              {getInitials(message.user.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} max-w-[75%]`}>
+                          <div className={`flex items-center gap-2 mb-1.5 ${isOwn ? 'flex-row-reverse' : ''}`}>
+                            <span className="text-sm font-semibold">
+                              {isOwn ? 'You' : message.user.name || 'User'}
+                            </span>
+                            <span className="text-xs text-muted-foreground/70">
+                              {formatTime(message.createdAt)}
+                            </span>
+                          </div>
+                          <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            className={`relative px-5 py-3 rounded-2xl break-words shadow-lg transition-shadow ${
+                              isOwn
+                                ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-sm'
+                                : 'bg-gradient-to-br from-muted to-muted/80 text-foreground rounded-bl-sm border border-primary/10'
+                            }`}
+                          >
+                            <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.message}</p>
+                          </motion.div>
+                        </div>
+                        {isOwn && (
+                          <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-primary/30">
+                            <AvatarImage src={message.user.image || undefined} />
+                            <AvatarFallback className="bg-gradient-to-br from-primary/30 to-primary/20 text-primary-foreground font-semibold">
+                              {getInitials(message.user.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                      </motion.div>
+                    )
+                  })
+                )}
+              </AnimatePresence>
+              <div ref={messagesEndRef} />
             </div>
-          </form>
-        </CardContent>
-      </Card>
+
+            {/* Message Input */}
+            <div className="border-t border-primary/20 p-4 bg-gradient-to-r from-background/95 to-background backdrop-blur-sm">
+              <form onSubmit={handleSendMessage} className="flex gap-3">
+                <div className="flex-1 relative">
+                  <Input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    className="w-full pr-12 border-primary/30 focus:border-primary focus:ring-primary/20 bg-background/80 backdrop-blur-sm h-12 text-base"
+                    disabled={sending}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={!newMessage.trim() || sending}
+                  className="h-12 px-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"
+                >
+                  {sending ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    >
+                      <Send className="h-5 w-5" />
+                    </motion.div>
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
+                </Button>
+              </form>
+            </div>
+          </GlassCard>
+        </GlowEffect>
+      </div>
     </div>
   )
 }

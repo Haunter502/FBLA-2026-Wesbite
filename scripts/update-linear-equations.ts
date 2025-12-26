@@ -240,8 +240,12 @@ async function updateLinearEquationsUnit() {
   console.log(`✅ Created ${insertedQuizzes.length} practice problem quizzes (linked to lessons only)`);
 
   // Link practice problem lessons to their quizzes
-  const practice1Lesson = insertedLessons.find((l) => l.slug === 'linear-equations-practice-1');
-  const practice2Lesson = insertedLessons.find((l) => l.slug === 'linear-equations-practice-2');
+  const practice1Lesson = insertedLessons.find(
+    (l: typeof schema.lessons.$inferSelect) => l.slug === 'linear-equations-practice-1'
+  );
+  const practice2Lesson = insertedLessons.find(
+    (l: typeof schema.lessons.$inferSelect) => l.slug === 'linear-equations-practice-2'
+  );
 
   if (practice1Lesson && insertedQuizzes[0]) {
     await db
@@ -278,10 +282,20 @@ async function updateLinearEquationsUnit() {
   }
 
   // Find the reading lessons to link PDFs
-  const fundamentalsLesson = insertedLessons.find((l) => l.slug === 'linear-equations-fundamentals');
-  const reviewLesson = insertedLessons.find((l) => l.slug === 'linear-equations-review');
+  const fundamentalsLesson = insertedLessons.find(
+    (l: typeof schema.lessons.$inferSelect) => l.slug === 'linear-equations-fundamentals'
+  );
+  const reviewLesson = insertedLessons.find(
+    (l: typeof schema.lessons.$inferSelect) => l.slug === 'linear-equations-review'
+  );
 
-  const studyGuidesData = [];
+  const studyGuidesData: Array<{
+    unitId: string | number;
+    title: string;
+    description: string;
+    content: string;
+    fileUrl: string;
+  }> = [];
 
   if (fundamentalsLesson) {
     studyGuidesData.push({
@@ -417,4 +431,3 @@ updateLinearEquationsUnit()
     console.error('❌ Error updating unit:', error);
     process.exit(1);
   });
-

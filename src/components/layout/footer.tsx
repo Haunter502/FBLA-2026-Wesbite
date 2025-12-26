@@ -7,12 +7,11 @@ export function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold">π</span>
-              <span className="text-xl font-bold">Numera</span>
+            <div className="flex items-center">
+              <span className="text-2xl font-bold">π</span><span className="text-xl font-bold">umera</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Math Hub for Algebra 1: Learn, Practice, Track.
+              The Online Learning Hub for Math: Learn, Practice, Track.
             </p>
           </div>
 

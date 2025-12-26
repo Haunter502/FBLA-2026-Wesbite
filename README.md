@@ -1,6 +1,6 @@
 # Numera - FBLA Website Design Competition
 
-**π Numera** | Math Hub for Algebra 1: , Track.
+**π Numera** | The Online Learning Hub for Math: , Track.
 
 A comprehensive, student-centered learning platform for Algebra 1 featuring 14 units of lessons, interactive flashcards, live tutoring, progress tracking, and personalized recommendations.
 

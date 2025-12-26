@@ -98,9 +98,23 @@ export function DirectChatClient({ otherUser, currentUserId }: DirectChatClientP
           messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
         }, 100)
       } else {
-        const error = await response.json()
-        console.error('API Error:', error)
-        alert(error.details || error.error || 'Failed to send message')
+        // Try to parse error response, but handle cases where it might not be JSON
+        let errorMessage = 'Failed to send message'
+        try {
+          const contentType = response.headers.get('content-type')
+          if (contentType && contentType.includes('application/json')) {
+            const error = await response.json()
+            errorMessage = error.details || error.error || errorMessage
+          } else {
+            const text = await response.text()
+            errorMessage = text || errorMessage
+          }
+        } catch (parseError) {
+          // If parsing fails, use status text or default message
+          errorMessage = response.statusText || errorMessage
+        }
+        console.error('API Error:', response.status, errorMessage)
+        alert(errorMessage)
       }
     } catch (error) {
       console.error('Error sending message:', error)

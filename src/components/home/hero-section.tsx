@@ -30,7 +30,7 @@ export function HeroSection() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              Math Hub for Algebra 1: Learn, Practice, Track.
+              The Online Learning Hub for Math: Learn, Practice, Track.
             </motion.p>
           </motion.div>
           <motion.div

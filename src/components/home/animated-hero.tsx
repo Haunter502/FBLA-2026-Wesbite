@@ -69,7 +69,7 @@ export function AnimatedHero() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto"
             >
-              Math Hub for Algebra 1: Learn, Practice, Track.
+              The Online Learning Hub for Math: Learn, Practice, Track.
             </motion.p>
           </motion.div>
           <motion.div
