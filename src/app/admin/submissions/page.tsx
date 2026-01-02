@@ -4,10 +4,12 @@ import { db } from "@/lib/db"
 import { tutoringRequests, contacts, users } from "@/lib/schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MessageSquare, HelpCircle, Mail, Clock } from "lucide-react"
+import { MessageSquare, HelpCircle, Mail, Clock, Zap, Calendar } from "lucide-react"
 import { eq, desc } from "@/lib/drizzle-helpers"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
 import { AdminSubmissionsClient } from "@/components/admin/submissions-client"
+import { GlassCard } from "@/components/animations/glass-card"
+import { GlowEffect } from "@/components/animations/glow-effect"
 
 async function getTutoringRequests() {
   const requests = await db
@@ -68,63 +70,115 @@ export default async function AdminSubmissionsPage() {
         </div>
       </ScrollReveal>
 
-      {/* Stats Cards */}
+      {/* Enhanced Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Immediate Help Requests
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{immediateRequests.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {unreadRequests.filter((r: { type: string }) => r.type === 'IMMEDIATE').length} pending
-            </p>
-          </CardContent>
-        </Card>
+        <GlowEffect intensity="low">
+          <GlassCard className="backdrop-blur-xl border-primary/20">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Immediate Help
+                </CardTitle>
+                <div className="p-2 rounded-lg bg-orange-500/20">
+                  <Zap className="h-4 w-4 text-orange-500" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary mb-1">{immediateRequests.length}</div>
+              <p className="text-xs text-muted-foreground">
+                {unreadRequests.filter((r: { type: string }) => r.type === 'IMMEDIATE').length > 0 ? (
+                  <span className="text-orange-500 font-semibold">
+                    {unreadRequests.filter((r: { type: string }) => r.type === 'IMMEDIATE').length} urgent
+                  </span>
+                ) : (
+                  'All handled'
+                )}
+              </p>
+            </CardContent>
+          </GlassCard>
+        </GlowEffect>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Contact Submissions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{contactSubmissions.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {unreadContacts.length} unread
-            </p>
-          </CardContent>
-        </Card>
+        <GlowEffect intensity="low">
+          <GlassCard className="backdrop-blur-xl border-primary/20">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Contact Forms
+                </CardTitle>
+                <div className="p-2 rounded-lg bg-blue-500/20">
+                  <Mail className="h-4 w-4 text-blue-500" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary mb-1">{contactSubmissions.length}</div>
+              <p className="text-xs text-muted-foreground">
+                {unreadContacts.length > 0 ? (
+                  <span className="text-blue-500 font-semibold">
+                    {unreadContacts.length} unread
+                  </span>
+                ) : (
+                  'All read'
+                )}
+              </p>
+            </CardContent>
+          </GlassCard>
+        </GlowEffect>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Scheduled Sessions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{scheduledRequests.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {scheduledRequests.filter((r: { status: string }) => r.status === 'PENDING').length} pending
-            </p>
-          </CardContent>
-        </Card>
+        <GlowEffect intensity="low">
+          <GlassCard className="backdrop-blur-xl border-primary/20">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Scheduled Sessions
+                </CardTitle>
+                <div className="p-2 rounded-lg bg-primary/20">
+                  <Calendar className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary mb-1">{scheduledRequests.length}</div>
+              <p className="text-xs text-muted-foreground">
+                {scheduledRequests.filter((r: { status: string }) => r.status === 'PENDING').length > 0 ? (
+                  <span className="text-orange-500 font-semibold">
+                    {scheduledRequests.filter((r: { status: string }) => r.status === 'PENDING').length} pending
+                  </span>
+                ) : (
+                  'All scheduled'
+                )}
+              </p>
+            </CardContent>
+          </GlassCard>
+        </GlowEffect>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Requests
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{tutoringRequests.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {unreadRequests.length} pending
-            </p>
-          </CardContent>
-        </Card>
+        <GlowEffect intensity="low">
+          <GlassCard className="backdrop-blur-xl border-primary/20">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Requests
+                </CardTitle>
+                <div className="p-2 rounded-lg bg-secondary/20">
+                  <MessageSquare className="h-4 w-4 text-secondary" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary mb-1">{tutoringRequests.length}</div>
+              <p className="text-xs text-muted-foreground">
+                {unreadRequests.length > 0 ? (
+                  <span className="text-orange-500 font-semibold">
+                    {unreadRequests.length} need attention
+                  </span>
+                ) : (
+                  'All handled'
+                )}
+              </p>
+            </CardContent>
+          </GlassCard>
+        </GlowEffect>
       </div>
 
       <AdminSubmissionsClient 

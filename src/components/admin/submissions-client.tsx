@@ -5,8 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MessageSquare, HelpCircle, Mail, Clock, User, CheckCircle2, TrendingUp, BookOpen, Calendar, Loader2 } from "lucide-react"
+import { MessageSquare, HelpCircle, Mail, Clock, User, CheckCircle2, TrendingUp, BookOpen, Calendar, Loader2, AlertCircle, Zap, Phone, MessageCircle, FileText, ArrowRight } from "lucide-react"
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import { GlassCard } from '@/components/animations/glass-card'
+import { GlowEffect } from '@/components/animations/glow-effect'
 
 interface TutoringRequest {
   id: string
@@ -182,81 +185,146 @@ export function AdminSubmissionsClient({
 
 
   return (
-    <Tabs defaultValue="immediate" className="space-y-4">
-      <TabsList>
-        <TabsTrigger value="immediate">
-          <HelpCircle className="h-4 w-4 mr-2" />
-          Immediate Help ({immediateRequests.length})
-          {unreadRequests.filter(r => r.type === 'IMMEDIATE').length > 0 && (
-            <Badge className="ml-2" variant="destructive">
-              {unreadRequests.filter(r => r.type === 'IMMEDIATE').length}
-            </Badge>
-          )}
-        </TabsTrigger>
-        <TabsTrigger value="scheduled">
-          Scheduled ({scheduledRequests.length})
-        </TabsTrigger>
-        <TabsTrigger value="contacts">
-          <Mail className="h-4 w-4 mr-2" />
-          Contact Forms ({contactSubmissions.length})
-          {unreadContacts.length > 0 && (
-            <Badge className="ml-2" variant="destructive">
-              {unreadContacts.length}
-            </Badge>
-          )}
-        </TabsTrigger>
-      </TabsList>
+    <div className="space-y-6">
+      <Tabs defaultValue="immediate" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-lg">
+          <TabsTrigger value="immediate" className="relative">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              <span>Immediate Help</span>
+              <Badge variant="secondary" className="ml-1">
+                {immediateRequests.length}
+              </Badge>
+            </div>
+            {unreadRequests.filter(r => r.type === 'IMMEDIATE').length > 0 && (
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full border-2 border-background" />
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="scheduled" className="relative">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>Scheduled</span>
+              <Badge variant="secondary" className="ml-1">
+                {scheduledRequests.length}
+              </Badge>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger value="contacts" className="relative">
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              <span>Contact Forms</span>
+              <Badge variant="secondary" className="ml-1">
+                {contactSubmissions.length}
+              </Badge>
+            </div>
+            {unreadContacts.length > 0 && (
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full border-2 border-background" />
+            )}
+          </TabsTrigger>
+        </TabsList>
 
       <TabsContent value="immediate" className="space-y-4">
         {immediateRequests.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8 text-muted-foreground">
-                No immediate help requests yet
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          immediateRequests.map((request) => (
-            <Card key={request.id} className={request.status === 'PENDING' ? 'border-orange-500/50 bg-orange-500/5' : ''}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CardTitle className="text-lg">Immediate Help Request</CardTitle>
-                      <Badge
-                        variant={
-                          request.status === 'PENDING'
-                            ? 'destructive'
-                            : request.status === 'MATCHED'
-                            ? 'default'
-                            : 'secondary'
-                        }
-                      >
-                        {request.status}
-                      </Badge>
-                    </div>
-                    <CardDescription>
-                      Topic: {request.topic?.split('\n\n[PROGRESS_SUMMARY]')[0] || 'No topic specified'}
-                    </CardDescription>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {formatDate(request.createdAt)}
-                    </div>
-                  </div>
+          <GlowEffect intensity="low">
+            <GlassCard className="backdrop-blur-xl">
+              <CardContent className="pt-12 pb-12">
+                <div className="text-center">
+                  <HelpCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-semibold mb-2">No Immediate Help Requests</p>
+                  <p className="text-sm text-muted-foreground">
+                    All caught up! No students are currently requesting immediate assistance.
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {request.user && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{request.user.name || 'Unknown'}</span>
-                      <span className="text-muted-foreground">({request.user.email})</span>
-                    </div>
-                  )}
+              </CardContent>
+            </GlassCard>
+          </GlowEffect>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            {immediateRequests.map((request, index) => (
+              <motion.div
+                key={request.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <GlowEffect intensity={request.status === 'PENDING' ? 'medium' : 'low'}>
+                  <GlassCard className={`backdrop-blur-xl transition-all ${
+                    request.status === 'PENDING' 
+                      ? 'border-orange-500/50 bg-orange-500/10 shadow-lg shadow-orange-500/20' 
+                      : request.status === 'MATCHED'
+                      ? 'border-primary/50 bg-primary/5'
+                      : 'border-muted'
+                  }`}>
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${
+                              request.status === 'PENDING'
+                                ? 'bg-orange-500/20 text-orange-500'
+                                : request.status === 'MATCHED'
+                                ? 'bg-primary/20 text-primary'
+                                : 'bg-muted text-muted-foreground'
+                            }`}>
+                              <Zap className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                              <CardTitle className="text-xl flex items-center gap-2">
+                                Immediate Help Request
+                                {request.status === 'PENDING' && (
+                                  <Badge variant="destructive" className="animate-pulse">
+                                    <AlertCircle className="h-3 w-3 mr-1" />
+                                    URGENT
+                                  </Badge>
+                                )}
+                              </CardTitle>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge
+                                  variant={
+                                    request.status === 'PENDING'
+                                      ? 'destructive'
+                                      : request.status === 'MATCHED'
+                                      ? 'default'
+                                      : 'secondary'
+                                  }
+                                  className="text-xs"
+                                >
+                                  {request.status}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {formatDate(request.createdAt)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          {request.topic && (
+                            <div className="mt-3 p-3 bg-background/50 rounded-lg border border-primary/10">
+                              <div className="flex items-start gap-2">
+                                <MessageCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <p className="text-xs text-muted-foreground mb-1 font-medium">Topic:</p>
+                                  <p className="text-sm font-medium">{request.topic.split('\n\n[PROGRESS_SUMMARY]')[0] || 'No topic specified'}</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {request.user && (
+                        <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm">{request.user.name || 'Unknown Student'}</p>
+                            <p className="text-xs text-muted-foreground">{request.user.email}</p>
+                          </div>
+                        </div>
+                      )}
 
                   {/* Progress Summary - Always show for immediate requests */}
                   {(() => {
@@ -407,169 +475,305 @@ export function AdminSubmissionsClient({
                       </div>
                     )
                   })()}
-                  <div className="flex gap-2 pt-2">
-                    {request.status === 'PENDING' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleUpdateRequestStatus(request.id, 'MATCHED')}
-                        disabled={loading === request.id}
-                      >
-                        Mark as Matched
-                      </Button>
-                    )}
-                    {request.status !== 'COMPLETED' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleUpdateRequestStatus(request.id, 'COMPLETED')}
-                        disabled={loading === request.id}
-                      >
-                        Mark as Completed
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                      
+                      <div className="flex gap-2 pt-4 border-t border-primary/10">
+                        {request.status === 'PENDING' && (
+                          <Button
+                            size="sm"
+                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+                            onClick={() => handleUpdateRequestStatus(request.id, 'MATCHED')}
+                            disabled={loading === request.id}
+                          >
+                            {loading === request.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                Mark as Matched
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        {request.status !== 'COMPLETED' && (
+                          <Button
+                            size="sm"
+                            variant={request.status === 'PENDING' ? 'outline' : 'default'}
+                            className={request.status === 'PENDING' ? 'flex-1' : ''}
+                            onClick={() => handleUpdateRequestStatus(request.id, 'COMPLETED')}
+                            disabled={loading === request.id}
+                          >
+                            {loading === request.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                Mark as Completed
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </GlassCard>
+                </GlowEffect>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
       </TabsContent>
 
       <TabsContent value="scheduled" className="space-y-4">
         {scheduledRequests.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8 text-muted-foreground">
-                No scheduled tutoring requests yet
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          scheduledRequests.map((request) => (
-            <Card key={request.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CardTitle className="text-lg">Scheduled Session</CardTitle>
-                      <Badge
-                        variant={
-                          request.status === 'PENDING'
-                            ? 'destructive'
-                            : request.status === 'MATCHED'
-                            ? 'default'
-                            : 'secondary'
-                        }
-                      >
-                        {request.status}
-                      </Badge>
-                    </div>
-                    {request.topic && (
-                      <CardDescription>Topic: {request.topic}</CardDescription>
-                    )}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {formatDate(request.createdAt)}
-                    </div>
-                  </div>
+          <GlowEffect intensity="low">
+            <GlassCard className="backdrop-blur-xl">
+              <CardContent className="pt-12 pb-12">
+                <div className="text-center">
+                  <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-semibold mb-2">No Scheduled Sessions</p>
+                  <p className="text-sm text-muted-foreground">
+                    No scheduled tutoring requests at this time.
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {request.user && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{request.user.name || 'Unknown'}</span>
-                    <span className="text-muted-foreground">({request.user.email})</span>
-                  </div>
-                )}
               </CardContent>
-            </Card>
-          ))
+            </GlassCard>
+          </GlowEffect>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            {scheduledRequests.map((request, index) => (
+              <motion.div
+                key={request.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <GlowEffect intensity="low">
+                  <GlassCard className={`backdrop-blur-xl transition-all ${
+                    request.status === 'PENDING' 
+                      ? 'border-orange-500/50 bg-orange-500/10' 
+                      : request.status === 'MATCHED'
+                      ? 'border-primary/50 bg-primary/5'
+                      : 'border-muted'
+                  }`}>
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${
+                              request.status === 'PENDING'
+                                ? 'bg-orange-500/20 text-orange-500'
+                                : request.status === 'MATCHED'
+                                ? 'bg-primary/20 text-primary'
+                                : 'bg-muted text-muted-foreground'
+                            }`}>
+                              <Calendar className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                              <CardTitle className="text-xl">Scheduled Session</CardTitle>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge
+                                  variant={
+                                    request.status === 'PENDING'
+                                      ? 'destructive'
+                                      : request.status === 'MATCHED'
+                                      ? 'default'
+                                      : 'secondary'
+                                  }
+                                  className="text-xs"
+                                >
+                                  {request.status}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {formatDate(request.createdAt)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          {request.topic && (
+                            <div className="mt-3 p-3 bg-background/50 rounded-lg border border-primary/10">
+                              <div className="flex items-start gap-2">
+                                <FileText className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <p className="text-xs text-muted-foreground mb-1 font-medium">Topic:</p>
+                                  <p className="text-sm font-medium">{request.topic}</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {request.user && (
+                        <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm">{request.user.name || 'Unknown Student'}</p>
+                            <p className="text-xs text-muted-foreground">{request.user.email}</p>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </GlassCard>
+                </GlowEffect>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
       </TabsContent>
 
       <TabsContent value="contacts" className="space-y-4">
         {contactSubmissions.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8 text-muted-foreground">
-                No contact form submissions yet
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          contactSubmissions.map((contact) => (
-            <Card key={contact.id} className={!contact.read ? 'border-blue-500/50 bg-blue-500/5' : ''}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CardTitle className="text-lg">{contact.subject}</CardTitle>
-                      {!contact.read && (
-                        <Badge variant="default">New</Badge>
-                      )}
-                      {contact.responded && (
-                        <Badge variant="secondary">
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                          Responded
-                        </Badge>
-                      )}
-                    </div>
-                    <CardDescription>
-                      From: {contact.name} ({contact.email})
-                    </CardDescription>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {formatDate(contact.createdAt)}
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-sm whitespace-pre-wrap bg-muted p-4 rounded-lg">
-                    {contact.message}
-                  </div>
-                  <div className="flex gap-2">
-                    {!contact.read && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleMarkContactRead(contact.id)}
-                        disabled={loading === contact.id}
-                      >
-                        Mark as Read
-                      </Button>
-                    )}
-                    {!contact.responded && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleMarkContactResponded(contact.id)}
-                        disabled={loading === contact.id}
-                      >
-                        Mark as Responded
-                      </Button>
-                    )}
-                    <a href={`mailto:${contact.email}?subject=Re: ${encodeURIComponent(contact.subject)}`}>
-                      <Button size="sm" variant="default">
-                        <Mail className="h-4 w-4 mr-2" />
-                        Reply
-                      </Button>
-                    </a>
-                  </div>
+          <GlowEffect intensity="low">
+            <GlassCard className="backdrop-blur-xl">
+              <CardContent className="pt-12 pb-12">
+                <div className="text-center">
+                  <Mail className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-semibold mb-2">No Contact Submissions</p>
+                  <p className="text-sm text-muted-foreground">
+                    No contact form submissions at this time.
+                  </p>
                 </div>
               </CardContent>
-            </Card>
-          ))
+            </GlassCard>
+          </GlowEffect>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            {contactSubmissions.map((contact, index) => (
+              <motion.div
+                key={contact.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <GlowEffect intensity={!contact.read ? 'medium' : 'low'}>
+                  <GlassCard className={`backdrop-blur-xl transition-all ${
+                    !contact.read 
+                      ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/20' 
+                      : 'border-muted'
+                  }`}>
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${
+                              !contact.read
+                                ? 'bg-blue-500/20 text-blue-500'
+                                : 'bg-muted text-muted-foreground'
+                            }`}>
+                              <Mail className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                              <CardTitle className="text-xl flex items-center gap-2">
+                                {contact.subject}
+                                {!contact.read && (
+                                  <Badge variant="default" className="animate-pulse">
+                                    <AlertCircle className="h-3 w-3 mr-1" />
+                                    NEW
+                                  </Badge>
+                                )}
+                                {contact.responded && (
+                                  <Badge variant="secondary">
+                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                    Responded
+                                  </Badge>
+                                )}
+                              </CardTitle>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {formatDate(contact.createdAt)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-3 p-3 bg-background/50 rounded-lg border border-primary/10">
+                            <div className="flex items-start gap-2">
+                              <User className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <div className="flex-1">
+                                <p className="text-xs text-muted-foreground mb-1 font-medium">From:</p>
+                                <p className="text-sm font-semibold">{contact.name}</p>
+                                <p className="text-xs text-muted-foreground">{contact.email}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-muted/30 rounded-lg border border-primary/10">
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{contact.message}</p>
+                      </div>
+                      <div className="flex gap-2 pt-2 border-t border-primary/10">
+                        {!contact.read && (
+                          <Button
+                            size="sm"
+                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+                            onClick={() => handleMarkContactRead(contact.id)}
+                            disabled={loading === contact.id}
+                          >
+                            {loading === contact.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                Mark as Read
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        {!contact.responded && (
+                          <Button
+                            size="sm"
+                            variant={!contact.read ? 'outline' : 'default'}
+                            className={!contact.read ? 'flex-1' : ''}
+                            onClick={() => handleMarkContactResponded(contact.id)}
+                            disabled={loading === contact.id}
+                          >
+                            {loading === contact.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <Mail className="h-4 w-4 mr-2" />
+                                Mark as Responded
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        <a href={`mailto:${contact.email}?subject=Re: ${encodeURIComponent(contact.subject)}`}>
+                          <Button size="sm" variant="default" className="bg-primary hover:bg-primary/90">
+                            <Mail className="h-4 w-4 mr-2" />
+                            Reply
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Button>
+                        </a>
+                      </div>
+                    </CardContent>
+                  </GlassCard>
+                </GlowEffect>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
       </TabsContent>
     </Tabs>
+    </div>
   )
 }
 
