@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GlassCard } from '@/components/animations/glass-card'
 import { GlowEffect } from '@/components/animations/glow-effect'
+import { MatchTutoringDialog } from '@/components/admin/match-tutoring-dialog'
 
 interface TutoringRequest {
   id: string
@@ -17,10 +18,26 @@ interface TutoringRequest {
   topic: string | null
   status: string
   createdAt: number | null
+  matchedTeacherId?: string | null
+  matchedSlotId?: string | null
+  matchStatus?: string | null
   user: {
     id: string
     name: string | null
     email: string
+  } | null
+  matchedTeacher?: {
+    id: string
+    name: string
+    email: string
+  } | null
+  matchedSlot?: {
+    id: string
+    start: number
+    end: number
+    teacher: {
+      name: string
+    }
   } | null
 }
 
@@ -92,6 +109,7 @@ export function AdminSubmissionsClient({
   const [loading, setLoading] = useState<string | null>(null)
   const [progressSummaries, setProgressSummaries] = useState<Record<string, ProgressSummary | null>>({})
   const [loadingSummaries, setLoadingSummaries] = useState<Record<string, boolean>>({})
+  const [matchingRequestId, setMatchingRequestId] = useState<string | null>(null)
 
   const immediateRequests = tutoringRequests.filter(r => r.type === 'IMMEDIATE')
   const scheduledRequests = tutoringRequests.filter(r => r.type === 'SCHEDULED')
@@ -333,10 +351,58 @@ export function AdminSubmissionsClient({
                     // Try to parse from topic field first
                     if (request.topic?.includes('[PROGRESS_SUMMARY]')) {
                       try {
-                        const summaryJson = request.topic.split('[PROGRESS_SUMMARY]\n')[1]
-                        summary = JSON.parse(summaryJson)
+                        const parts = request.topic.split('[PROGRESS_SUMMARY]')
+                        if (parts.length > 1) {
+                          let jsonPart = parts[1].trim()
+                          
+                          // Remove leading newline if present
+                          if (jsonPart.startsWith('\n')) {
+                            jsonPart = jsonPart.substring(1).trim()
+                          }
+                          
+                          // Try to extract valid JSON by finding balanced braces
+                          // This handles cases where there might be extra text after the JSON
+                          let braceCount = 0
+                          let jsonStart = -1
+                          let jsonEnd = -1
+                          
+                          for (let i = 0; i < jsonPart.length; i++) {
+                            if (jsonPart[i] === '{') {
+                              if (braceCount === 0) jsonStart = i
+                              braceCount++
+                            }
+                            if (jsonPart[i] === '}') {
+                              braceCount--
+                              if (braceCount === 0) {
+                                jsonEnd = i + 1
+                                break
+                              }
+                            }
+                          }
+                          
+                          if (jsonStart >= 0 && jsonEnd > jsonStart) {
+                            jsonPart = jsonPart.substring(jsonStart, jsonEnd)
+                            
+                            // Only parse if we have valid JSON-looking content
+                            if (jsonPart.trim().startsWith('{') && jsonPart.trim().endsWith('}')) {
+                              try {
+                                const parsed = JSON.parse(jsonPart)
+                                // Validate that it has the expected structure
+                                if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                                  summary = parsed
+                                }
+                              } catch (parseError) {
+                                // JSON is malformed, skip it
+                                console.warn('Malformed JSON in progress summary, skipping:', parseError)
+                                summary = null
+                              }
+                            }
+                          }
+                        }
                       } catch (e) {
-                        console.error('Error parsing progress summary:', e)
+                        console.error('Error extracting progress summary from topic:', e)
+                        // If parsing fails, don't set summary - will fetch from API instead
+                        summary = null
                       }
                     }
                     
@@ -366,12 +432,14 @@ export function AdminSubmissionsClient({
                                 <span className="text-muted-foreground font-medium">Overall Progress:</span>
                                 <span className="font-bold text-lg text-primary">{summary.overallProgress}%</span>
                               </div>
-                              {summary.overallGrade !== null && (
-                                <div className="flex items-center justify-between p-2 bg-background/50 rounded">
-                                  <span className="text-muted-foreground font-medium">Overall Grade:</span>
-                                  <span className="font-bold text-lg text-primary">{summary.overallGrade}%</span>
-                                </div>
-                              )}
+                              <div className="flex items-center justify-between p-2 bg-background/50 rounded">
+                                <span className="text-muted-foreground font-medium">Overall Grade:</span>
+                                <span className="font-bold text-lg text-primary">
+                                  {summary.overallGrade !== null && summary.overallGrade !== undefined 
+                                    ? `${summary.overallGrade}%` 
+                                    : 'N/A'}
+                                </span>
+                              </div>
                             </div>
                             {summary.currentUnit && (
                               <div className="space-y-2 p-3 bg-background/50 rounded border border-primary/10">
@@ -409,18 +477,25 @@ export function AdminSubmissionsClient({
                                   <span>Upcoming Tutoring Sessions:</span>
                                 </div>
                                 <div className="ml-6 space-y-1">
-                                  {summary.upcomingSessions.slice(0, 3).map((session: any, idx: number) => (
-                                    <div key={idx} className="text-xs">
-                                      {session.startTime ? (
-                                        <span className="font-semibold">{new Date(session.startTime * 1000).toLocaleString()}</span>
-                                      ) : (
-                                        <span className="text-muted-foreground">Pending scheduling</span>
-                                      )}
-                                      {session.topic && (
-                                        <span className="text-muted-foreground"> • {session.topic}</span>
-                                      )}
-                                    </div>
-                                  ))}
+                                  {summary.upcomingSessions.slice(0, 3).map((session: any, idx: number) => {
+                                    // Clean the topic to remove progress summary JSON if present
+                                    const cleanTopic = session.topic && session.topic.includes('[PROGRESS_SUMMARY]')
+                                      ? session.topic.split('[PROGRESS_SUMMARY]')[0].trim()
+                                      : session.topic
+                                    
+                                    return (
+                                      <div key={idx} className="text-xs">
+                                        {session.startTime ? (
+                                          <span className="font-semibold">{new Date(session.startTime * 1000).toLocaleString()}</span>
+                                        ) : (
+                                          <span className="text-muted-foreground">Pending scheduling</span>
+                                        )}
+                                        {cleanTopic && (
+                                          <span className="text-muted-foreground"> • {cleanTopic}</span>
+                                        )}
+                                      </div>
+                                    )
+                                  })}
                                 </div>
                               </div>
                             )}
@@ -475,26 +550,91 @@ export function AdminSubmissionsClient({
                       </div>
                     )
                   })()}
+
+                  {/* Matched Tutor Info */}
+                  {(request.status === 'MATCHED' || request.matchedTeacherId || request.matchedSlotId) && (
+                    <div className="mt-4 p-4 bg-primary/10 rounded-lg border border-primary/20">
+                      <h4 className="font-semibold text-sm mb-3 flex items-center gap-2 text-primary">
+                        <User className="h-4 w-4" />
+                        Match Information
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        {request.matchedTeacher && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Teacher:</span>
+                            <span className="font-medium">{request.matchedTeacher.name}</span>
+                            <span className="text-muted-foreground">({request.matchedTeacher.email})</span>
+                          </div>
+                        )}
+                        {request.matchedSlot && (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-muted-foreground">Session:</span>
+                              <span className="font-medium">
+                                {new Date(request.matchedSlot.start * 1000).toLocaleDateString('en-US', {
+                                  weekday: 'long',
+                                  month: 'long',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 ml-5">
+                              <Clock className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-muted-foreground">Time:</span>
+                              <span className="font-medium">
+                                {new Date(request.matchedSlot.start * 1000).toLocaleTimeString('en-US', {
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                })}{' '}
+                                -{' '}
+                                {new Date(request.matchedSlot.end * 1000).toLocaleTimeString('en-US', {
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            </div>
+                            {request.matchedSlot.teacher && (
+                              <div className="ml-5 text-xs text-muted-foreground">
+                                with {request.matchedSlot.teacher.name}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {request.matchStatus && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">Status:</span>
+                            <Badge
+                              variant={
+                                request.matchStatus === 'ACCEPTED'
+                                  ? 'default'
+                                  : request.matchStatus === 'DECLINED'
+                                  ? 'destructive'
+                                  : request.matchStatus === 'RESCHEDULED'
+                                  ? 'secondary'
+                                  : 'outline'
+                              }
+                              className="text-xs"
+                            >
+                              {request.matchStatus.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                       
                       <div className="flex gap-2 pt-4 border-t border-primary/10">
                         {request.status === 'PENDING' && (
                           <Button
                             size="sm"
                             className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-                            onClick={() => handleUpdateRequestStatus(request.id, 'MATCHED')}
+                            onClick={() => setMatchingRequestId(request.id)}
                             disabled={loading === request.id}
                           >
-                            {loading === request.id ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Processing...
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle2 className="h-4 w-4 mr-2" />
-                                Mark as Matched
-                              </>
-                            )}
+                            <User className="h-4 w-4 mr-2" />
+                            Match to Tutor
                           </Button>
                         )}
                         {request.status !== 'COMPLETED' && (
@@ -773,6 +913,19 @@ export function AdminSubmissionsClient({
         )}
       </TabsContent>
     </Tabs>
+    
+    {/* Matching Dialog */}
+    {matchingRequestId && (
+      <MatchTutoringDialog
+        open={!!matchingRequestId}
+        onOpenChange={(open) => !open && setMatchingRequestId(null)}
+        requestId={matchingRequestId}
+        onMatchSuccess={() => {
+          setMatchingRequestId(null)
+          router.refresh()
+        }}
+      />
+    )}
     </div>
   )
 }

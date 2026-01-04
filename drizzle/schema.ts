@@ -7,6 +7,7 @@ export const lessonTypes = ['VIDEO', 'READING', 'EXERCISE'] as const;
 export const progressStatuses = ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED'] as const;
 export const tutoringRequestTypes = ['SCHEDULED', 'IMMEDIATE'] as const;
 export const tutoringRequestStatuses = ['PENDING', 'MATCHED', 'COMPLETED', 'CANCELLED'] as const;
+export const matchStatuses = ['PENDING_ACCEPTANCE', 'ACCEPTED', 'DECLINED', 'RESCHEDULED'] as const;
 
 // Type exports
 export type UserRole = typeof userRoles[number];
@@ -14,6 +15,7 @@ export type LessonType = typeof lessonTypes[number];
 export type ProgressStatus = typeof progressStatuses[number];
 export type TutoringRequestType = typeof tutoringRequestTypes[number];
 export type TutoringRequestStatus = typeof tutoringRequestStatuses[number];
+export type MatchStatus = typeof matchStatuses[number];
 
 // Helper for timestamps
 const timestamps = {
@@ -283,11 +285,16 @@ export const tutoringRequests = sqliteTable('tutoring_requests', {
   topic: text('topic'),
   status: text('status', { enum: tutoringRequestStatuses }).notNull().default('PENDING'),
   scheduledSlotId: text('scheduled_slot_id'),
+  matchedTeacherId: text('matched_teacher_id').references(() => teachers.id, { onDelete: 'set null' }),
+  matchedSlotId: text('matched_slot_id').references(() => tutoringSlots.id, { onDelete: 'set null' }),
+  matchStatus: text('match_status', { enum: matchStatuses }),
+  matchResponse: text('match_response'), // Student's response message
   ...timestamps,
 }, (table) => ({
   userIdIdx: index('tutoring_requests_user_id_idx').on(table.userId),
   statusIdx: index('tutoring_requests_status_idx').on(table.status),
   typeIdx: index('tutoring_requests_type_idx').on(table.type),
+  matchedTeacherIdIdx: index('tutoring_requests_matched_teacher_id_idx').on(table.matchedTeacherId),
 }));
 
 // Event Logs table
@@ -533,6 +540,8 @@ export const tutoringSlotsRelations = relations(tutoringSlots, ({ one }) => ({
 
 export const tutoringRequestsRelations = relations(tutoringRequests, ({ one }) => ({
   user: one(users, { fields: [tutoringRequests.userId], references: [users.id] }),
+  matchedTeacher: one(teachers, { fields: [tutoringRequests.matchedTeacherId], references: [teachers.id] }),
+  matchedSlot: one(tutoringSlots, { fields: [tutoringRequests.matchedSlotId], references: [tutoringSlots.id] }),
 }));
 
 export const eventLogsRelations = relations(eventLogs, ({ one }) => ({

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { progress, units, lessons, tutoringRequests, tutoringSlots } from '@/lib/schema'
-import { eq, and, desc, asc, or } from '@/lib/drizzle-helpers'
+import { progress, units, lessons, tutoringRequests, tutoringSlots, teachers } from '@/lib/schema'
+import { eq, and, desc, asc, or, inArray, gte } from '@/lib/drizzle-helpers'
 import { getNextBestLesson, getUserProgressByUnit } from '@/lib/recommendations'
 
 export async function GET(
@@ -83,12 +83,16 @@ export async function GET(
     const nextLessonData = await getNextBestLesson(userId)
 
     // Get upcoming tutoring sessions
-    const upcomingSessions = await db
+    const now = Math.floor(Date.now() / 1000) // Current time in Unix seconds
+    const sessionsData = await db
       .select({
         id: tutoringRequests.id,
         topic: tutoringRequests.topic,
         status: tutoringRequests.status,
         scheduledSlotId: tutoringRequests.scheduledSlotId,
+        matchedTeacherId: tutoringRequests.matchedTeacherId,
+        matchedSlotId: tutoringRequests.matchedSlotId,
+        matchStatus: tutoringRequests.matchStatus,
         slot: {
           start: tutoringSlots.start,
           end: tutoringSlots.end,
@@ -105,8 +109,64 @@ export async function GET(
           )
         )
       )
-      .orderBy(asc(tutoringSlots.start))
-      .limit(5)
+      .orderBy(desc(tutoringRequests.createdAt))
+      .limit(20) // Get more to account for filtering
+
+    // Get matched teachers and slots separately
+    const matchedTeacherIds = [...new Set(sessionsData.map(s => s.matchedTeacherId).filter(Boolean) as string[])]
+    const matchedSlotIds = [...new Set(sessionsData.map(s => s.matchedSlotId).filter(Boolean) as string[])]
+
+    const matchedTeachers = matchedTeacherIds.length > 0
+      ? await db
+          .select({
+            id: teachers.id,
+            name: teachers.name,
+            email: teachers.email,
+          })
+          .from(teachers)
+          .where(inArray(teachers.id, matchedTeacherIds))
+      : []
+
+    const matchedSlots = matchedSlotIds.length > 0
+      ? await db
+          .select({
+            id: tutoringSlots.id,
+            start: tutoringSlots.start,
+            end: tutoringSlots.end,
+          })
+          .from(tutoringSlots)
+          .where(inArray(tutoringSlots.id, matchedSlotIds))
+      : []
+
+    const upcomingSessions = sessionsData
+      .map(session => ({
+        ...session,
+        matchedTeacher: session.matchedTeacherId
+          ? matchedTeachers.find(t => t.id === session.matchedTeacherId) || null
+          : null,
+        matchedSlot: session.matchedSlotId
+          ? matchedSlots.find(s => s.id === session.matchedSlotId) || null
+          : null,
+      }))
+      .filter(session => {
+        // Get the start time from either scheduledSlot or matchedSlot
+        let startTime: number | null = null
+        
+        if (session.slot?.start) {
+          startTime = typeof session.slot.start === 'number' 
+            ? (session.slot.start < 10000000000 ? session.slot.start : Math.floor(session.slot.start / 1000))
+            : Math.floor(new Date(session.slot.start).getTime() / 1000)
+        } else if (session.matchedSlot?.start) {
+          startTime = typeof session.matchedSlot.start === 'number' 
+            ? (session.matchedSlot.start < 10000000000 ? session.matchedSlot.start : Math.floor(session.matchedSlot.start / 1000))
+            : Math.floor(new Date(session.matchedSlot.start).getTime() / 1000)
+        }
+        
+        // Only include sessions with a future start time
+        // If no start time is available, include it (pending scheduling)
+        return startTime === null || startTime >= now
+      })
+      .slice(0, 5) // Limit to 5 after filtering
 
     return NextResponse.json({
       overallProgress,
@@ -133,16 +193,34 @@ export async function GET(
         id: session.id,
         topic: session.topic,
         status: session.status,
-        startTime: session.slot?.start ? (typeof session.slot.start === 'number' ? session.slot.start : Math.floor(new Date(session.slot.start).getTime() / 1000)) : null,
-        endTime: session.slot?.end ? (typeof session.slot.end === 'number' ? session.slot.end : Math.floor(new Date(session.slot.end).getTime() / 1000)) : null,
+        matchStatus: session.matchStatus,
+        startTime: (session.slot?.start || session.matchedSlot?.start) 
+          ? (typeof (session.slot?.start || session.matchedSlot?.start) === 'number' 
+              ? (session.slot?.start || session.matchedSlot?.start) 
+              : Math.floor(new Date(session.slot?.start || session.matchedSlot?.start).getTime() / 1000)) 
+          : null,
+        endTime: (session.slot?.end || session.matchedSlot?.end)
+          ? (typeof (session.slot?.end || session.matchedSlot?.end) === 'number'
+              ? (session.slot?.end || session.matchedSlot?.end)
+              : Math.floor(new Date(session.slot?.end || session.matchedSlot?.end).getTime() / 1000))
+          : null,
+        matchedTeacher: session.matchedTeacher ? {
+          id: session.matchedTeacher.id,
+          name: session.matchedTeacher.name,
+          email: session.matchedTeacher.email,
+        } : null,
       })),
     })
   } catch (error) {
     console.error('Error fetching progress summary:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch progress summary' },
-      { status: 500 }
-    )
+    // Return a basic structure so the UI doesn't break
+    return NextResponse.json({
+      overallProgress: 0,
+      overallGrade: null,
+      currentUnit: null,
+      nextLesson: null,
+      upcomingSessions: [],
+    })
   }
 }
 

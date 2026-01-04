@@ -7,7 +7,6 @@ import { ImmediateHelp } from "@/components/tutoring/immediate-help"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar, MessageCircle, Clock, Users } from "lucide-react"
 import { gte, gt, asc, eq } from "@/lib/drizzle-helpers"
-import { ScrollReveal } from "@/components/animations/scroll-reveal"
 import { GradientText } from "@/components/animations/gradient-text"
 import { GlowEffect } from "@/components/animations/glow-effect"
 
@@ -38,16 +37,14 @@ export default async function TutoringPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <ScrollReveal>
-        <div className="mb-12 text-center">
-          <h1 className="text-5xl font-bold mb-4">
-            <GradientText variant="primary">Live Tutoring</GradientText>
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            Get help from expert teachers through scheduled sessions or immediate assistance
-          </p>
-        </div>
-      </ScrollReveal>
+      <div className="mb-12 text-center">
+        <h1 className="text-5xl font-bold mb-4">
+          <GradientText variant="primary">Live Tutoring</GradientText>
+        </h1>
+        <p className="text-xl text-muted-foreground">
+          Get help from expert teachers through scheduled sessions or immediate assistance
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8 items-stretch">
         <Card className="h-full flex flex-col lg:col-span-3">

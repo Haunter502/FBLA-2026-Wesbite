@@ -93,42 +93,74 @@ export function TutoringCalendar() {
     return acc
   }, {})
 
-  // Get days in current month (Monday through Saturday, excluding Sunday)
-  const daysInMonth = currentMonth.daysInMonth()
+  // Build calendar weeks (Monday through Saturday, excluding Sunday)
+  const weeks: Array<Array<{ day: number; date: dayjs.Dayjs } | null>> = []
   
-  // Create a map of all days in the month, keyed by their day of week (1-6 for Mon-Sat, excluding Sunday)
-  // We'll use this to properly position dates in the grid
-  const daysByDayOfWeek: Record<number, { day: number; date: dayjs.Dayjs }[]> = {
-    1: [], // Monday
-    2: [], // Tuesday
-    3: [], // Wednesday
-    4: [], // Thursday
-    5: [], // Friday
-    6: [], // Saturday
+  // Get the first day of the month
+  const firstDay = currentMonth.startOf('month')
+  
+  // Find the Monday of the week containing the first day
+  // day() returns 0=Sunday, 1=Monday, 2=Tuesday, etc.
+  let startDate = firstDay
+  const firstDayOfWeek = firstDay.day()
+  
+  // Calculate days to go back to get to Monday
+  // If Sunday (0), go back 6 days. Otherwise go back (dayOfWeek - 1) days
+  if (firstDayOfWeek === 0) {
+    startDate = firstDay.subtract(6, 'day')
+  } else if (firstDayOfWeek !== 1) {
+    startDate = firstDay.subtract(firstDayOfWeek - 1, 'day')
   }
   
-  for (let i = 1; i <= daysInMonth; i++) {
-    const date = currentMonth.date(i)
-    const dayOfWeek = date.day() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  // Get the last day of the month
+  const lastDay = currentMonth.endOf('month')
+  const lastDayOfWeek = lastDay.day()
+  
+  // Calculate the Saturday of the week containing the last day
+  let endDate = lastDay
+  if (lastDayOfWeek !== 0 && lastDayOfWeek !== 6) {
+    // If not Sunday or Saturday, go forward to Saturday
+    endDate = lastDay.add(6 - lastDayOfWeek, 'day')
+  } else if (lastDayOfWeek === 0) {
+    // If Sunday, go back to Saturday
+    endDate = lastDay.subtract(1, 'day')
+  }
+  
+  // Build weeks starting from the Monday
+  let currentDate = startDate
+  
+  while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
+    const week: Array<{ day: number; date: dayjs.Dayjs } | null> = []
     
-    // Skip Sundays
-    if (dayOfWeek === 0) {
-      continue
+    // Build a week (Monday through Saturday, 6 days total)
+    for (let i = 0; i < 6; i++) {
+      // Skip if it's Sunday (shouldn't happen if logic is correct, but just in case)
+      if (currentDate.day() === 0) {
+        currentDate = currentDate.add(1, 'day')
+        i-- // Decrement to maintain the loop count
+        continue
+      }
+      
+      // Only include days from the current month
+      if (currentDate.month() === currentMonth.month()) {
+        week.push({
+          day: currentDate.date(),
+          date: currentDate,
+        })
+      } else {
+        week.push(null) // Day from previous/next month
+      }
+      
+      currentDate = currentDate.add(1, 'day')
     }
     
-    // Skip Saturday if it's day 1 (first day of month)
-    if (dayOfWeek === 6 && i === 1) {
-      continue
-    }
+    // Add the week (even if it has nulls, we want to show the structure)
+    weeks.push(week)
     
-    if (!daysByDayOfWeek[dayOfWeek]) {
-      daysByDayOfWeek[dayOfWeek] = []
+    // Stop if we've passed the end date
+    if (currentDate.isAfter(endDate)) {
+      break
     }
-    
-    daysByDayOfWeek[dayOfWeek].push({
-      day: i,
-      date,
-    })
   }
 
   // Get slots for a specific date (Saturday will always return empty array)
@@ -208,82 +240,76 @@ export function TutoringCalendar() {
       </div>
 
       {/* Calendar Grid - Monday through Saturday (excluding Sunday) */}
-      <div className="grid grid-cols-6 gap-2 mb-4 items-stretch">
+      <div className="space-y-2 mb-4">
         {/* Header row with weekday labels */}
-        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayLabel, colIndex) => (
-          <div key={dayLabel} className="text-center text-sm font-medium text-muted-foreground p-2">
-            {dayLabel}
+        <div className="grid grid-cols-6 gap-2">
+          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayLabel) => (
+            <div key={dayLabel} className="text-center text-sm font-medium text-muted-foreground p-2">
+              {dayLabel}
+            </div>
+          ))}
+        </div>
+        
+        {/* Calendar weeks - each week is a row */}
+        {weeks.map((week, weekIndex) => (
+          <div key={weekIndex} className="grid grid-cols-6 gap-2">
+            {week.map((dayData, dayIndex) => {
+              if (!dayData) {
+                return <div key={`empty-${weekIndex}-${dayIndex}`} className="flex-1 min-h-[115px]"></div>
+              }
+              
+              const { day, date } = dayData
+              const dateSlots = getSlotsForDate(day)
+              const isToday = dayjs().isSame(date, 'day')
+              const hasSlots = dateSlots.length > 0
+              const dateKey = date.format('YYYY-MM-DD')
+              const isSelected = selectedDate === dateKey
+              const isWeekend = date.day() === 6 // Saturday
+
+              return (
+                <div
+                  key={day}
+                  className={`flex-1 flex flex-col min-h-[115px] p-2 border-2 rounded-lg transition-all ${
+                    isWeekend ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+                  } ${
+                    isToday ? 'bg-primary/20 border-primary shadow-md shadow-primary/20' : 'border-border bg-card'
+                  } ${isSelected ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : ''} ${
+                    hasSlots && !isWeekend ? 'hover:bg-muted/50 hover:border-primary/50 hover:shadow-sm' : ''
+                  }`}
+                  onClick={() => handleDateClick(day)}
+                >
+                  <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-primary' : 'text-foreground'}`}>
+                    {day}
+                  </div>
+                  <div className="flex-1 flex flex-col justify-start">
+                    {isWeekend ? (
+                      <div className="text-xs text-muted-foreground/30 italic">Saturday</div>
+                    ) : hasSlots ? (
+                      <div className="space-y-1">
+                        {dateSlots.slice(0, 3).map((slot: Slot) => (
+                          <div
+                            key={slot.id}
+                            className={`text-xs ${getTimeSlotColor(slot)} px-1.5 py-0.5 rounded font-medium`}
+                            title={`${getTimeSlotLabel(slot)}: ${dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start).format('h:mm A')} - ${slot.teacher?.name || 'Teacher'}`}
+                          >
+                            {getTimeSlotLabel(slot)}
+                          </div>
+                        ))}
+                        {dateSlots.length > 3 && (
+                          <div className="text-xs text-muted-foreground font-medium">
+                            +{dateSlots.length - 3} more
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-muted-foreground/50">No slots</div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         ))}
-        
-        {/* Calendar cells - organized by weekday columns */}
-        {[1, 2, 3, 4, 5, 6].map((dayOfWeekIndex) => {
-          const daysInThisColumn = daysByDayOfWeek[dayOfWeekIndex] || []
-          const maxDaysInAnyColumn = Math.max(...[1, 2, 3, 4, 5, 6].map(i => (daysByDayOfWeek[i] || []).length))
-          
-          const isWeekend = dayOfWeekIndex === 6 // Saturday is the only weekend day now
-          
-          return (
-            <div key={dayOfWeekIndex} className="flex flex-col gap-2">
-              {Array.from({ length: maxDaysInAnyColumn }).map((_, rowIndex) => {
-                const weekdayData = daysInThisColumn[rowIndex]
-                
-                if (!weekdayData) {
-                  return <div key={`empty-${dayOfWeekIndex}-${rowIndex}`} className="flex-1 min-h-[115px]"></div>
-                }
-                
-                const { day, date } = weekdayData
-                const dateSlots = getSlotsForDate(day)
-                const isToday = dayjs().isSame(date, 'day')
-                const hasSlots = dateSlots.length > 0
-                const dateKey = date.format('YYYY-MM-DD')
-                const isSelected = selectedDate === dateKey
-
-                return (
-                  <div
-                    key={day}
-                    className={`flex-1 flex flex-col min-h-[115px] p-2 border-2 rounded-lg transition-all ${
-                      isWeekend ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
-                    } ${
-                      isToday ? 'bg-primary/20 border-primary shadow-md shadow-primary/20' : 'border-border bg-card'
-                    } ${isSelected ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : ''} ${
-                      hasSlots && !isWeekend ? 'hover:bg-muted/50 hover:border-primary/50 hover:shadow-sm' : ''
-                    }`}
-                    onClick={() => handleDateClick(day)}
-                  >
-                    <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-primary' : 'text-foreground'}`}>
-                      {day}
-                    </div>
-                    <div className="flex-1 flex flex-col justify-start">
-                      {isWeekend ? (
-                        <div className="text-xs text-muted-foreground/30 italic">Saturday</div>
-                      ) : hasSlots ? (
-                        <div className="space-y-1">
-                          {dateSlots.slice(0, 3).map((slot: Slot) => (
-                            <div
-                              key={slot.id}
-                              className={`text-xs ${getTimeSlotColor(slot)} px-1.5 py-0.5 rounded font-medium`}
-                              title={`${getTimeSlotLabel(slot)}: ${dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start).format('h:mm A')} - ${slot.teacher?.name || 'Teacher'}`}
-                            >
-                              {getTimeSlotLabel(slot)}
-                            </div>
-                          ))}
-                          {dateSlots.length > 3 && (
-                            <div className="text-xs text-muted-foreground font-medium">
-                              +{dateSlots.length - 3} more
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-xs text-muted-foreground/50">No slots</div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )
-        })}
       </div>
 
       {/* Selected Date Slots */}

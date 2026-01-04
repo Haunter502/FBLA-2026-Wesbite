@@ -1,23 +1,27 @@
 import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { tutoringRequests, contacts, users } from "@/lib/schema"
+import { tutoringRequests, contacts, users, teachers, tutoringSlots } from "@/lib/schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { MessageSquare, HelpCircle, Mail, Clock, Zap, Calendar } from "lucide-react"
-import { eq, desc } from "@/lib/drizzle-helpers"
+import { eq, desc, inArray } from "@/lib/drizzle-helpers"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
 import { AdminSubmissionsClient } from "@/components/admin/submissions-client"
 import { GlassCard } from "@/components/animations/glass-card"
 import { GlowEffect } from "@/components/animations/glow-effect"
 
 async function getTutoringRequests() {
+  // First get all requests with user info
   const requests = await db
     .select({
       id: tutoringRequests.id,
       type: tutoringRequests.type,
       topic: tutoringRequests.topic,
       status: tutoringRequests.status,
+      matchedTeacherId: tutoringRequests.matchedTeacherId,
+      matchedSlotId: tutoringRequests.matchedSlotId,
+      matchStatus: tutoringRequests.matchStatus,
       createdAt: tutoringRequests.createdAt,
       user: {
         id: users.id,
@@ -29,7 +33,65 @@ async function getTutoringRequests() {
     .leftJoin(users, eq(tutoringRequests.userId, users.id))
     .orderBy(desc(tutoringRequests.createdAt))
 
-  return requests
+  // Then fetch matched teachers and slots separately
+  const teacherIds = [...new Set(requests.map(r => r.matchedTeacherId).filter(Boolean) as string[])]
+  const slotIds = [...new Set(requests.map(r => r.matchedSlotId).filter(Boolean) as string[])]
+
+  const matchedTeachers = teacherIds.length > 0
+    ? await db
+        .select({
+          id: teachers.id,
+          name: teachers.name,
+          email: teachers.email,
+        })
+        .from(teachers)
+        .where(inArray(teachers.id, teacherIds))
+    : []
+
+  const matchedSlots = slotIds.length > 0
+    ? await db
+        .select({
+          id: tutoringSlots.id,
+          start: tutoringSlots.start,
+          end: tutoringSlots.end,
+          teacherId: tutoringSlots.teacherId,
+        })
+        .from(tutoringSlots)
+        .where(inArray(tutoringSlots.id, slotIds))
+    : []
+
+  // Get slot teachers
+  const slotTeacherIds = [...new Set(matchedSlots.map(s => s.teacherId).filter(Boolean) as string[])]
+  const slotTeachers = slotTeacherIds.length > 0
+    ? await db
+        .select({
+          id: teachers.id,
+          name: teachers.name,
+        })
+        .from(teachers)
+        .where(inArray(teachers.id, slotTeacherIds))
+    : []
+
+  // Combine the data
+  return requests.map(request => ({
+    ...request,
+    matchedTeacher: request.matchedTeacherId
+      ? matchedTeachers.find(t => t.id === request.matchedTeacherId) || null
+      : null,
+    matchedSlot: request.matchedSlotId
+      ? (() => {
+          const slot = matchedSlots.find(s => s.id === request.matchedSlotId)
+          if (!slot) return null
+          const teacher = slotTeachers.find(t => t.id === slot.teacherId)
+          return {
+            id: slot.id,
+            start: slot.start,
+            end: slot.end,
+            teacher: teacher ? { name: teacher.name } : null,
+          }
+        })()
+      : null,
+  }))
 }
 
 async function getContactSubmissions() {

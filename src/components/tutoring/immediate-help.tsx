@@ -39,6 +39,12 @@ interface ProgressSummary {
     status: string
     startTime: number | null
     endTime: number | null
+    matchStatus: string | null
+    matchedTeacher: {
+      id: string
+      name: string
+      email: string
+    } | null
   }>
 }
 
@@ -58,9 +64,27 @@ export function ImmediateHelp({ userId }: ImmediateHelpProps) {
         if (response.ok) {
           const data = await response.json()
           setProgressSummary(data)
+        } else {
+          console.error("Failed to fetch progress summary:", response.status)
+          // Set to empty object so the card still shows
+          setProgressSummary({
+            overallProgress: 0,
+            overallGrade: null,
+            currentUnit: null,
+            nextLesson: null,
+            upcomingSessions: [],
+          })
         }
       } catch (error) {
         console.error("Error fetching progress summary:", error)
+        // Set to empty object so the card still shows
+        setProgressSummary({
+          overallProgress: 0,
+          overallGrade: null,
+          currentUnit: null,
+          nextLesson: null,
+          upcomingSessions: [],
+        })
       } finally {
         setLoadingSummary(false)
       }
@@ -141,53 +165,70 @@ export function ImmediateHelp({ userId }: ImmediateHelpProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Progress Summary Preview */}
-      {!loadingSummary && progressSummary && (
+      {loadingSummary ? (
         <Card className="bg-muted/50 border-primary/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Your Progress Summary
-            </CardTitle>
-            <CardDescription className="text-xs">
-              This information will be shared with your teacher
-            </CardDescription>
+          <CardContent className="p-6 text-center">
+            <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto" />
+            <p className="text-sm text-muted-foreground mt-2">Loading your progress...</p>
+          </CardContent>
+        </Card>
+      ) : progressSummary && (
+        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/30 shadow-lg">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base flex items-center gap-2 mb-1">
+                  <div className="p-1.5 rounded-lg bg-primary/20">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                  </div>
+                  Your Progress Summary
+                </CardTitle>
+                <CardDescription className="text-xs mt-1">
+                  This information will be shared with your teacher
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
+          <CardContent className="space-y-4 text-sm">
             {/* Overall Progress and Grade */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Overall Progress:</span>
-                <span className="font-semibold">{progressSummary.overallProgress}%</span>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 bg-background/60 rounded-lg border border-primary/10">
+                <div className="text-xs text-muted-foreground mb-1">Overall Progress</div>
+                <div className="text-2xl font-bold text-foreground">{progressSummary.overallProgress}%</div>
               </div>
               {progressSummary.overallGrade !== null && (
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Overall Grade:</span>
-                  <span className="font-semibold text-primary">{progressSummary.overallGrade}%</span>
+                <div className="p-3 bg-background/60 rounded-lg border border-primary/10">
+                  <div className="text-xs text-muted-foreground mb-1">Overall Grade</div>
+                  <div className="text-2xl font-bold text-primary">{progressSummary.overallGrade}%</div>
                 </div>
               )}
             </div>
 
             {/* Current Unit */}
             {progressSummary.currentUnit && (
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    <BookOpen className="h-3 w-3" />
-                    Current Unit:
-                  </span>
-                  <Link 
-                    href={`/units/${progressSummary.currentUnit.slug}`}
-                    className="font-semibold text-primary hover:underline"
-                  >
-                    {progressSummary.currentUnit.title}
-                  </Link>
+              <div className="p-4 bg-background/60 rounded-lg border border-primary/10">
+                <div className="flex items-center gap-2 mb-2">
+                  <BookOpen className="h-4 w-4 text-primary" />
+                  <span className="text-xs text-muted-foreground font-medium">Current Unit</span>
                 </div>
-                <div className="ml-4 text-xs text-muted-foreground">
-                  {progressSummary.currentUnit.progress.completedLessons} / {progressSummary.currentUnit.progress.totalLessons} lessons completed
+                <Link 
+                  href={`/units/${progressSummary.currentUnit.slug}`}
+                  className="font-semibold text-primary hover:underline block mb-2"
+                >
+                  {progressSummary.currentUnit.title}
+                </Link>
+                <div className="text-xs text-muted-foreground flex items-center gap-2">
+                  <span className="font-medium">{progressSummary.currentUnit.progress.completedLessons}</span>
+                  <span>/</span>
+                  <span className="font-medium">{progressSummary.currentUnit.progress.totalLessons}</span>
+                  <span>lessons completed</span>
                   {progressSummary.currentUnit.progress.grade && (
-                    <span className="ml-2">• Grade: {progressSummary.currentUnit.progress.grade}%</span>
+                    <>
+                      <span>•</span>
+                      <span className="font-semibold text-primary">Grade: {progressSummary.currentUnit.progress.grade}%</span>
+                    </>
                   )}
                 </div>
               </div>
@@ -195,11 +236,11 @@ export function ImmediateHelp({ userId }: ImmediateHelpProps) {
 
             {/* Next Lesson */}
             {progressSummary.nextLesson && (
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Next Lesson:</span>
+              <div className="p-4 bg-background/60 rounded-lg border border-primary/10">
+                <div className="text-xs text-muted-foreground font-medium mb-2">Next Recommended Lesson</div>
                 <Link 
                   href={`/lessons/${progressSummary.nextLesson.slug}`}
-                  className="font-semibold text-primary hover:underline text-right max-w-[60%] truncate"
+                  className="font-semibold text-primary hover:underline block line-clamp-2"
                 >
                   {progressSummary.nextLesson.title}
                 </Link>
@@ -208,23 +249,40 @@ export function ImmediateHelp({ userId }: ImmediateHelpProps) {
 
             {/* Upcoming Sessions */}
             {progressSummary.upcomingSessions.length > 0 && (
-              <div className="space-y-1 pt-2 border-t">
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Calendar className="h-3 w-3" />
-                  <span>Upcoming Sessions:</span>
+              <div className="pt-3 border-t border-primary/20">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium mb-3">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span>Upcoming Sessions</span>
                 </div>
-                {progressSummary.upcomingSessions.slice(0, 2).map((session) => (
-                  <div key={session.id} className="ml-4 text-xs">
-                    {session.startTime ? (
-                      <span>{formatTime(session.startTime)}</span>
-                    ) : (
-                      <span className="text-muted-foreground">Pending scheduling</span>
-                    )}
-                    {session.topic && (
-                      <span className="text-muted-foreground"> • {session.topic}</span>
-                    )}
-                  </div>
-                ))}
+                <div className="space-y-2">
+                  {progressSummary.upcomingSessions.slice(0, 2).map((session) => {
+                    // Clean the topic to remove progress summary JSON if present
+                    const cleanTopic = session.topic && session.topic.includes('[PROGRESS_SUMMARY]')
+                      ? session.topic.split('[PROGRESS_SUMMARY]')[0].trim()
+                      : session.topic
+                    
+                    return (
+                      <div key={session.id} className="flex items-center gap-2 p-2 bg-background/40 rounded text-xs">
+                        <Calendar className="h-3 w-3 text-primary flex-shrink-0" />
+                        <div className="flex-1 flex items-center gap-2 flex-wrap">
+                          {session.startTime ? (
+                            <span className="font-medium">{formatTime(session.startTime)}</span>
+                          ) : session.matchStatus === 'ACCEPTED' && session.matchedTeacher ? (
+                            <span className="font-medium text-primary">Matched with {session.matchedTeacher.name}</span>
+                          ) : (
+                            <span className="text-muted-foreground">Pending scheduling</span>
+                          )}
+                          {session.matchStatus === 'ACCEPTED' && session.matchedTeacher && session.startTime && (
+                            <span className="text-primary">• {session.matchedTeacher.name}</span>
+                          )}
+                          {cleanTopic && (
+                            <span className="text-muted-foreground truncate">• {cleanTopic}</span>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             )}
           </CardContent>
@@ -232,30 +290,37 @@ export function ImmediateHelp({ userId }: ImmediateHelpProps) {
       )}
 
       <form onSubmit={handleRequest} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="topic">What do you need help with?</Label>
+        <div className="space-y-3">
+          <Label htmlFor="topic" className="text-base font-semibold">
+            What do you need help with?
+          </Label>
           <Input
             id="topic"
             placeholder="e.g., Solving quadratic equations, Factoring polynomials..."
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             required
+            className="h-12 text-base"
           />
         </div>
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button 
+          type="submit" 
+          className="w-full h-12 text-base font-semibold" 
+          disabled={loading}
+        >
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Requesting...
+              <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+              Requesting Help...
             </>
           ) : (
             <>
-              <MessageCircle className="h-4 w-4 mr-2" />
+              <MessageCircle className="h-5 w-5 mr-2" />
               Request Immediate Help
             </>
           )}
         </Button>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-center text-muted-foreground">
           We'll match you with an available teacher as soon as possible.
         </p>
       </form>
@@ -299,7 +364,7 @@ export function ImmediateHelp({ userId }: ImmediateHelpProps) {
           </div>
         </div>
       </div>
-    </form>
+    </div>
   )
 }
 

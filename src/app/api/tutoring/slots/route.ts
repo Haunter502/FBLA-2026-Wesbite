@@ -25,7 +25,18 @@ export async function GET() {
       .orderBy(asc(tutoringSlots.start))
       .limit(10)
 
-    return NextResponse.json({ slots })
+    // Normalize timestamps to Unix seconds for consistent handling
+    const normalizedSlots = slots.map(slot => ({
+      ...slot,
+      start: typeof slot.start === 'number' 
+        ? (slot.start < 10000000000 ? slot.start : Math.floor(slot.start / 1000))
+        : Math.floor(new Date(slot.start).getTime() / 1000),
+      end: typeof slot.end === 'number' 
+        ? (slot.end < 10000000000 ? slot.end : Math.floor(slot.end / 1000))
+        : Math.floor(new Date(slot.end).getTime() / 1000),
+    }))
+
+    return NextResponse.json({ slots: normalizedSlots })
   } catch (error) {
     console.error("Error fetching slots:", error)
     return NextResponse.json({ error: "Failed to fetch slots" }, { status: 500 })
