@@ -69,7 +69,33 @@ export function MatchResponseClient({ requestId }: { requestId: string }) {
   async function handleResponse(actionType: 'accept' | 'decline' | 'reschedule') {
     if (submitting) return
 
+    // Refresh the request data first to ensure we have the latest status
+    await fetchMatch()
+
+    // Check if the request is still in a valid state
+    if (!matchData?.request) {
+      alert('Unable to load request data. Please refresh the page and try again.')
+      return
+    }
+
+    const { request } = matchData
+    if (request.status !== 'MATCHED' || request.matchStatus !== 'PENDING_ACCEPTANCE') {
+      let statusMessage = 'This request is no longer awaiting acceptance.'
+      if (request.matchStatus === 'ACCEPTED') {
+        statusMessage = 'This match has already been accepted.'
+      } else if (request.matchStatus === 'DECLINED') {
+        statusMessage = 'This match has already been declined.'
+      } else if (request.matchStatus === 'RESCHEDULED') {
+        statusMessage = 'A rematch has already been requested for this match.'
+      }
+      alert(statusMessage)
+      // Refresh to show updated status
+      await fetchMatch()
+      return
+    }
+
     setSubmitting(true)
+    setAction(actionType)
     try {
       const res = await fetch(`/api/tutoring/matches/${requestId}`, {
         method: 'PATCH',
@@ -81,7 +107,19 @@ export function MatchResponseClient({ requestId }: { requestId: string }) {
       })
 
       if (!res.ok) {
-        throw new Error('Failed to submit response')
+        // Try to get error message from response
+        let errorMessage = 'Failed to submit response'
+        try {
+          const errorData = await res.json()
+          errorMessage = errorData.error || errorMessage
+          if (errorData.details) {
+            errorMessage += `: ${JSON.stringify(errorData.details)}`
+          }
+        } catch (e) {
+          // If response is not JSON, use status text
+          errorMessage = res.statusText || errorMessage
+        }
+        throw new Error(errorMessage)
       }
 
       // Refresh the data to get updated teacher info
@@ -90,7 +128,8 @@ export function MatchResponseClient({ requestId }: { requestId: string }) {
       router.refresh()
     } catch (error) {
       console.error('Error submitting response:', error)
-      alert('Failed to submit response. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit response. Please try again.'
+      alert(errorMessage)
     } finally {
       setSubmitting(false)
       setAction(null)

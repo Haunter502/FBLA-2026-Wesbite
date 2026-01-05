@@ -141,15 +141,60 @@ export function AdminSubmissionsClient({
   // Auto-fetch progress summaries for immediate requests that don't have them
   useEffect(() => {
     immediateRequests.forEach((request) => {
-      if (request.user && !request.topic?.includes('[PROGRESS_SUMMARY]')) {
-        // Only fetch if we haven't already tried
-        if (progressSummaries[request.id] === undefined && !loadingSummaries[request.id]) {
+      if (request.user) {
+        // Try to parse from topic first
+        let hasSummaryInTopic = false
+        if (request.topic?.includes('[PROGRESS_SUMMARY]')) {
+          try {
+            const parts = request.topic.split('[PROGRESS_SUMMARY]')
+            if (parts.length > 1) {
+              let jsonPart = parts[1].trim()
+              if (jsonPart.startsWith('\n')) {
+                jsonPart = jsonPart.substring(1).trim()
+              }
+              let braceCount = 0
+              let jsonStart = -1
+              let jsonEnd = -1
+              for (let i = 0; i < jsonPart.length; i++) {
+                if (jsonPart[i] === '{') {
+                  if (braceCount === 0) jsonStart = i
+                  braceCount++
+                }
+                if (jsonPart[i] === '}') {
+                  braceCount--
+                  if (braceCount === 0) {
+                    jsonEnd = i + 1
+                    break
+                  }
+                }
+              }
+              if (jsonStart >= 0 && jsonEnd > jsonStart) {
+                jsonPart = jsonPart.substring(jsonStart, jsonEnd)
+                if (jsonPart.trim().startsWith('{') && jsonPart.trim().endsWith('}')) {
+                  try {
+                    const parsed = JSON.parse(jsonPart)
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                      hasSummaryInTopic = true
+                    }
+                  } catch (e) {
+                    // JSON is malformed, will fetch from API
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            // Error parsing, will fetch from API
+          }
+        }
+        
+        // Only fetch if we don't have summary in topic and haven't already tried
+        if (!hasSummaryInTopic && progressSummaries[request.id] === undefined && !loadingSummaries[request.id]) {
           fetchProgressSummary(request.user.id, request.id)
         }
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Only run once on mount
+  }, [tutoringRequests]) // Run when requests change
 
   const handleMarkContactRead = async (id: string) => {
     setLoading(id)
@@ -413,10 +458,8 @@ export function AdminSubmissionsClient({
                       
                       if (requestSummary !== undefined) {
                         summary = requestSummary
-                      } else if (!isLoading) {
-                        // Fetch on first render
-                        fetchProgressSummary(request.user.id, request.id)
                       }
+                      // Note: Fetching is handled in useEffect, not during render
                     }
 
                     if (summary) {

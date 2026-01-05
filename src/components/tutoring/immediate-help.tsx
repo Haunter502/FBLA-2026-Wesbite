@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Loader2, CheckCircle, MessageCircle, BookOpen, Calendar, TrendingUp } from "lucide-react"
 import Link from "next/link"
 
@@ -249,40 +250,42 @@ export function ImmediateHelp({ userId }: ImmediateHelpProps) {
 
             {/* Upcoming Sessions */}
             {progressSummary.upcomingSessions.length > 0 && (
-              <div className="pt-3 border-t border-primary/20">
+              <div className="pt-3 border-t border-primary/20 -mb-2">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium mb-3">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>Upcoming Sessions</span>
                 </div>
-                <div className="space-y-2">
-                  {progressSummary.upcomingSessions.slice(0, 2).map((session) => {
-                    // Clean the topic to remove progress summary JSON if present
-                    const cleanTopic = session.topic && session.topic.includes('[PROGRESS_SUMMARY]')
-                      ? session.topic.split('[PROGRESS_SUMMARY]')[0].trim()
-                      : session.topic
-                    
-                    return (
-                      <div key={session.id} className="flex items-center gap-2 p-2 bg-background/40 rounded text-xs">
-                        <Calendar className="h-3 w-3 text-primary flex-shrink-0" />
-                        <div className="flex-1 flex items-center gap-2 flex-wrap">
-                          {session.startTime ? (
-                            <span className="font-medium">{formatTime(session.startTime)}</span>
-                          ) : session.matchStatus === 'ACCEPTED' && session.matchedTeacher ? (
-                            <span className="font-medium text-primary">Matched with {session.matchedTeacher.name}</span>
-                          ) : (
-                            <span className="text-muted-foreground">Pending scheduling</span>
-                          )}
-                          {session.matchStatus === 'ACCEPTED' && session.matchedTeacher && session.startTime && (
-                            <span className="text-primary">• {session.matchedTeacher.name}</span>
-                          )}
-                          {cleanTopic && (
-                            <span className="text-muted-foreground truncate">• {cleanTopic}</span>
-                          )}
+                <ScrollArea className="h-[90px] pr-4">
+                  <div className="space-y-2">
+                    {progressSummary.upcomingSessions.map((session) => {
+                      // Clean the topic to remove progress summary JSON if present
+                      const cleanTopic = session.topic && session.topic.includes('[PROGRESS_SUMMARY]')
+                        ? session.topic.split('[PROGRESS_SUMMARY]')[0].trim()
+                        : session.topic
+                      
+                      return (
+                        <div key={session.id} className="flex items-center gap-2 p-2 bg-background/40 rounded text-xs">
+                          <Calendar className="h-3 w-3 text-primary flex-shrink-0" />
+                          <div className="flex-1 flex items-center gap-2 flex-wrap">
+                            {session.startTime ? (
+                              <span className="font-medium">{formatTime(session.startTime)}</span>
+                            ) : session.matchStatus === 'ACCEPTED' && session.matchedTeacher ? (
+                              <span className="font-medium text-primary">Matched with {session.matchedTeacher.name}</span>
+                            ) : (
+                              <span className="text-muted-foreground">Pending scheduling</span>
+                            )}
+                            {session.matchStatus === 'ACCEPTED' && session.matchedTeacher && session.startTime && (
+                              <span className="text-primary">• {session.matchedTeacher.name}</span>
+                            )}
+                            {cleanTopic && (
+                              <span className="text-muted-foreground truncate">• {cleanTopic}</span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                      )
+                    })}
+                  </div>
+                </ScrollArea>
               </div>
             )}
           </CardContent>
