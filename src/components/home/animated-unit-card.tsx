@@ -1,8 +1,9 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { GlassCard } from '@/components/animations/glass-card'
+import { GlowEffect } from '@/components/animations/glow-effect'
+import { BookOpen } from 'lucide-react'
 
 interface AnimatedUnitCardProps {
   href: string
@@ -13,22 +14,30 @@ interface AnimatedUnitCardProps {
 
 export function AnimatedUnitCard({ href, title, description, delay = 0 }: AnimatedUnitCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-    >
-      <Link href={href}>
-        <Card className="cursor-pointer h-full">
-          <CardHeader>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </CardHeader>
-        </Card>
-      </Link>
-    </motion.div>
+    <GlowEffect intensity="medium" className="h-full">
+      <GlassCard delay={delay} hover className="h-full flex flex-col group cursor-pointer">
+        <Link href={href} className="flex flex-col h-full">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="p-2 rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
+              <BookOpen className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold mb-2 text-foreground group-hover:text-primary transition-colors">
+                {title}
+              </h3>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+            {description}
+          </p>
+          <div className="mt-4 pt-4 border-t border-primary/10">
+            <span className="text-xs text-primary font-medium group-hover:underline">
+              Explore Unit →
+            </span>
+          </div>
+        </Link>
+      </GlassCard>
+    </GlowEffect>
   )
 }
 

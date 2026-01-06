@@ -20,6 +20,8 @@ import { ToastContainer } from "@/components/animations/toast-notification"
 import { AnimatedSectionHeader } from "@/components/home/animated-section-header"
 import { AnimatedCTASection } from "@/components/home/animated-cta-section"
 import { AnimatedButtonWrapper } from "@/components/home/animated-button-wrapper"
+import { GradientText } from "@/components/animations/gradient-text"
+import { FadeInUp } from "@/components/animations/fade-in-up"
 
 async function getUnits() {
   return await db.select().from(unitsTable).orderBy(asc(unitsTable.order)).limit(6)
@@ -45,8 +47,9 @@ export default async function Home() {
   const [units, reviews] = await Promise.all([getUnits(), getReviews()])
 
   return (
-    <div className="flex flex-col relative">
+    <div className="flex flex-col relative min-h-screen bg-background">
       <ToastContainer />
+      {/* Background effects - behind everything */}
       <ParticleBackground count={30} />
       <GodRays count={5} />
       {/* CSS-based god rays layer */}
@@ -62,22 +65,36 @@ export default async function Home() {
       <FeatureShowcase />
 
       {/* Units Preview */}
-      <section className="pt-12 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background via-muted/10 to-background relative z-10">
-        <div className="container mx-auto max-w-7xl">
-          <AnimatedSectionHeader className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Explore Our Units
-            </h2>
-            <Link href="/units">
-              <Button variant="outline" className="group hover-lift">
-                View All
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </AnimatedSectionHeader>
+      <section className="pt-16 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
+        <div className="absolute inset-0">
+          <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
+        <div className="container mx-auto max-w-7xl relative">
+          <FadeInUp delay={0.1}>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-12">
+              <div>
+                <h2 className="text-4xl md:text-5xl font-bold mb-2">
+                  <GradientText variant="primary" className="text-4xl md:text-5xl">
+                    Explore Our Units
+                  </GradientText>
+                </h2>
+                <p className="text-muted-foreground text-lg">
+                  Comprehensive Algebra 1 curriculum designed for your success
+                </p>
+              </div>
+              <Link href="/units">
+                <Button variant="outline" className="group hover-lift border-primary/30 hover:border-primary/50">
+                  View All
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </div>
+          </FadeInUp>
           <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {units.map((unit: typeof units[0], index: number) => (
-              <StaggerItem key={unit.id}>
+              <StaggerItem key={unit.id} className="h-full">
                 <AnimatedUnitCard
                   href={`/units/${unit.slug}`}
                   title={unit.title}
@@ -92,17 +109,24 @@ export default async function Home() {
 
       {/* Reviews Section */}
       {reviews.length > 0 && (
-        <section className="pt-12 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background via-primary/5 to-background relative z-10">
-          <div className="container mx-auto max-w-7xl">
-            <AnimatedSectionHeader className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                What <span className="text-gradient-animated">Students</span> Say
-              </h2>
-              <p className="text-muted-foreground text-lg">Real feedback from our learning community</p>
-            </AnimatedSectionHeader>
+        <section className="pt-16 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-background to-primary/10" />
+          <div className="absolute inset-0">
+            <div className="absolute top-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute bottom-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+          </div>
+          <div className="container mx-auto max-w-7xl relative">
+            <FadeInUp delay={0.1}>
+              <div className="text-center mb-12">
+                <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                  What <GradientText variant="primary" className="text-4xl md:text-5xl">Students</GradientText> Say
+                </h2>
+                <p className="text-muted-foreground text-lg">Real feedback from our learning community</p>
+              </div>
+            </FadeInUp>
             <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {reviews.map((review: typeof reviews[0], index: number) => (
-                <StaggerItem key={review.id}>
+                <StaggerItem key={review.id} className="h-full">
                   <AnimatedReviewCard
                     rating={review.rating}
                     userName={review.userName}
@@ -117,7 +141,7 @@ export default async function Home() {
       )}
 
       {/* Enhanced CTA Section */}
-      <section className="pt-16 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden mt-12">
+      <section className="pt-16 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         {/* Animated background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-primary/50" />
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />

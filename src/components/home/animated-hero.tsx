@@ -10,7 +10,7 @@ export function AnimatedHero() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-secondary/10 pt-20 pb-12 px-4 sm:px-6 lg:px-8">
       {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{
             x: [0, 100, 0],

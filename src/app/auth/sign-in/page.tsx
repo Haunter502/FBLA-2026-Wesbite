@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { signIn, getSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -38,8 +38,29 @@ export default function SignInPage() {
       if (result?.error) {
         setError("Invalid email or password")
       } else {
-        router.push("/dashboard")
-        router.refresh()
+        // Wait for session to be available, then check role
+        let attempts = 0
+        const maxAttempts = 10
+        const checkSession = async () => {
+          const session = await getSession()
+          if (session?.user?.role) {
+            const role = session.user.role.toUpperCase()
+            if (role === "ADMIN" || role === "TEACHER") {
+              router.push("/admin/submissions")
+            } else {
+              router.push("/dashboard")
+            }
+            router.refresh()
+          } else if (attempts < maxAttempts) {
+            attempts++
+            setTimeout(checkSession, 200)
+          } else {
+            // Fallback to dashboard if session check fails
+            router.push("/dashboard")
+            router.refresh()
+          }
+        }
+        checkSession()
       }
     } catch (err) {
       setError("An error occurred. Please try again.")

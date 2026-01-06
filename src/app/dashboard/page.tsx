@@ -15,6 +15,10 @@ import { AnimatedStatCard } from "@/components/dashboard/animated-stat-card"
 import { AnimatedNumber } from "@/components/dashboard/animated-number"
 import { AnimatedUnitCard } from "@/components/dashboard/animated-unit-card"
 import { NotificationBell } from "@/components/dashboard/notification-bell"
+import { GlassCard } from "@/components/animations/glass-card"
+import { GlowEffect } from "@/components/animations/glow-effect"
+import { GradientText } from "@/components/animations/gradient-text"
+import { ParticleBackground } from "@/components/animations/particle-background"
 
 function getLetterGrade(score: number): string {
   if (score >= 90) return 'A'
@@ -81,47 +85,59 @@ export default async function DashboardPage() {
   const data = await getDashboardData(session.user.id)
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <h1 className="text-4xl font-bold mb-2">Welcome back, {session.user.name || "Student"}!</h1>
-          <p className="text-muted-foreground">Continue your Algebra 1 learning journey</p>
-        </div>
-        <div className="flex-shrink-0 flex items-center">
-          <NotificationBell />
-        </div>
+    <div className="relative min-h-screen overflow-hidden">
+      <ParticleBackground count={30} />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
+      <div className="absolute inset-0">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
+      
+      <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
+        <FadeInUp delay={0.1}>
+          <div className="mb-8 flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-4xl md:text-5xl font-bold mb-2">
+                Welcome back, <GradientText variant="primary" className="text-4xl md:text-5xl">{session.user.name || "Student"}</GradientText>!
+              </h1>
+              <p className="text-muted-foreground text-lg">Continue your Algebra 1 learning journey</p>
+            </div>
+            <div className="flex-shrink-0 flex items-center">
+              <NotificationBell />
+            </div>
+          </div>
+        </FadeInUp>
 
       {/* Stats Grid */}
       <StaggerChildren className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 items-stretch">
-        <StaggerItem>
-          <AnimatedStatCard>
-            <Card className="min-h-[219px] flex flex-col">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+        <StaggerItem className="h-full">
+          <AnimatedStatCard delay={0.1}>
+            <div className="min-h-[219px] flex flex-col p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-lg bg-primary/20">
                   <TrendingUp className="h-5 w-5 text-primary" />
-                  Overall Progress
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 flex items-center justify-center">
+                </div>
+                <h3 className="font-semibold text-lg">Overall Progress</h3>
+              </div>
+              <div className="flex-1 flex items-center justify-center">
                 <div className="flex justify-center">
                   <ProgressRing progress={data.overallProgress} size={120} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </AnimatedStatCard>
         </StaggerItem>
 
-        <StaggerItem>
-          <AnimatedStatCard>
-            <Card className="min-h-[219px] flex flex-col">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+        <StaggerItem className="h-full">
+          <AnimatedStatCard delay={0.15}>
+            <div className="min-h-[219px] flex flex-col p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-lg bg-blue-500/20">
                   <Trophy className="h-5 w-5 text-blue-500" />
-                  Overall Grade
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 flex items-center justify-center">
+                </div>
+                <h3 className="font-semibold text-lg">Overall Grade</h3>
+              </div>
+              <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                   {data.overallGrade !== null ? (
                     <>
@@ -142,21 +158,21 @@ export default async function DashboardPage() {
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </AnimatedStatCard>
         </StaggerItem>
 
-        <StaggerItem>
-          <AnimatedStatCard>
-            <Card className="min-h-[219px] flex flex-col">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+        <StaggerItem className="h-full">
+          <AnimatedStatCard delay={0.2}>
+            <div className="min-h-[219px] flex flex-col p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-lg bg-orange-500/20">
                   <Flame className="h-5 w-5 text-orange-500" />
-                  Streak
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 flex items-center justify-center">
+                </div>
+                <h3 className="font-semibold text-lg">Streak</h3>
+              </div>
+              <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                   <AnimatedNumber>
                     <div className="text-4xl font-bold text-orange-500 mb-2">
@@ -167,21 +183,21 @@ export default async function DashboardPage() {
                     Longest: {data.streak?.longest || 0} days
                   </p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </AnimatedStatCard>
         </StaggerItem>
 
-        <StaggerItem>
-          <AnimatedStatCard>
-            <Card className="min-h-[219px] flex flex-col">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+        <StaggerItem className="h-full">
+          <AnimatedStatCard delay={0.25}>
+            <div className="min-h-[219px] flex flex-col p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-lg bg-yellow-500/20">
                   <Award className="h-5 w-5 text-yellow-500" />
-                  Badges Earned
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 flex items-center justify-center">
+                </div>
+                <h3 className="font-semibold text-lg">Badges Earned</h3>
+              </div>
+              <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
                   <AnimatedNumber>
                     <div className="text-4xl font-bold text-yellow-500 mb-2">
@@ -190,8 +206,8 @@ export default async function DashboardPage() {
                   </AnimatedNumber>
                   <p className="text-sm text-muted-foreground">Keep it up!</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </AnimatedStatCard>
         </StaggerItem>
       </StaggerChildren>
@@ -199,38 +215,45 @@ export default async function DashboardPage() {
       {/* Next Best Lesson */}
       {data.nextLesson && (
         <FadeInUp delay={0.3}>
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Next Best Lesson</CardTitle>
-              <CardDescription>Continue your learning journey</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg">{data.nextLesson.lesson.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {data.nextLesson.lesson.description}
-                  </p>
+          <GlowEffect intensity="medium" className="mb-8">
+            <GlassCard hover className="backdrop-blur-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  Next Best Lesson
+                </CardTitle>
+                <CardDescription>Continue your learning journey</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-2">{data.nextLesson.lesson.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {data.nextLesson.lesson.description}
+                    </p>
+                  </div>
+                  <Link href={`/lessons/${data.nextLesson.lesson.slug}`}>
+                    <Button className="group hover-lift">
+                      Start Lesson
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
                 </div>
-                <Link href={`/lessons/${data.nextLesson.lesson.slug}`}>
-                  <Button>
-                    Start Lesson
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </GlassCard>
+          </GlowEffect>
         </FadeInUp>
       )}
 
       {/* Unit Progress */}
       <FadeInUp delay={0.4}>
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Your Progress</h2>
-          <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            <GradientText variant="primary" className="text-3xl md:text-4xl">Your Progress</GradientText>
+          </h2>
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {data.unitProgress.slice(0, 6).map((unitProgress, index) => (
-              <StaggerItem key={unitProgress.unit.id}>
+              <StaggerItem key={unitProgress.unit.id} className="h-full">
                 <AnimatedUnitCard
                   href={`/units/${unitProgress.unit.slug}`}
                   title={unitProgress.unit.title}
@@ -243,34 +266,44 @@ export default async function DashboardPage() {
             ))}
           </StaggerChildren>
         </div>
-        <div className="mt-4 text-center">
+        <div className="mt-6 text-center">
           <Link href="/units">
-            <Button variant="outline">View All Units</Button>
+            <Button variant="outline" className="group hover-lift border-primary/30 hover:border-primary/50">
+              View All Units
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
           </Link>
         </div>
       </FadeInUp>
 
       {/* Recent Badges */}
       {data.badges.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Badges</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-4">
-              {data.badges.map((userBadge: typeof data.badges[0]) => (
-                <div
-                  key={userBadge.id}
-                  className="flex flex-col items-center p-4 border rounded-lg"
-                >
-                  <span className="text-4xl mb-2">{userBadge.badge.icon}</span>
-                  <span className="text-sm font-semibold">{userBadge.badge.name}</span>
+        <FadeInUp delay={0.5}>
+          <GlowEffect intensity="low" className="mb-8">
+            <GlassCard hover className="backdrop-blur-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5 text-primary" />
+                  Recent Badges
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-4">
+                  {data.badges.map((userBadge: typeof data.badges[0]) => (
+                    <GlowEffect key={userBadge.id} intensity="low">
+                      <div className="flex flex-col items-center p-4 border border-primary/20 rounded-lg bg-background/40 hover:bg-background/60 transition-colors">
+                        <span className="text-4xl mb-2">{userBadge.badge.icon}</span>
+                        <span className="text-sm font-semibold text-center">{userBadge.badge.name}</span>
+                      </div>
+                    </GlowEffect>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </GlassCard>
+          </GlowEffect>
+        </FadeInUp>
       )}
+      </div>
     </div>
   )
 }

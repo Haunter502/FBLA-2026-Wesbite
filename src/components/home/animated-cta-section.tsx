@@ -20,7 +20,7 @@ export function AnimatedCTASection({ children }: AnimatedCTASectionProps) {
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className="absolute top-1/2 left-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"
+        className="absolute top-1/2 left-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none"
       />
       <div className="container mx-auto max-w-4xl text-center space-y-8 relative z-10">
         <motion.div
