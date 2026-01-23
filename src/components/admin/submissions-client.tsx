@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MessageSquare, HelpCircle, Mail, Clock, User, CheckCircle2, TrendingUp, BookOpen, Calendar, Loader2, AlertCircle, Zap, Phone, MessageCircle, FileText, ArrowRight } from "lucide-react"
+import { MessageSquare, HelpCircle, Mail, Clock, User, CheckCircle2, TrendingUp, BookOpen, Calendar, Loader2, AlertCircle, Zap, Phone, MessageCircle, FileText, ArrowRight, Trash2 } from "lucide-react"
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GlassCard } from '@/components/animations/glass-card'
@@ -20,6 +20,7 @@ interface TutoringRequest {
   createdAt: number | null
   matchedTeacherId?: string | null
   matchedSlotId?: string | null
+  scheduledSlotId?: string | null
   matchStatus?: string | null
   user: {
     id: string
@@ -32,6 +33,14 @@ interface TutoringRequest {
     email: string
   } | null
   matchedSlot?: {
+    id: string
+    start: number
+    end: number
+    teacher: {
+      name: string
+    }
+  } | null
+  scheduledSlot?: {
     id: string
     start: number
     end: number
@@ -244,6 +253,100 @@ export function AdminSubmissionsClient({
     } finally {
       setLoading(null)
     }
+  }
+
+  const handleDeleteTutoringRequest = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this tutoring request? This action cannot be undone.')) {
+      return
+    }
+    setLoading(id)
+    try {
+      const response = await fetch(`/api/admin/tutoring/${id}/delete`, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        router.refresh()
+      } else {
+        alert('Failed to delete tutoring request')
+      }
+    } catch (error) {
+      console.error('Error deleting tutoring request:', error)
+      alert('Error deleting tutoring request')
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  const handleDeleteContact = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this contact submission? This action cannot be undone.')) {
+      return
+    }
+    setLoading(id)
+    try {
+      const response = await fetch(`/api/admin/contacts/${id}/delete`, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        router.refresh()
+      } else {
+        alert('Failed to delete contact submission')
+      }
+    } catch (error) {
+      console.error('Error deleting contact submission:', error)
+      alert('Error deleting contact submission')
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  // Check if a tutoring request can be cleared (session date has passed or status is completed/cancelled)
+  const canClearTutoringRequest = (request: TutoringRequest): boolean => {
+    // Always allow clearing if status is COMPLETED or CANCELLED
+    if (request.status === 'COMPLETED' || request.status === 'CANCELLED') {
+      return true
+    }
+    
+    const now = new Date()
+    const nowSeconds = Math.floor(now.getTime() / 1000)
+    
+    // Helper function to check if timestamp has passed (timestamps are in Unix seconds)
+    const hasSessionPassed = (start: number, end?: number): boolean => {
+      if (end) {
+        // Add 1 hour buffer (3600 seconds) to ensure session is truly over
+        return nowSeconds >= (end + 3600)
+      } else {
+        // If no end time, check if start time has passed with 2 hour buffer
+        return nowSeconds >= (start + 7200)
+      }
+    }
+    
+    // Check scheduled slot first (for scheduled requests)
+    if (request.scheduledSlot?.start) {
+      return hasSessionPassed(request.scheduledSlot.start, request.scheduledSlot.end)
+    }
+    
+    // If there's a matched slot, check if the session date has passed
+    if (request.matchedSlot?.start) {
+      return hasSessionPassed(request.matchedSlot.start, request.matchedSlot.end)
+    }
+    
+    // For scheduled requests without a slot but with MATCHED status, 
+    // allow clearing if it's been more than 7 days since creation
+    if (request.type === 'SCHEDULED' && request.status === 'MATCHED' && request.createdAt) {
+      const createdAtSeconds = typeof request.createdAt === 'number' 
+        ? (request.createdAt < 10000000000 ? request.createdAt : Math.floor(request.createdAt / 1000))
+        : Math.floor(new Date(request.createdAt).getTime() / 1000)
+      const daysSinceCreation = (nowSeconds - createdAtSeconds) / (60 * 60 * 24)
+      return daysSinceCreation >= 7
+    }
+    
+    // For requests without a slot, don't allow clearing unless completed/cancelled
+    return false
+  }
+
+  // Check if a contact submission can be cleared (responded)
+  const canClearContact = (contact: ContactSubmission): boolean => {
+    return contact.responded === true
   }
 
 
@@ -701,6 +804,26 @@ export function AdminSubmissionsClient({
                             )}
                           </Button>
                         )}
+                        {canClearTutoringRequest(request) && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteTutoringRequest(request.id)}
+                            disabled={loading === request.id}
+                          >
+                            {loading === request.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Clear
+                              </>
+                            )}
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </GlassCard>
@@ -793,7 +916,7 @@ export function AdminSubmissionsClient({
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="space-y-4">
                       {request.user && (
                         <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
                           <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -805,6 +928,130 @@ export function AdminSubmissionsClient({
                           </div>
                         </div>
                       )}
+                      
+                      {/* Scheduled Slot Info */}
+                      {request.scheduledSlot && (
+                        <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                          <h4 className="font-semibold text-sm mb-3 flex items-center gap-2 text-primary">
+                            <Calendar className="h-4 w-4" />
+                            Scheduled Session
+                          </h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-muted-foreground">Date:</span>
+                                <span className="font-medium">
+                                  {new Date(request.scheduledSlot.start * 1000).toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                  })}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 ml-5">
+                                <Clock className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-muted-foreground">Time:</span>
+                                <span className="font-medium">
+                                  {new Date(request.scheduledSlot.start * 1000).toLocaleTimeString('en-US', {
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                  })}{' '}
+                                  -{' '}
+                                  {new Date(request.scheduledSlot.end * 1000).toLocaleTimeString('en-US', {
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                              </div>
+                              {request.scheduledSlot.teacher && (
+                                <div className="ml-5 text-xs text-muted-foreground">
+                                  with {request.scheduledSlot.teacher.name}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Matched Tutor Info for Scheduled */}
+                      {(request.status === 'MATCHED' || request.matchedTeacherId || request.matchedSlotId) && (
+                        <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                          <h4 className="font-semibold text-sm mb-3 flex items-center gap-2 text-primary">
+                            <User className="h-4 w-4" />
+                            Match Information
+                          </h4>
+                          <div className="space-y-2 text-sm">
+                            {request.matchedTeacher && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">Teacher:</span>
+                                <span className="font-medium">{request.matchedTeacher.name}</span>
+                                <span className="text-muted-foreground">({request.matchedTeacher.email})</span>
+                              </div>
+                            )}
+                            {request.matchedSlot && (
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-muted-foreground">Session:</span>
+                                  <span className="font-medium">
+                                    {new Date(request.matchedSlot.start * 1000).toLocaleDateString('en-US', {
+                                      weekday: 'long',
+                                      month: 'long',
+                                      day: 'numeric',
+                                      year: 'numeric',
+                                    })}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 ml-5">
+                                  <Clock className="h-3 w-3 text-muted-foreground" />
+                                  <span className="text-muted-foreground">Time:</span>
+                                  <span className="font-medium">
+                                    {new Date(request.matchedSlot.start * 1000).toLocaleTimeString('en-US', {
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                    })}{' '}
+                                    -{' '}
+                                    {new Date(request.matchedSlot.end * 1000).toLocaleTimeString('en-US', {
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                    })}
+                                  </span>
+                                </div>
+                                {request.matchedSlot.teacher && (
+                                  <div className="ml-5 text-xs text-muted-foreground">
+                                    with {request.matchedSlot.teacher.name}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 pt-4 border-t border-primary/10">
+                        {canClearTutoringRequest(request) && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteTutoringRequest(request.id)}
+                            disabled={loading === request.id}
+                          >
+                            {loading === request.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Clear
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
                     </CardContent>
                   </GlassCard>
                 </GlowEffect>
@@ -946,6 +1193,26 @@ export function AdminSubmissionsClient({
                             <ArrowRight className="h-4 w-4 ml-2" />
                           </Button>
                         </a>
+                        {canClearContact(contact) && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteContact(contact.id)}
+                            disabled={loading === contact.id}
+                          >
+                            {loading === contact.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Clear
+                              </>
+                            )}
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </GlassCard>

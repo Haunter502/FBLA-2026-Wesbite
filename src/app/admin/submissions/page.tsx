@@ -21,6 +21,7 @@ async function getTutoringRequests() {
       status: tutoringRequests.status,
       matchedTeacherId: tutoringRequests.matchedTeacherId,
       matchedSlotId: tutoringRequests.matchedSlotId,
+      scheduledSlotId: tutoringRequests.scheduledSlotId,
       matchStatus: tutoringRequests.matchStatus,
       createdAt: tutoringRequests.createdAt,
       user: {
@@ -36,6 +37,7 @@ async function getTutoringRequests() {
   // Then fetch matched teachers and slots separately
   const teacherIds = [...new Set(requests.map(r => r.matchedTeacherId).filter(Boolean) as string[])]
   const slotIds = [...new Set(requests.map(r => r.matchedSlotId).filter(Boolean) as string[])]
+  const scheduledSlotIds = [...new Set(requests.map(r => r.scheduledSlotId).filter(Boolean) as string[])]
 
   const matchedTeachers = teacherIds.length > 0
     ? await db
@@ -60,8 +62,22 @@ async function getTutoringRequests() {
         .where(inArray(tutoringSlots.id, slotIds))
     : []
 
-  // Get slot teachers
-  const slotTeacherIds = [...new Set(matchedSlots.map(s => s.teacherId).filter(Boolean) as string[])]
+  const scheduledSlots = scheduledSlotIds.length > 0
+    ? await db
+        .select({
+          id: tutoringSlots.id,
+          start: tutoringSlots.start,
+          end: tutoringSlots.end,
+          teacherId: tutoringSlots.teacherId,
+        })
+        .from(tutoringSlots)
+        .where(inArray(tutoringSlots.id, scheduledSlotIds))
+    : []
+
+  // Get slot teachers (for both matched and scheduled slots)
+  const allSlotIds = [...slotIds, ...scheduledSlotIds]
+  const allSlots = [...matchedSlots, ...scheduledSlots]
+  const slotTeacherIds = [...new Set(allSlots.map(s => s.teacherId).filter(Boolean) as string[])]
   const slotTeachers = slotTeacherIds.length > 0
     ? await db
         .select({
@@ -71,6 +87,17 @@ async function getTutoringRequests() {
         .from(teachers)
         .where(inArray(teachers.id, slotTeacherIds))
     : []
+
+  // Helper function to normalize timestamps to Unix seconds
+  const normalizeTimestamp = (ts: number | Date): number => {
+    if (typeof ts === 'number') {
+      // If it's already in seconds (less than year 2286), return as is
+      // If it's in milliseconds (greater than that), convert to seconds
+      return ts < 10000000000 ? ts : Math.floor(ts / 1000)
+    }
+    // If it's a Date object, convert to Unix seconds
+    return Math.floor(new Date(ts).getTime() / 1000)
+  }
 
   // Combine the data
   return requests.map(request => ({
@@ -85,8 +112,21 @@ async function getTutoringRequests() {
           const teacher = slotTeachers.find(t => t.id === slot.teacherId)
           return {
             id: slot.id,
-            start: slot.start,
-            end: slot.end,
+            start: normalizeTimestamp(slot.start),
+            end: normalizeTimestamp(slot.end),
+            teacher: teacher ? { name: teacher.name } : null,
+          }
+        })()
+      : null,
+    scheduledSlot: request.scheduledSlotId
+      ? (() => {
+          const slot = scheduledSlots.find(s => s.id === request.scheduledSlotId)
+          if (!slot) return null
+          const teacher = slotTeachers.find(t => t.id === slot.teacherId)
+          return {
+            id: slot.id,
+            start: normalizeTimestamp(slot.start),
+            end: normalizeTimestamp(slot.end),
             teacher: teacher ? { name: teacher.name } : null,
           }
         })()

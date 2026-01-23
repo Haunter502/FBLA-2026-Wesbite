@@ -163,11 +163,10 @@ export function TutoringCalendar() {
     }
   }
 
-  // Get slots for a specific date (Saturday will always return empty array)
-  const getSlotsForDate = (day: number) => {
-    const date = currentMonth.date(day)
-    if (date.day() === 6) return [] // No slots on Saturday
-    const dateKey = date.format('YYYY-MM-DD')
+  // Get slots for a specific date using the date object from the week data
+  const getSlotsForDate = (dateObj: dayjs.Dayjs) => {
+    if (dateObj.day() === 6) return [] // No slots on Saturday
+    const dateKey = dateObj.format('YYYY-MM-DD')
     return slotsByDate[dateKey] || []
   }
 
@@ -259,7 +258,7 @@ export function TutoringCalendar() {
               }
               
               const { day, date } = dayData
-              const dateSlots = getSlotsForDate(day)
+              const dateSlots = getSlotsForDate(date)
               const isToday = dayjs().isSame(date, 'day')
               const hasSlots = dateSlots.length > 0
               const dateKey = date.format('YYYY-MM-DD')
@@ -276,7 +275,7 @@ export function TutoringCalendar() {
                   } ${isSelected ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : ''} ${
                     hasSlots && !isWeekend ? 'hover:bg-muted/50 hover:border-primary/50 hover:shadow-sm' : ''
                   }`}
-                  onClick={() => handleDateClick(day)}
+                  onClick={() => handleDateClick(date)}
                 >
                   <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-primary' : 'text-foreground'}`}>
                     {day}
