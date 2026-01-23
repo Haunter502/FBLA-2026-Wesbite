@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Calendar, Clock, Users, Check, ChevronLeft, ChevronRight, X } from 'lucide-react'
@@ -33,19 +33,32 @@ export function TutoringCalendar() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [selectedDateSlots, setSelectedDateSlots] = useState<Slot[]>([])
 
+  // Group slots by date (must be defined before useEffect that uses it)
+  const slotsByDate = useMemo(() => {
+    return slots.reduce((acc: Record<string, Slot[]>, slot: Slot) => {
+      const slotDate = dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start)
+      if (!slotDate.isValid()) return acc // Skip invalid dates
+      const dateKey = slotDate.format('YYYY-MM-DD')
+      if (!acc[dateKey]) {
+        acc[dateKey] = []
+      }
+      acc[dateKey].push(slot)
+      return acc
+    }, {})
+  }, [slots])
+
   useEffect(() => {
     fetchSlots()
   }, [])
 
   useEffect(() => {
     if (selectedDate) {
-      const dateSlots = slots.filter((slot) => {
-        const slotDate = dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start)
-        return slotDate.format('YYYY-MM-DD') === selectedDate
-      })
-      setSelectedDateSlots(dateSlots)
+      // Use the already-grouped slots for better performance
+      setSelectedDateSlots(slotsByDate[selectedDate] || [])
+    } else {
+      setSelectedDateSlots([])
     }
-  }, [selectedDate, slots])
+  }, [selectedDate, slotsByDate])
 
   const fetchSlots = async () => {
     try {
@@ -81,17 +94,6 @@ export function TutoringCalendar() {
       console.error('Error booking slot:', error)
     }
   }
-
-  // Group slots by date
-  const slotsByDate = slots.reduce((acc: Record<string, Slot[]>, slot: Slot) => {
-    const slotDate = dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start)
-    const dateKey = slotDate.format('YYYY-MM-DD')
-    if (!acc[dateKey]) {
-      acc[dateKey] = []
-    }
-    acc[dateKey].push(slot)
-    return acc
-  }, {})
 
   // Build calendar weeks (Monday through Saturday, excluding Sunday)
   const weeks: Array<Array<{ day: number; date: dayjs.Dayjs } | null>> = []
@@ -180,10 +182,9 @@ export function TutoringCalendar() {
     setSelectedDate(null)
   }
 
-  const handleDateClick = (day: number) => {
-    const date = currentMonth.date(day)
-    if (date.day() === 6) return // Don't select Saturday (no slots available)
-    const dateKey = date.format('YYYY-MM-DD')
+  const handleDateClick = (dateObj: dayjs.Dayjs) => {
+    if (!dateObj.isValid() || dateObj.day() === 6) return // Don't select Saturday (no slots available) or invalid dates
+    const dateKey = dateObj.format('YYYY-MM-DD')
     setSelectedDate(selectedDate === dateKey ? null : dateKey)
   }
 
@@ -317,7 +318,7 @@ export function TutoringCalendar() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-semibold">
-                Sessions for {dayjs(selectedDate).format('MMMM D, YYYY')}
+                Sessions for {dayjs(selectedDate).isValid() ? dayjs(selectedDate).format('MMMM D, YYYY') : 'Selected Date'}
               </h4>
               <Button
                 variant="ghost"
@@ -378,7 +379,9 @@ export function TutoringCalendar() {
         <Card className="border-primary/20">
           <CardContent className="p-4 text-center">
             <p className="text-sm text-muted-foreground">
-              No sessions available for {dayjs(selectedDate).format('MMMM D, YYYY')}
+              {dayjs(selectedDate).isValid() 
+                ? `No sessions available for ${dayjs(selectedDate).format('MMMM D, YYYY')}`
+                : 'No sessions available for the selected date'}
             </p>
           </CardContent>
         </Card>

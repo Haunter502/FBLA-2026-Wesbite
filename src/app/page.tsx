@@ -85,9 +85,11 @@ export default async function Home() {
                 </p>
               </div>
               <Link href="/units">
-                <Button variant="outline" className="group hover-lift border-primary/30 hover:border-primary/50">
-                  View All
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <Button variant="outline" className="group hover-lift border-primary/30 hover:border-primary/50 relative overflow-hidden">
+                  <span className="relative z-10 flex items-center">
+                    View All
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </Button>
               </Link>
             </div>

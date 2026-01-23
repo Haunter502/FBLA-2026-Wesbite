@@ -353,38 +353,47 @@ export function AdminSubmissionsClient({
   return (
     <div className="space-y-6">
       <Tabs defaultValue="immediate" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-lg">
-          <TabsTrigger value="immediate" className="relative">
+        <TabsList className="grid w-full grid-cols-3 bg-muted/30 backdrop-blur-xl p-1.5 rounded-xl border border-primary/20 shadow-lg">
+          <TabsTrigger 
+            value="immediate" 
+            className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500/20 data-[state=active]:to-orange-600/10 data-[state=active]:border-orange-500/30 data-[state=active]:shadow-lg data-[state=active]:shadow-orange-500/20 transition-all duration-300 rounded-lg border border-transparent"
+          >
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4" />
-              <span>Immediate Help</span>
-              <Badge variant="secondary" className="ml-1">
+              <span className="font-semibold">Immediate Help</span>
+              <Badge variant="secondary" className="ml-1 bg-orange-500/20 text-orange-500 border-orange-500/30">
                 {immediateRequests.length}
               </Badge>
             </div>
             {unreadRequests.filter(r => r.type === 'IMMEDIATE').length > 0 && (
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full border-2 border-background" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full border-2 border-background animate-pulse" />
             )}
           </TabsTrigger>
-          <TabsTrigger value="scheduled" className="relative">
+          <TabsTrigger 
+            value="scheduled" 
+            className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-primary/10 data-[state=active]:border-primary/30 data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 transition-all duration-300 rounded-lg border border-transparent"
+          >
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              <span>Scheduled</span>
-              <Badge variant="secondary" className="ml-1">
+              <span className="font-semibold">Scheduled</span>
+              <Badge variant="secondary" className="ml-1 bg-primary/20 text-primary border-primary/30">
                 {scheduledRequests.length}
               </Badge>
             </div>
           </TabsTrigger>
-          <TabsTrigger value="contacts" className="relative">
+          <TabsTrigger 
+            value="contacts" 
+            className="relative data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-blue-600/10 data-[state=active]:border-blue-500/30 data-[state=active]:shadow-lg data-[state=active]:shadow-blue-500/20 transition-all duration-300 rounded-lg border border-transparent"
+          >
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              <span>Contact Forms</span>
-              <Badge variant="secondary" className="ml-1">
+              <span className="font-semibold">Contact Forms</span>
+              <Badge variant="secondary" className="ml-1 bg-blue-500/20 text-blue-500 border-blue-500/30">
                 {contactSubmissions.length}
               </Badge>
             </div>
             {unreadContacts.length > 0 && (
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full border-2 border-background" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full border-2 border-background animate-pulse" />
             )}
           </TabsTrigger>
         </TabsList>
@@ -392,12 +401,14 @@ export function AdminSubmissionsClient({
       <TabsContent value="immediate" className="space-y-4">
         {immediateRequests.length === 0 ? (
           <GlowEffect intensity="low">
-            <GlassCard className="backdrop-blur-xl">
-              <CardContent className="pt-12 pb-12">
+            <GlassCard className="backdrop-blur-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-background">
+              <CardContent className="pt-16 pb-16">
                 <div className="text-center">
-                  <HelpCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-semibold mb-2">No Immediate Help Requests</p>
-                  <p className="text-sm text-muted-foreground">
+                  <div className="p-4 rounded-full bg-primary/10 w-fit mx-auto mb-6">
+                    <HelpCircle className="h-12 w-12 text-primary mx-auto opacity-70" />
+                  </div>
+                  <p className="text-xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">No Immediate Help Requests</p>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
                     All caught up! No students are currently requesting immediate assistance.
                   </p>
                 </div>
@@ -414,38 +425,38 @@ export function AdminSubmissionsClient({
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <GlowEffect intensity={request.status === 'PENDING' ? 'medium' : 'low'}>
-                  <GlassCard className={`backdrop-blur-xl transition-all ${
+                <GlowEffect intensity={request.status === 'PENDING' ? 'high' : 'medium'}>
+                  <GlassCard className={`backdrop-blur-xl transition-all duration-300 hover:shadow-xl ${
                     request.status === 'PENDING' 
-                      ? 'border-orange-500/50 bg-orange-500/10 shadow-lg shadow-orange-500/20' 
+                      ? 'border-2 border-orange-500/60 bg-gradient-to-br from-orange-500/15 via-orange-500/5 to-background shadow-2xl shadow-orange-500/30 hover:border-orange-500/80' 
                       : request.status === 'MATCHED'
-                      ? 'border-primary/50 bg-primary/5'
-                      : 'border-muted'
+                      ? 'border-2 border-primary/50 bg-gradient-to-br from-primary/10 via-primary/5 to-background hover:border-primary/70'
+                      : 'border-2 border-muted/50 hover:border-muted'
                   }`}>
-                    <CardHeader className="pb-4">
+                    <CardHeader className="pb-5">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-center gap-4">
+                            <div className={`p-3 rounded-xl transition-all duration-300 ${
                               request.status === 'PENDING'
-                                ? 'bg-orange-500/20 text-orange-500'
+                                ? 'bg-gradient-to-br from-orange-500/30 to-orange-600/20 text-orange-500 shadow-lg shadow-orange-500/20'
                                 : request.status === 'MATCHED'
-                                ? 'bg-primary/20 text-primary'
-                                : 'bg-muted text-muted-foreground'
+                                ? 'bg-gradient-to-br from-primary/30 to-primary/20 text-primary shadow-lg shadow-primary/20'
+                                : 'bg-muted/50 text-muted-foreground'
                             }`}>
-                              <Zap className="h-5 w-5" />
+                              <Zap className="h-6 w-6" />
                             </div>
                             <div className="flex-1">
-                              <CardTitle className="text-xl flex items-center gap-2">
+                              <CardTitle className="text-2xl font-bold flex items-center gap-3 mb-2">
                                 Immediate Help Request
                                 {request.status === 'PENDING' && (
-                                  <Badge variant="destructive" className="animate-pulse">
+                                  <Badge variant="destructive" className="animate-pulse text-xs px-2 py-1">
                                     <AlertCircle className="h-3 w-3 mr-1" />
                                     URGENT
                                   </Badge>
                                 )}
                               </CardTitle>
-                              <div className="flex items-center gap-2 mt-1">
+                              <div className="flex items-center gap-3 mt-2">
                                 <Badge
                                   variant={
                                     request.status === 'PENDING'
@@ -454,24 +465,26 @@ export function AdminSubmissionsClient({
                                       ? 'default'
                                       : 'secondary'
                                   }
-                                  className="text-xs"
+                                  className="text-xs font-semibold px-3 py-1"
                                 >
                                   {request.status}
                                 </Badge>
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
+                                <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                                  <Clock className="h-3.5 w-3.5" />
                                   {formatDate(request.createdAt)}
                                 </span>
                               </div>
                             </div>
                           </div>
                           {request.topic && (
-                            <div className="mt-3 p-3 bg-background/50 rounded-lg border border-primary/10">
-                              <div className="flex items-start gap-2">
-                                <MessageCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                            <div className="mt-4 p-4 bg-gradient-to-br from-background/80 to-background/50 rounded-xl border-2 border-primary/20 shadow-md">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-lg bg-primary/20">
+                                  <MessageCircle className="h-4 w-4 text-primary flex-shrink-0" />
+                                </div>
                                 <div className="flex-1">
-                                  <p className="text-xs text-muted-foreground mb-1 font-medium">Topic:</p>
-                                  <p className="text-sm font-medium">{request.topic.split('\n\n[PROGRESS_SUMMARY]')[0] || 'No topic specified'}</p>
+                                  <p className="text-xs text-muted-foreground mb-2 font-semibold uppercase tracking-wide">Topic:</p>
+                                  <p className="text-sm font-semibold leading-relaxed">{request.topic.split('\n\n[PROGRESS_SUMMARY]')[0] || 'No topic specified'}</p>
                                 </div>
                               </div>
                             </div>
@@ -481,13 +494,13 @@ export function AdminSubmissionsClient({
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {request.user && (
-                        <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <User className="h-5 w-5 text-primary" />
+                        <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-muted/40 to-muted/20 rounded-xl border border-primary/10 shadow-sm">
+                          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border-2 border-primary/30">
+                            <User className="h-6 w-6 text-primary" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-semibold text-sm">{request.user.name || 'Unknown Student'}</p>
-                            <p className="text-xs text-muted-foreground">{request.user.email}</p>
+                            <p className="font-bold text-base mb-1">{request.user.name || 'Unknown Student'}</p>
+                            <p className="text-xs text-muted-foreground font-medium">{request.user.email}</p>
                           </div>
                         </div>
                       )}
@@ -567,20 +580,22 @@ export function AdminSubmissionsClient({
 
                     if (summary) {
                       return (
-                        <div className="mt-4 p-5 bg-gradient-to-br from-primary/10 via-primary/5 to-background rounded-lg border-2 border-primary/30 shadow-lg">
-                          <h4 className="font-bold text-base mb-4 flex items-center gap-2 text-primary">
-                            <TrendingUp className="h-5 w-5" />
+                        <div className="mt-5 p-6 bg-gradient-to-br from-primary/15 via-primary/8 to-background rounded-xl border-2 border-primary/40 shadow-xl backdrop-blur-sm">
+                          <h4 className="font-bold text-lg mb-5 flex items-center gap-3 text-primary">
+                            <div className="p-2 rounded-lg bg-primary/20">
+                              <TrendingUp className="h-5 w-5" />
+                            </div>
                             Student Progress Summary
                           </h4>
-                          <div className="space-y-3 text-sm">
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="flex items-center justify-between p-2 bg-background/50 rounded">
-                                <span className="text-muted-foreground font-medium">Overall Progress:</span>
-                                <span className="font-bold text-lg text-primary">{summary.overallProgress}%</span>
+                          <div className="space-y-4 text-sm">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="flex items-center justify-between p-4 bg-gradient-to-br from-background/80 to-background/50 rounded-xl border border-primary/20 shadow-md">
+                                <span className="text-muted-foreground font-semibold">Overall Progress:</span>
+                                <span className="font-bold text-2xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">{summary.overallProgress}%</span>
                               </div>
-                              <div className="flex items-center justify-between p-2 bg-background/50 rounded">
-                                <span className="text-muted-foreground font-medium">Overall Grade:</span>
-                                <span className="font-bold text-lg text-primary">
+                              <div className="flex items-center justify-between p-4 bg-gradient-to-br from-background/80 to-background/50 rounded-xl border border-primary/20 shadow-md">
+                                <span className="text-muted-foreground font-semibold">Overall Grade:</span>
+                                <span className="font-bold text-2xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                                   {summary.overallGrade !== null && summary.overallGrade !== undefined 
                                     ? `${summary.overallGrade}%` 
                                     : 'N/A'}

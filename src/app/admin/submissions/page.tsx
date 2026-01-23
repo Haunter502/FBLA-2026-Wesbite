@@ -162,120 +162,143 @@ export default async function AdminSubmissionsPage() {
   const unreadRequests = tutoringRequests.filter((r: { status: string }) => r.status === 'PENDING')
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <ScrollReveal>
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground text-lg">
-            View and manage tutoring requests and contact form submissions
-          </p>
-        </div>
-      </ScrollReveal>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Enhanced Header */}
+        <ScrollReveal>
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 backdrop-blur-sm border border-primary/30">
+                <MessageSquare className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                  Admin Dashboard
+                </h1>
+                <p className="text-muted-foreground text-lg">
+                  View and manage tutoring requests and contact form submissions
+                </p>
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
 
-      {/* Enhanced Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <GlowEffect intensity="low">
-          <GlassCard className="backdrop-blur-xl border-primary/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+        {/* Enhanced Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 items-end">
+        <GlowEffect intensity="medium" className="h-full">
+          <GlassCard className="backdrop-blur-xl border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/10 via-background/50 to-background hover:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20 group h-full flex flex-col">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between mb-2">
+                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                   Immediate Help
                 </CardTitle>
-                <div className="p-2 rounded-lg bg-orange-500/20">
-                  <Zap className="h-4 w-4 text-orange-500" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500/30 to-orange-600/20 group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="h-5 w-5 text-orange-500" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary mb-1">{immediateRequests.length}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="flex-1 flex flex-col justify-end">
+              <div className="text-4xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent mb-2">
+                {immediateRequests.length}
+              </div>
+              <p className="text-xs font-medium">
                 {unreadRequests.filter((r: { type: string }) => r.type === 'IMMEDIATE').length > 0 ? (
-                  <span className="text-orange-500 font-semibold">
+                  <span className="text-orange-500 font-bold flex items-center gap-1">
+                    <span className="h-2 w-2 bg-orange-500 rounded-full animate-pulse"></span>
                     {unreadRequests.filter((r: { type: string }) => r.type === 'IMMEDIATE').length} urgent
                   </span>
                 ) : (
-                  'All handled'
+                  <span className="text-green-500 font-semibold">All handled</span>
                 )}
               </p>
             </CardContent>
           </GlassCard>
         </GlowEffect>
 
-        <GlowEffect intensity="low">
-          <GlassCard className="backdrop-blur-xl border-primary/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+        <GlowEffect intensity="medium" className="h-full">
+          <GlassCard className="backdrop-blur-xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-background/50 to-background hover:border-blue-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 group h-full flex flex-col">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between mb-2">
+                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                   Contact Forms
                 </CardTitle>
-                <div className="p-2 rounded-lg bg-blue-500/20">
-                  <Mail className="h-4 w-4 text-blue-500" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/30 to-blue-600/20 group-hover:scale-110 transition-transform duration-300">
+                  <Mail className="h-5 w-5 text-blue-500" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary mb-1">{contactSubmissions.length}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="flex-1 flex flex-col justify-end">
+              <div className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent mb-2">
+                {contactSubmissions.length}
+              </div>
+              <p className="text-xs font-medium">
                 {unreadContacts.length > 0 ? (
-                  <span className="text-blue-500 font-semibold">
+                  <span className="text-blue-500 font-bold flex items-center gap-1">
+                    <span className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></span>
                     {unreadContacts.length} unread
                   </span>
                 ) : (
-                  'All read'
+                  <span className="text-green-500 font-semibold">All read</span>
                 )}
               </p>
             </CardContent>
           </GlassCard>
         </GlowEffect>
 
-        <GlowEffect intensity="low">
-          <GlassCard className="backdrop-blur-xl border-primary/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+        <GlowEffect intensity="medium" className="h-full">
+          <GlassCard className="backdrop-blur-xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-background/50 to-background hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 group h-full flex flex-col">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between mb-2">
+                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                   Scheduled Sessions
                 </CardTitle>
-                <div className="p-2 rounded-lg bg-primary/20">
-                  <Calendar className="h-4 w-4 text-primary" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-primary/30 to-primary/20 group-hover:scale-110 transition-transform duration-300">
+                  <Calendar className="h-5 w-5 text-primary" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary mb-1">{scheduledRequests.length}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="flex-1 flex flex-col justify-end">
+              <div className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent mb-2">
+                {scheduledRequests.length}
+              </div>
+              <p className="text-xs font-medium">
                 {scheduledRequests.filter((r: { status: string }) => r.status === 'PENDING').length > 0 ? (
-                  <span className="text-orange-500 font-semibold">
+                  <span className="text-orange-500 font-bold flex items-center gap-1">
+                    <span className="h-2 w-2 bg-orange-500 rounded-full animate-pulse"></span>
                     {scheduledRequests.filter((r: { status: string }) => r.status === 'PENDING').length} pending
                   </span>
                 ) : (
-                  'All scheduled'
+                  <span className="text-green-500 font-semibold">All scheduled</span>
                 )}
               </p>
             </CardContent>
           </GlassCard>
         </GlowEffect>
 
-        <GlowEffect intensity="low">
-          <GlassCard className="backdrop-blur-xl border-primary/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+        <GlowEffect intensity="medium" className="h-full">
+          <GlassCard className="backdrop-blur-xl border-2 border-secondary/30 bg-gradient-to-br from-secondary/10 via-background/50 to-background hover:border-secondary/50 transition-all duration-300 hover:shadow-lg hover:shadow-secondary/20 group h-full flex flex-col">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between mb-2">
+                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                   Total Requests
                 </CardTitle>
-                <div className="p-2 rounded-lg bg-secondary/20">
-                  <MessageSquare className="h-4 w-4 text-secondary" />
+                <div className="p-3 rounded-xl bg-gradient-to-br from-secondary/30 to-secondary/20 group-hover:scale-110 transition-transform duration-300">
+                  <MessageSquare className="h-5 w-5 text-secondary" />
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-primary mb-1">{tutoringRequests.length}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="flex-1 flex flex-col justify-end">
+              <div className="text-4xl font-bold bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent mb-2">
+                {tutoringRequests.length}
+              </div>
+              <p className="text-xs font-medium">
                 {unreadRequests.length > 0 ? (
-                  <span className="text-orange-500 font-semibold">
+                  <span className="text-orange-500 font-bold flex items-center gap-1">
+                    <span className="h-2 w-2 bg-orange-500 rounded-full animate-pulse"></span>
                     {unreadRequests.length} need attention
                   </span>
                 ) : (
-                  'All handled'
+                  <span className="text-green-500 font-semibold">All handled</span>
                 )}
               </p>
             </CardContent>
@@ -287,6 +310,7 @@ export default async function AdminSubmissionsPage() {
         tutoringRequests={tutoringRequests}
         contactSubmissions={contactSubmissions}
       />
+      </div>
     </div>
   )
 }
