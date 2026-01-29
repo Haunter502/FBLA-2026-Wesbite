@@ -159,7 +159,7 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
                 Lessons
               </CardTitle>
               <CardDescription>
-                6 lessons covering key concepts
+                {unit.lessons.length} lessons covering key concepts
               </CardDescription>
             </CardHeader>
             <CardContent>

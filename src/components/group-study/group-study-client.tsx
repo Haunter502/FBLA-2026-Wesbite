@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Search, Users, MessageSquare, Plus, X, BookOpen, CheckCircle2 } from 'lucide-react'
+import { Search, Users, MessageSquare, Plus, X, BookOpen, CheckCircle2, Shield } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -32,15 +32,18 @@ interface Group {
   description: string | null
   createdAt: number | Date
   role: string
+  memberCount?: number
+  createdBy?: string
 }
 
 interface GroupStudyClientProps {
   students: Student[]
   userGroups: Group[]
   currentUserId: string
+  isAdmin?: boolean
 }
 
-export function GroupStudyClient({ students, userGroups, currentUserId }: GroupStudyClientProps) {
+export function GroupStudyClient({ students, userGroups, currentUserId, isAdmin = false }: GroupStudyClientProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [showCreateGroup, setShowCreateGroup] = useState(false)
@@ -236,7 +239,7 @@ export function GroupStudyClient({ students, userGroups, currentUserId }: GroupS
           <div>
             <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
               <MessageSquare className="h-7 w-7 text-primary" />
-              Your Groups
+              {isAdmin ? 'All Group Chats' : 'Your Groups'}
             </h2>
             <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.1}>
               {userGroups.map((group, index) => (
@@ -250,19 +253,38 @@ export function GroupStudyClient({ students, userGroups, currentUserId }: GroupS
                         <CardHeader>
                           <CardTitle className="flex items-center justify-between text-lg">
                             <span className="font-bold">{group.name}</span>
-                            {group.role === 'ADMIN' && (
-                              <motion.div
-                                whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-                                transition={{ duration: 0.3 }}
-                              >
-                                <Badge variant="default" className="text-xs bg-primary/20 text-primary border-primary/30">
-                                  Admin
-                                </Badge>
-                              </motion.div>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {isAdmin && group.role !== 'ADMIN' && (
+                                <motion.div
+                                  whileHover={{ scale: 1.1 }}
+                                  transition={{ duration: 0.3 }}
+                                >
+                                  <Badge variant="secondary" className="text-xs bg-blue-500/20 text-blue-500 border-blue-500/30">
+                                    <Shield className="h-3 w-3 mr-1" />
+                                    Admin View
+                                  </Badge>
+                                </motion.div>
+                              )}
+                              {group.role === 'ADMIN' && (
+                                <motion.div
+                                  whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
+                                  transition={{ duration: 0.3 }}
+                                >
+                                  <Badge variant="default" className="text-xs bg-primary/20 text-primary border-primary/30">
+                                    Admin
+                                  </Badge>
+                                </motion.div>
+                              )}
+                            </div>
                           </CardTitle>
                           {group.description && (
                             <CardDescription className="mt-2">{group.description}</CardDescription>
+                          )}
+                          {isAdmin && group.memberCount !== undefined && (
+                            <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                              <Users className="h-3 w-3" />
+                              <span>{group.memberCount} {group.memberCount === 1 ? 'member' : 'members'}</span>
+                            </div>
                           )}
                         </CardHeader>
                         <CardContent>

@@ -54,7 +54,51 @@ async function getUserUnitProgress(userId: string) {
   return { completed: completedUnits, inProgress: inProgressUnits }
 }
 
-async function getStudyGroups(userId: string) {
+async function getStudyGroups(userId: string, userRole: string) {
+  // If admin, get all groups
+  if (userRole === 'ADMIN') {
+    const allGroups = await db
+      .select({
+        id: studyGroups.id,
+        name: studyGroups.name,
+        description: studyGroups.description,
+        createdAt: studyGroups.createdAt,
+        createdBy: studyGroups.createdBy,
+      })
+      .from(studyGroups)
+      .orderBy(desc(studyGroups.createdAt))
+
+    // Get member info for each group to show member count
+    const groupsWithInfo = await Promise.all(
+      allGroups.map(async (group: typeof allGroups[0]) => {
+        const memberCount = await db
+          .select()
+          .from(groupMembers)
+          .where(eq(groupMembers.groupId, group.id))
+        
+        // Check if admin is a member
+        const adminMembership = await db
+          .select()
+          .from(groupMembers)
+          .where(and(eq(groupMembers.groupId, group.id), eq(groupMembers.userId, userId)))
+          .limit(1)
+
+        return {
+          id: group.id,
+          name: group.name,
+          description: group.description,
+          createdAt: group.createdAt,
+          role: adminMembership.length > 0 ? adminMembership[0].role : 'VIEWER',
+          memberCount: memberCount.length,
+          createdBy: group.createdBy,
+        }
+      })
+    )
+
+    return groupsWithInfo
+  }
+
+  // For non-admins, get only their groups
   const userGroups = await db
     .select({
       group: {
@@ -77,6 +121,7 @@ async function getStudyGroups(userId: string) {
     description: ug.group.description,
     createdAt: ug.group.createdAt,
     role: ug.member.role,
+    memberCount: 0, // Will be calculated if needed
   }))
 }
 
@@ -89,7 +134,7 @@ export default async function GroupStudyPage() {
 
   const [allStudents, userGroups] = await Promise.all([
     getAllStudents(),
-    getStudyGroups(session.user.id),
+    getStudyGroups(session.user.id, session.user.role || 'STUDENT'),
   ])
 
   // Get unit progress for each student
@@ -154,7 +199,9 @@ export default async function GroupStudyPage() {
                     </div>
                     <div>
                       <div className="text-3xl font-bold text-blue-500">{userGroups.length}</div>
-                      <div className="text-sm text-muted-foreground font-medium">Your Groups</div>
+                      <div className="text-sm text-muted-foreground font-medium">
+                        {session.user.role === 'ADMIN' ? 'All Groups' : 'Your Groups'}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -187,6 +234,7 @@ export default async function GroupStudyPage() {
           students={studentsWithProgress}
           userGroups={userGroups}
           currentUserId={session.user.id}
+          isAdmin={session.user.role === 'ADMIN'}
         />
       </div>
     </div>

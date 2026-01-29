@@ -5,16 +5,19 @@ import { studyGroups, groupMembers, users } from '@/lib/schema'
 import { eq, and } from '@/lib/drizzle-helpers'
 import { GroupChatClient } from '@/components/group-study/group-chat-client'
 
-async function getGroup(groupId: string, userId: string) {
-  // Check if user is a member
-  const membership = await db
-    .select()
-    .from(groupMembers)
-    .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
-    .limit(1)
+async function getGroup(groupId: string, userId: string, userRole: string) {
+  // Admins can access any group
+  if (userRole !== 'ADMIN') {
+    // Check if user is a member
+    const membership = await db
+      .select()
+      .from(groupMembers)
+      .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
+      .limit(1)
 
-  if (membership.length === 0) {
-    return null
+    if (membership.length === 0) {
+      return null
+    }
   }
 
   const [group] = await db
@@ -56,7 +59,7 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
     redirect('/auth/sign-in')
   }
 
-  const group = await getGroup(groupId, session.user.id)
+  const group = await getGroup(groupId, session.user.id, session.user.role || 'STUDENT')
 
   if (!group) {
     redirect('/group-study')

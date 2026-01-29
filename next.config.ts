@@ -6,12 +6,12 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
-  },
-  // Allow larger file uploads for API routes
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
+    // Speeds up dev/build by reducing bundle + transform work.
+    // Safe: does not remove any features/animations.
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+    ],
   },
 };
 
