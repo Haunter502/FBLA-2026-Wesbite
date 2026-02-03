@@ -309,15 +309,9 @@ export function AdminSubmissionsClient({
     const now = new Date()
     const nowSeconds = Math.floor(now.getTime() / 1000)
     
-    // Helper function to check if timestamp has passed (timestamps are in Unix seconds)
-    const hasSessionPassed = (start: number, end?: number): boolean => {
-      if (end) {
-        // Add 1 hour buffer (3600 seconds) to ensure session is truly over
-        return nowSeconds >= (end + 3600)
-      } else {
-        // If no end time, check if start time has passed with 2 hour buffer
-        return nowSeconds >= (start + 7200)
-      }
+    // Helper: session has passed when start time is in the past (so admins can clear once the session has begun)
+    const hasSessionPassed = (start: number, _end?: number): boolean => {
+      return nowSeconds >= start
     }
     
     // Check scheduled slot first (for scheduled requests)

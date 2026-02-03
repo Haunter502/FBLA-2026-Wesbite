@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Textarea } from '@/components/ui/textarea'
@@ -36,6 +36,7 @@ export function ProfileClient({ user: initialUser }: ProfileClientProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -59,19 +60,21 @@ export function ProfileClient({ user: initialUser }: ProfileClientProps) {
       const response = await fetch('/api/profile/upload', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       })
 
       if (response.ok) {
         const data = await response.json()
-        setUser({ ...user, image: data.imageUrl })
+        setUser(prev => ({ ...prev, image: data.imageUrl }))
+        if (fileInputRef.current) fileInputRef.current.value = ''
         router.refresh()
       } else {
-        const error = await response.json()
-        alert(error.error || 'Failed to upload image')
+        const data = await response.json().catch(() => ({}))
+        alert(data.error || `Upload failed (${response.status}). Please try again.`)
       }
     } catch (error) {
       console.error('Error uploading image:', error)
-      alert('Failed to upload image. Please try again.')
+      alert('Failed to upload image. Check your connection and try again.')
     } finally {
       setUploading(false)
     }
@@ -138,33 +141,33 @@ export function ProfileClient({ user: initialUser }: ProfileClientProps) {
                   </Avatar>
                 </motion.div>
                 <div className="flex flex-col gap-3 flex-1 w-full sm:w-auto">
-                  <label className="cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      disabled={uploading}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={uploading}
-                      className="w-full border-primary/30 hover:border-primary/50"
-                    >
-                      {uploading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="h-4 w-4 mr-2" />
-                          {user.image ? 'Change Picture' : 'Upload Picture'}
-                        </>
-                      )}
-                    </Button>
-                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={uploading}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border-primary/30 hover:border-primary/50"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        {user.image ? 'Change Picture' : 'Upload Picture'}
+                      </>
+                    )}
+                  </Button>
                   {user.image && (
                     <Button
                       variant="outline"

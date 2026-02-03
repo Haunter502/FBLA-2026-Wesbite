@@ -40,6 +40,16 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Deploy to Vercel (live link for everyone)
+
+To host the site on Vercel and get a permanent URL (e.g. `your-project.vercel.app`):
+
+1. Push your code to GitHub, then go to **[vercel.com/new](https://vercel.com/new)**.
+2. Sign in with GitHub and **Import** your repository (e.g. `NUMERA_FBLA_NCCC_FINAL`).
+3. Click **Deploy** (leave defaults). Vercel will build and give you a live link.
+
+For full steps and database setup (so login works on Vercel), see **[DEPLOY_VERCEL.md](./DEPLOY_VERCEL.md)**.
+
 ### Demo Accounts
 
 After seeding, use these accounts to explore the platform:

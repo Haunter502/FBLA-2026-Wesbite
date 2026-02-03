@@ -61,14 +61,17 @@ export async function POST(request: NextRequest) {
     const fileExtension = file.name.split('.').pop() || 'jpg'
     const filename = `${session.user.id}-${Date.now()}.${fileExtension}`
     const uploadDir = join(process.cwd(), 'public', 'uploads', 'profiles')
-    
-    // Ensure directory exists
+
+    // Ensure directory exists (required for local and some hosts)
     if (!existsSync(uploadDir)) {
       try {
         mkdirSync(uploadDir, { recursive: true })
-      } catch (error) {
-        console.error('Error creating upload directory:', error)
-        return NextResponse.json({ error: 'Failed to create upload directory' }, { status: 500 })
+      } catch (err) {
+        console.error('Error creating upload directory:', err)
+        return NextResponse.json(
+          { error: 'Server could not create upload folder. Try again or use a different image.' },
+          { status: 500 }
+        )
       }
     }
 

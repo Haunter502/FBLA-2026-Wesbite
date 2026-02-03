@@ -116,6 +116,28 @@ export default function AboutPage() {
                   </GlowEffect>
                 </FadeInUp>
               </StaggerItem>
+
+              <StaggerItem>
+                <FadeInUp delay={0.55}>
+                  <GlowEffect intensity="low">
+                    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clock className="h-5 w-5" />
+                          Learning at Your Pace
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          Whether you're reviewing concepts or exploring new topics, πumera adapts to your schedule.
+                          Study when it works for you, track your progress, and get personalized recommendations
+                          to help you achieve your learning goals.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </GlowEffect>
+                </FadeInUp>
+              </StaggerItem>
             </StaggerChildren>
           </div>
 
@@ -179,57 +201,37 @@ export default function AboutPage() {
 
             <FadeInUp delay={0.4}>
               <GlowEffect intensity="medium">
-                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
+                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background flex flex-col min-h-full">
                   <CardHeader>
                     <CardTitle>What You'll Learn</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
+                  <CardContent className="flex flex-1 flex-col justify-end pt-0">
+                    <div className="space-y-4">
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-sm">Linear equations and inequalities</span>
+                        <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span className="text-lg">Linear equations and inequalities</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-sm">Systems of equations</span>
+                        <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span className="text-lg">Systems of equations</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-sm">Polynomials and factoring</span>
+                        <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span className="text-lg">Polynomials and factoring</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-sm">Quadratic equations</span>
+                        <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span className="text-lg">Quadratic equations</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-sm">Functions and relations</span>
+                        <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span className="text-lg">Functions and relations</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="text-sm">Exponential and radical expressions</span>
+                        <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span className="text-lg">Exponential and radical expressions</span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </GlowEffect>
-            </FadeInUp>
-
-            <FadeInUp delay={0.5}>
-              <GlowEffect intensity="low">
-                <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Clock className="h-5 w-5" />
-                      Learning at Your Pace
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Whether you're reviewing concepts or exploring new topics, πumera adapts to your schedule. 
-                      Study when it works for you, track your progress, and get personalized recommendations 
-                      to help you achieve your learning goals.
-                    </p>
                   </CardContent>
                 </Card>
               </GlowEffect>

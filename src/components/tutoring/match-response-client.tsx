@@ -46,21 +46,36 @@ export function MatchResponseClient({ requestId }: { requestId: string }) {
   const [submitting, setSubmitting] = useState(false)
   const [action, setAction] = useState<'accept' | 'decline' | 'reschedule' | null>(null)
   const [message, setMessage] = useState('')
+  const [fetchError, setFetchError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchMatch()
   }, [requestId])
 
   async function fetchMatch() {
+    setFetchError(null)
     try {
       const res = await fetch(`/api/tutoring/matches/${requestId}`)
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        throw new Error('Failed to fetch match')
+        const raw = typeof data?.error === 'string' ? data.error : ''
+        const message =
+          res.status === 401
+            ? 'Please log in again to view this match.'
+            : res.status === 403
+              ? 'You don\'t have permission to view this match.'
+              : res.status === 404
+                ? 'This request was not found or has been removed.'
+                : raw || 'Failed to load match. Please try again.'
+        setFetchError(message)
+        setMatchData(null)
+        return
       }
-      const data = await res.json()
       setMatchData(data)
     } catch (error) {
       console.error('Error fetching match:', error)
+      setFetchError('Failed to load match. Please try again.')
+      setMatchData(null)
     } finally {
       setLoading(false)
     }
@@ -151,10 +166,16 @@ export function MatchResponseClient({ requestId }: { requestId: string }) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 flex flex-col items-center gap-4">
             <p className="text-center text-muted-foreground">
-              Match not found or you don't have permission to view it.
+              {fetchError ?? 'Match not found or you don\'t have permission to view it.'}
             </p>
+            <Button variant="outline" onClick={() => { setLoading(true); fetchMatch(); }}>
+              Try again
+            </Button>
+            <Button variant="ghost" onClick={() => router.push('/dashboard')}>
+              Back to dashboard
+            </Button>
           </CardContent>
         </Card>
       </div>
