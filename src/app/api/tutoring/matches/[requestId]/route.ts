@@ -215,7 +215,7 @@ export async function PATCH(
     console.error('Error responding to match:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
+        { error: 'Invalid request data', details: error.issues },
         { status: 400 }
       )
     }

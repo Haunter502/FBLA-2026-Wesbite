@@ -1,5 +1,7 @@
 import "next-auth"
-import { UserRole } from "@prisma/client"
+
+/** Matches Drizzle schema: STUDENT | TEACHER | ADMIN */
+export type UserRole = "STUDENT" | "TEACHER" | "ADMIN"
 
 declare module "next-auth" {
   interface Session {

@@ -119,7 +119,7 @@ export function QuickPractice() {
     if (selectedAnswer === null) return
 
     // Store current problem before moving on
-    setPreviousProblems((prev) => [...prev, currentProblem])
+    setPreviousProblems((prev) => (currentProblem ? [...prev, currentProblem] : prev))
 
     setCurrentProblem(generateProblem(difficulty))
     setSelectedAnswer(null)

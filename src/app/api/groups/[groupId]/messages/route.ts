@@ -130,11 +130,12 @@ export async function POST(
       .from(groupMembers)
       .where(eq(groupMembers.groupId, groupId))
 
+    type MemberRow = { userId: string | null }
     // Create notifications for all members except the sender
     try {
-      const notificationPromises = allMembers
-        .filter(m => m.userId !== session.user.id)
-        .map(member =>
+      const notificationPromises = (allMembers as MemberRow[])
+        .filter((m: MemberRow) => m.userId !== session.user.id)
+        .map((member: MemberRow) =>
           db.insert(notifications).values({
             userId: member.userId,
             type: 'group_message',

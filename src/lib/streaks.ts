@@ -1,5 +1,5 @@
-import { db } from "@/db/client";
-import { streaks, eventLogs } from "@/db/schema";
+import { db } from "@/lib/db";
+import { streaks, eventLogs } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import dayjs from "dayjs";
 

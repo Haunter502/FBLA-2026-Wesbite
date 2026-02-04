@@ -48,9 +48,10 @@ export async function GET(
     let currentUnit = null
     let currentUnitProgress = null
 
+    type ProgressRow = (typeof allUserProgress)[number]
     if (allUserProgress.length > 0) {
       // Find progress with a unitId
-      const unitProgressEntry = allUserProgress.find(p => p.unitId)
+      const unitProgressEntry = allUserProgress.find((p: ProgressRow) => p.unitId)
       if (unitProgressEntry?.unitId) {
         const [unit] = await db
           .select()
@@ -113,10 +114,13 @@ export async function GET(
       .limit(20) // Get more to account for filtering
 
     // Get matched teachers and slots separately
-    const matchedTeacherIds = [...new Set(sessionsData.map(s => s.matchedTeacherId).filter(Boolean) as string[])]
-    const matchedSlotIds = [...new Set(sessionsData.map(s => s.matchedSlotId).filter(Boolean) as string[])]
+    type SessionRow = (typeof sessionsData)[number]
+    const matchedTeacherIds = [...new Set(sessionsData.map((s: SessionRow) => s.matchedTeacherId).filter(Boolean) as string[])]
+    const matchedSlotIds = [...new Set(sessionsData.map((s: SessionRow) => s.matchedSlotId).filter(Boolean) as string[])]
 
-    const matchedTeachers = matchedTeacherIds.length > 0
+    type TeacherRow = { id: string; name: string | null; email: string | null }
+    type SlotRow = { id: string; start: number | Date; end: number | Date }
+    const matchedTeachers: TeacherRow[] = matchedTeacherIds.length > 0
       ? await db
           .select({
             id: teachers.id,
@@ -127,7 +131,7 @@ export async function GET(
           .where(inArray(teachers.id, matchedTeacherIds))
       : []
 
-    const matchedSlots = matchedSlotIds.length > 0
+    const matchedSlots: SlotRow[] = matchedSlotIds.length > 0
       ? await db
           .select({
             id: tutoringSlots.id,
@@ -138,17 +142,18 @@ export async function GET(
           .where(inArray(tutoringSlots.id, matchedSlotIds))
       : []
 
+    type SessionWithExtras = SessionRow & { matchedTeacher: TeacherRow | null; matchedSlot: SlotRow | null; slot?: { start: number | Date; end: number | Date } }
     const upcomingSessions = sessionsData
-      .map(session => ({
+      .map((session: SessionRow) => ({
         ...session,
         matchedTeacher: session.matchedTeacherId
-          ? matchedTeachers.find(t => t.id === session.matchedTeacherId) || null
+          ? matchedTeachers.find((t: TeacherRow) => t.id === session.matchedTeacherId) || null
           : null,
         matchedSlot: session.matchedSlotId
-          ? matchedSlots.find(s => s.id === session.matchedSlotId) || null
+          ? matchedSlots.find((s: SlotRow) => s.id === session.matchedSlotId) || null
           : null,
       }))
-      .filter(session => {
+      .filter((session: SessionWithExtras) => {
         // Get the start time from either scheduledSlot or matchedSlot
         let startTime: number | null = null
         
@@ -189,7 +194,7 @@ export async function GET(
         unitTitle: nextLessonData.unit.title,
         unitSlug: nextLessonData.unit.slug,
       } : null,
-      upcomingSessions: upcomingSessions.map(session => ({
+      upcomingSessions: upcomingSessions.map((session: SessionWithExtras) => ({
         id: session.id,
         topic: session.topic,
         status: session.status,

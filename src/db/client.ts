@@ -7,10 +7,11 @@ import * as schema from "./schema";
 
 dotenv.config({ path: ".env.local" });
 
-const databaseUrl = process.env.DATABASE_URL;
+// Vercel + Neon often set POSTGRES_URL; app also supports DATABASE_URL
+const databaseUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
 // Detect if using PostgreSQL or SQLite
-const isPostgres = databaseUrl?.includes("postgresql");
+const isPostgres = Boolean(databaseUrl?.includes("postgresql"));
 
 let db: ReturnType<typeof drizzle> | ReturnType<typeof drizzlePg>;
 

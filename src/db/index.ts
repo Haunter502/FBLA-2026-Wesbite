@@ -7,14 +7,14 @@ declare global {
   // eslint-disable-next-line no-var
   var __db__: ReturnType<typeof drizzle> | undefined
   // eslint-disable-next-line no-var
-  var __sqlite__: Database | undefined
+  var __sqlite__: InstanceType<typeof Database> | undefined
 }
 
 const databaseUrl =
   process.env.SQLITE_DB_PATH ??
-  process.env.DATABASE_URL?.startsWith("file:")
+  (process.env.DATABASE_URL?.startsWith("file:")
     ? process.env.DATABASE_URL.replace(/^file:/, "")
-    : process.env.DATABASE_URL
+    : process.env.DATABASE_URL)
 
 function createSqliteDb() {
   if (!global.__sqlite__) {

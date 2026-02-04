@@ -22,10 +22,11 @@ export async function GET(req: NextRequest) {
       .limit(50)
 
     // Count unread notifications
-    const unreadCount = allNotifications.filter(n => !n.read).length
+    type NotifRow = (typeof allNotifications)[number]
+    const unreadCount = allNotifications.filter((n: NotifRow) => !n.read).length
 
     // Format notifications for the frontend
-    const formattedNotifications = allNotifications.map((notification) => ({
+    const formattedNotifications = allNotifications.map((notification: NotifRow) => ({
       id: notification.id,
       type: notification.type as 'direct_message' | 'tutoring_request' | 'group_message',
       title: notification.title,

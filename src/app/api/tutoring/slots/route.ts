@@ -26,7 +26,8 @@ export async function GET() {
       .limit(10)
 
     // Normalize timestamps to Unix seconds for consistent handling
-    const normalizedSlots = slots.map(slot => ({
+    type SlotRow = (typeof slots)[number]
+    const normalizedSlots = slots.map((slot: SlotRow) => ({
       ...slot,
       start: typeof slot.start === 'number' 
         ? (slot.start < 10000000000 ? slot.start : Math.floor(slot.start / 1000))

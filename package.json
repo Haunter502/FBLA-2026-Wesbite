@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
@@ -14,9 +15,12 @@
     "update-content": "tsx scripts/update-content.ts",
     "view-content": "tsx scripts/view-content.ts",
     "update-linear-equations": "tsx scripts/update-linear-equations.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.0.0",
     "@auth/drizzle-adapter": "^1.11.1",
     "@hookform/resolvers": "^5.2.2",
     "@libsql/client": "^0.15.15",
@@ -47,6 +51,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "prisma": "^6.0.0",
     "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^20",

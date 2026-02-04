@@ -35,11 +35,12 @@ async function getTutoringRequests() {
     .orderBy(desc(tutoringRequests.createdAt))
 
   // Then fetch matched teachers and slots separately
-  const teacherIds = [...new Set(requests.map(r => r.matchedTeacherId).filter(Boolean) as string[])]
-  const slotIds = [...new Set(requests.map(r => r.matchedSlotId).filter(Boolean) as string[])]
-  const scheduledSlotIds = [...new Set(requests.map(r => r.scheduledSlotId).filter(Boolean) as string[])]
+  type RequestRow = (typeof requests)[number]
+  const teacherIds = [...new Set(requests.map((r: RequestRow) => r.matchedTeacherId).filter(Boolean) as string[])]
+  const slotIds = [...new Set(requests.map((r: RequestRow) => r.matchedSlotId).filter(Boolean) as string[])]
+  const scheduledSlotIds = [...new Set(requests.map((r: RequestRow) => r.scheduledSlotId).filter(Boolean) as string[])]
 
-  const matchedTeachers = teacherIds.length > 0
+  const matchedTeachers: { id: string; name: string | null; email: string | null }[] = teacherIds.length > 0
     ? await db
         .select({
           id: teachers.id,
@@ -50,7 +51,7 @@ async function getTutoringRequests() {
         .where(inArray(teachers.id, teacherIds))
     : []
 
-  const matchedSlots = slotIds.length > 0
+  const matchedSlots: { id: string; start: number | Date; end: number | Date; teacherId: string | null }[] = slotIds.length > 0
     ? await db
         .select({
           id: tutoringSlots.id,
@@ -62,7 +63,7 @@ async function getTutoringRequests() {
         .where(inArray(tutoringSlots.id, slotIds))
     : []
 
-  const scheduledSlots = scheduledSlotIds.length > 0
+  const scheduledSlots: { id: string; start: number | Date; end: number | Date; teacherId: string | null }[] = scheduledSlotIds.length > 0
     ? await db
         .select({
           id: tutoringSlots.id,
@@ -77,8 +78,8 @@ async function getTutoringRequests() {
   // Get slot teachers (for both matched and scheduled slots)
   const allSlotIds = [...slotIds, ...scheduledSlotIds]
   const allSlots = [...matchedSlots, ...scheduledSlots]
-  const slotTeacherIds = [...new Set(allSlots.map(s => s.teacherId).filter(Boolean) as string[])]
-  const slotTeachers = slotTeacherIds.length > 0
+  const slotTeacherIds = [...new Set(allSlots.map((s: { teacherId: string | null }) => s.teacherId).filter(Boolean) as string[])]
+  const slotTeachers: { id: string; name: string | null }[] = slotTeacherIds.length > 0
     ? await db
         .select({
           id: teachers.id,
@@ -100,7 +101,7 @@ async function getTutoringRequests() {
   }
 
   // Combine the data
-  return requests.map(request => ({
+  return requests.map((request: RequestRow) => ({
     ...request,
     matchedTeacher: request.matchedTeacherId
       ? matchedTeachers.find(t => t.id === request.matchedTeacherId) || null

@@ -62,7 +62,8 @@ export async function GET(
       )
 
     // Convert createdAt to Unix timestamp
-    const formattedMessages = messages.map((msg) => ({
+    type MessageRow = (typeof messages)[number]
+    const formattedMessages = messages.map((msg: MessageRow) => ({
       id: msg.id,
       message: msg.message,
       createdAt: typeof msg.createdAt === 'number' 
