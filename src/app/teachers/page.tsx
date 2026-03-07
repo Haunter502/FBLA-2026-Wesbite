@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { teachers, reviews, users } from "@/lib/schema"
@@ -10,7 +11,7 @@ import { asc, eq, desc, and } from "@/lib/drizzle-helpers"
 
 async function getTeachers() {
   const allTeachers = await db.select().from(teachers).orderBy(asc(teachers.name))
-  
+
   // Get reviews for each teacher
   const teachersWithReviews = await Promise.all(
     allTeachers.map(async (teacher: typeof allTeachers[0]) => {
@@ -51,6 +52,11 @@ async function getTeachers() {
 
 export default async function TeachersPage() {
   const [session, teachersData] = await Promise.all([auth(), getTeachers()])
+
+  if (!session || !session.user?.id) {
+    redirect('/auth/sign-in')
+  }
+
   const canEditAvatars =
     session?.user?.role === 'TEACHER' || session?.user?.role === 'ADMIN'
 
@@ -62,7 +68,7 @@ export default async function TeachersPage() {
         <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
-      
+
       <div className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
         <ScrollReveal>
           <FadeInUp delay={0.1}>
