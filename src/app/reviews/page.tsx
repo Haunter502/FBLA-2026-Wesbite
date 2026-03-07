@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { reviews, users, teachers } from '@/lib/schema'
@@ -69,10 +68,6 @@ async function getTeachers() {
 
 export default async function ReviewsPage() {
   const session = await auth()
-
-  if (!session || !session.user?.id) {
-    redirect('/auth/sign-in')
-  }
 
   const [reviewsList, stats, teachersList] = await Promise.all([
     getReviews(),

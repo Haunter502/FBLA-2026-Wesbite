@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { teachers, reviews, users } from "@/lib/schema"
@@ -52,10 +51,6 @@ async function getTeachers() {
 
 export default async function TeachersPage() {
   const [session, teachersData] = await Promise.all([auth(), getTeachers()])
-
-  if (!session || !session.user?.id) {
-    redirect('/auth/sign-in')
-  }
 
   const canEditAvatars =
     session?.user?.role === 'TEACHER' || session?.user?.role === 'ADMIN'
