@@ -5,33 +5,33 @@ import dayjs from "dayjs"
 
 async function forceRegenerateSlots() {
   console.log("🔄 Force regenerating tutoring slots...")
-  
+
   const now = new Date()
   const nowTimestamp = Math.floor(now.getTime() / 1000)
-  
+
   // Get all teachers
   const allTeachers = await db.select().from(teachers)
   console.log(`Found ${allTeachers.length} teachers`)
-  
+
   if (allTeachers.length === 0) {
     console.log("❌ No teachers found!")
     process.exit(1)
   }
-  
+
   // Delete all future slots
   console.log("Clearing existing future slots...")
   try {
-    await db.delete(tutoringSlots).where(gte(tutoringSlots.start, nowTimestamp))
+    await db.delete(tutoringSlots).where(gte(tutoringSlots.start, now))
     console.log("✓ Cleared existing future slots")
   } catch (error) {
     console.error("Error clearing slots:", error)
   }
-  
+
   // Generate slots for next 60 days, every other weekday
   const newSlots: Array<{
     teacherId: string
-    start: number
-    end: number
+    start: Date
+    end: Date
     capacity: number
     spotsLeft: number
   }> = []
@@ -45,7 +45,7 @@ async function forceRegenerateSlots() {
 
   // Track weekday count (for every other day logic)
   let weekdayCount = 0
-  
+
   for (let day = 0; day < 60; day++) {
     const date = dayjs(now).add(day, 'day')
     const dayOfWeek = date.day()
@@ -60,7 +60,7 @@ async function forceRegenerateSlots() {
       weekdayCount++
       continue
     }
-    
+
     weekdayCount++
 
     // Create 3 sessions per day - ALL teachers for each time slot
@@ -69,13 +69,10 @@ async function forceRegenerateSlots() {
         const start = date.hour(timeSlot.hour).minute(timeSlot.minute).second(0).millisecond(0)
         const end = start.add(1, 'hour')
 
-        const startUnix = start.unix()
-        const endUnix = end.unix()
-
         newSlots.push({
           teacherId: teacher.id,
-          start: startUnix,
-          end: endUnix,
+          start: start.toDate(),
+          end: end.toDate(),
           capacity: 5,
           spotsLeft: 5,
         })
