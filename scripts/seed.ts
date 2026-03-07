@@ -146,32 +146,63 @@ async function seed() {
   const insertedTeachers = await db.insert(teachers).values(teacherData).returning();
   console.log('✓ Created 3 teacher profiles');
 
-  // Create tutoring slots for next 2 weeks
+  // Create tutoring slots for next 2 weeks (Mondays, Wednesdays, Fridays only)
   console.log('Creating tutoring slots...');
-  const slots = [];
+  const slots: {
+    teacherId: string;
+    start: Date;
+    end: Date;
+    capacity: number;
+    spotsLeft: number;
+  }[] = [];
+
+  // Time slots: Morning (9–10 AM), Afternoon (1:30–2:30 PM), Evening (6–7 PM)
+  const timeSlots = [
+    { label: 'morning', hour: 9, minute: 0 },
+    { label: 'afternoon', hour: 13, minute: 30 },
+    { label: 'evening', hour: 18, minute: 0 },
+  ];
+
+  let rotationIndex = 0;
+
   for (let day = 0; day < 14; day++) {
-    for (let teacher of insertedTeachers) {
-      const slotDate = dayjs().add(day, 'day');
-      // Morning slot
-      slots.push({
-        teacherId: teacher.id,
-        start: slotDate.hour(10).minute(0).toDate(),
-        end: slotDate.hour(11).minute(0).toDate(),
-        capacity: 5,
-        spotsLeft: 5,
-      });
-      // Afternoon slot
-      slots.push({
-        teacherId: teacher.id,
-        start: slotDate.hour(15).minute(0).toDate(),
-        end: slotDate.hour(16).minute(0).toDate(),
-        capacity: 5,
-        spotsLeft: 5,
-      });
+    const slotDate = dayjs().add(day, 'day');
+    const dayOfWeek = slotDate.day(); // 0 = Sunday, 6 = Saturday
+
+    // Only create slots on Monday (1), Wednesday (3), and Friday (5)
+    if (dayOfWeek !== 1 && dayOfWeek !== 3 && dayOfWeek !== 5) {
+      continue;
     }
+
+    const teacherCount = insertedTeachers.length;
+
+    timeSlots.forEach((timeSlot, timeSlotIndex) => {
+      const teacherIndex = (rotationIndex + timeSlotIndex) % teacherCount;
+      const teacher = insertedTeachers[teacherIndex];
+
+      const start = slotDate
+        .hour(timeSlot.hour)
+        .minute(timeSlot.minute)
+        .second(0)
+        .millisecond(0);
+      const end = start.add(1, 'hour');
+
+      slots.push({
+        teacherId: teacher.id,
+        start: start.toDate(),
+        end: end.toDate(),
+        capacity: 5,
+        spotsLeft: 5,
+      });
+    });
+
+    rotationIndex = (rotationIndex + 1) % teacherCount;
   }
-  await db.insert(tutoringSlots).values(slots);
-  console.log('✓ Created tutoring slots');
+
+  if (slots.length > 0) {
+    await db.insert(tutoringSlots).values(slots);
+  }
+  console.log(`✓ Created ${slots.length} tutoring slots`);
 
   // Create 14 Algebra 1 Units
   console.log('Creating 14 Algebra 1 units...');

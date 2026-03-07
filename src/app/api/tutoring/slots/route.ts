@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { tutoringSlots, teachers } from "@/lib/schema"
-import { gte, gt, asc, eq, and } from "@/lib/drizzle-helpers"
+import { gte, lte, gt, asc, eq, and } from "@/lib/drizzle-helpers"
 
 export async function GET() {
   try {
     const now = new Date()
+    const windowEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
     const slots = await db
       .select({
         id: tutoringSlots.id,
@@ -21,9 +22,15 @@ export async function GET() {
       })
       .from(tutoringSlots)
       .leftJoin(teachers, eq(tutoringSlots.teacherId, teachers.id))
-      .where(and(gte(tutoringSlots.start, now), gt(tutoringSlots.spotsLeft, 0)))
+      .where(
+        and(
+          gte(tutoringSlots.start, now),
+          lte(tutoringSlots.start, windowEnd),
+          gt(tutoringSlots.spotsLeft, 0)
+        )
+      )
       .orderBy(asc(tutoringSlots.start))
-      .limit(10)
+      .limit(60)
 
     // Normalize timestamps to Unix seconds for consistent handling
     type SlotRow = (typeof slots)[number]

@@ -1,7 +1,9 @@
-import { db } from "../src/lib/db"
+import { getDbSync } from "../src/lib/db-server"
 import { tutoringSlots, teachers } from "../src/lib/schema"
 import { gte } from "../src/lib/drizzle-helpers"
 import dayjs from "dayjs"
+
+const db = getDbSync()
 
 async function forceRegenerateSlots() {
   console.log("🔄 Force regenerating tutoring slots...")
@@ -27,7 +29,7 @@ async function forceRegenerateSlots() {
     console.error("Error clearing slots:", error)
   }
 
-  // Generate slots for next 60 days, every other weekday
+  // Generate slots for next 60 days, Mondays/Wednesdays/Fridays only
   const newSlots: Array<{
     teacherId: string
     start: Date
@@ -36,48 +38,50 @@ async function forceRegenerateSlots() {
     spotsLeft: number
   }> = []
 
-  // Time slots: Morning (9 AM), Afternoon (2 PM), Evening (6 PM)
+  // Time slots: Morning (9–10 AM), Afternoon (1:30–2:30 PM), Evening (6–7 PM)
   const timeSlots = [
-    { hour: 9, minute: 0, label: 'morning' },
-    { hour: 14, minute: 0, label: 'afternoon' },
-    { hour: 18, minute: 0, label: 'evening' },
+    { label: 'morning', hour: 9, minute: 0 },
+    { label: 'afternoon', hour: 13, minute: 30 },
+    { label: 'evening', hour: 18, minute: 0 },
   ]
 
-  // Track weekday count (for every other day logic)
-  let weekdayCount = 0
+  // Track rotation index so teachers rotate across time slots each tutoring day
+  let rotationIndex = 0
 
   for (let day = 0; day < 60; day++) {
     const date = dayjs(now).add(day, 'day')
     const dayOfWeek = date.day()
 
-    // Skip weekends (0 = Sunday, 6 = Saturday)
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
+    // Only create slots on Monday (1), Wednesday (3), and Friday (5)
+    if (dayOfWeek !== 1 && dayOfWeek !== 3 && dayOfWeek !== 5) {
       continue
     }
 
-    // Only create slots every other weekday
-    if (weekdayCount % 2 !== 0) {
-      weekdayCount++
-      continue
-    }
+    const teacherCount = allTeachers.length
 
-    weekdayCount++
+    // Create exactly 3 sessions per tutoring day - one teacher per time slot, rotated
+    timeSlots.forEach((timeSlot, timeSlotIndex) => {
+      const teacherIndex = (rotationIndex + timeSlotIndex) % teacherCount
+      const teacher = allTeachers[teacherIndex] as typeof teachers.$inferSelect
 
-    // Create 3 sessions per day - ALL teachers for each time slot
-    timeSlots.forEach((timeSlot) => {
-      allTeachers.forEach((teacher: typeof teachers.$inferSelect) => {
-        const start = date.hour(timeSlot.hour).minute(timeSlot.minute).second(0).millisecond(0)
-        const end = start.add(1, 'hour')
+      const start = date
+        .hour(timeSlot.hour)
+        .minute(timeSlot.minute)
+        .second(0)
+        .millisecond(0)
+      const end = start.add(1, 'hour')
 
-        newSlots.push({
-          teacherId: teacher.id,
-          start: start.toDate(),
-          end: end.toDate(),
-          capacity: 5,
-          spotsLeft: 5,
-        })
+      newSlots.push({
+        teacherId: teacher.id,
+        start: start.toDate(),
+        end: end.toDate(),
+        capacity: 5,
+        spotsLeft: 5,
       })
     })
+
+    // Move rotation forward for the next tutoring day
+    rotationIndex = (rotationIndex + 1) % teacherCount
   }
 
   if (newSlots.length > 0) {
@@ -89,9 +93,9 @@ async function forceRegenerateSlots() {
         await db.insert(tutoringSlots).values(batch)
       }
       console.log(`✅ Generated ${newSlots.length} tutoring slots!`)
-      console.log(`   - ${Math.floor(60 * 5 / 7 / 2)} weekdays (every other day)`)
-      console.log(`   - 3 time slots per day (morning, afternoon, evening)`)
-      console.log(`   - ${allTeachers.length} teachers per time slot`)
+      console.log(`   - Up to 60 days of Mondays, Wednesdays, and Fridays`)
+      console.log(`   - 3 time slots per tutoring day (morning, afternoon, evening)`)
+      console.log(`   - Teachers rotated across time slots each tutoring day`)
     } catch (error) {
       console.error('❌ Error inserting slots:', error)
       throw error

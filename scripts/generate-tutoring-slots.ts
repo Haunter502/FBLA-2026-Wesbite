@@ -26,7 +26,7 @@ async function generateTutoringSlots() {
     // Skip clearing existing slots for now - just add new ones
     console.log('Skipping deletion of existing slots - will add new ones')
 
-    // Generate slots for the next 60 days, every other weekday
+    // Generate slots for the next 60 days, Mondays/Wednesdays/Fridays only
     console.log('Generating slot data...')
     const newSlots: Array<{
       teacherId: string
@@ -36,59 +36,51 @@ async function generateTutoringSlots() {
       spotsLeft: number
     }> = []
 
-    let dayIndex = 0
-    let weekdayCount = 0
-    const maxDays = 200 // Safety limit to prevent infinite loops
+    // Time slots: Morning (9–10 AM), Afternoon (1:30–2:30 PM), Evening (6–7 PM)
+    const timeSlots = [
+      { label: 'morning', hour: 9, minute: 0 },
+      { label: 'afternoon', hour: 13, minute: 30 },
+      { label: 'evening', hour: 18, minute: 0 },
+    ]
 
-    while (weekdayCount < 60 && dayIndex < maxDays) {
-      const currentDate = dayjs().add(dayIndex, 'day')
+    let rotationIndex = 0
+
+    for (let day = 0; day < 60; day++) {
+      const currentDate = dayjs().add(day, 'day')
       const dayOfWeek = currentDate.day() // 0 = Sunday, 6 = Saturday
 
-      // Skip weekends (0 = Sunday, 6 = Saturday)
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        // Only add slots every other weekday (when weekdayCount is even: 0, 2, 4, 6...)
-        if (weekdayCount % 2 === 0) {
-          const timeSlots = [
-            { label: 'Morning', hour: 9 },
-            { label: 'Afternoon', hour: 14 },
-            { label: 'Evening', hour: 18 },
-          ]
-
-          // Rotate teachers through time slots
-          timeSlots.forEach((timeSlot, timeSlotIndex) => {
-            // Calculate which teacher should teach this slot
-            const teacherIndex = (weekdayCount + timeSlotIndex) % allTeachers.length
-            const teacher = allTeachers[teacherIndex]
-
-            const startDate = currentDate.hour(timeSlot.hour).minute(0).second(0).toDate()
-            const endDate = currentDate.hour(timeSlot.hour + 1).minute(0).second(0).toDate()
-
-            newSlots.push({
-              teacherId: teacher.id,
-              start: startDate,
-              end: endDate,
-              capacity: 5,
-              spotsLeft: 5,
-            })
-          })
-          
-          if ((weekdayCount / 2 + 1) % 10 === 0) {
-            console.log(`  Generated slots for ${weekdayCount / 2 + 1} slot-days (day ${dayIndex})...`)
-          }
-        }
-        weekdayCount++ // Increment for every weekday we encounter
+      // Only create slots on Monday (1), Wednesday (3), and Friday (5)
+      if (dayOfWeek !== 1 && dayOfWeek !== 3 && dayOfWeek !== 5) {
+        continue
       }
-      dayIndex++
-      if (dayIndex % 30 === 0) {
-        console.log(`  Processed ${dayIndex} days, found ${weekdayCount} weekdays so far...`)
-      }
-    }
-    
-    if (dayIndex >= maxDays) {
-      console.warn(`⚠️  Reached max days limit (${maxDays}) before finding 60 weekdays. Found ${weekdayCount} weekdays.`)
+
+      const teacherCount = allTeachers.length
+
+      timeSlots.forEach((timeSlot, timeSlotIndex) => {
+        const teacherIndex = (rotationIndex + timeSlotIndex) % teacherCount
+        const teacher = allTeachers[teacherIndex]
+
+        const startDate = currentDate
+          .hour(timeSlot.hour)
+          .minute(timeSlot.minute)
+          .second(0)
+          .millisecond(0)
+          .toDate()
+        const endDate = dayjs(startDate).add(1, 'hour').toDate()
+
+        newSlots.push({
+          teacherId: teacher.id,
+          start: startDate,
+          end: endDate,
+          capacity: 5,
+          spotsLeft: 5,
+        })
+      })
+
+      rotationIndex = (rotationIndex + 1) % teacherCount
     }
 
-    console.log(`📅 Generated ${newSlots.length} slots for ${weekdayCount} weekdays`)
+    console.log(`📅 Generated ${newSlots.length} slots for upcoming Mondays, Wednesdays, and Fridays`)
     console.log('Starting to insert slots...')
 
     // Insert slots in batches

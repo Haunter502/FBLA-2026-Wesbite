@@ -197,9 +197,16 @@ export function TutoringCalendar() {
 
   const getTimeSlotColor = (slot: Slot) => {
     const hour = dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start).hour()
-    if (hour >= 6 && hour < 12) return 'bg-blue-500/20 text-blue-600'
-    if (hour >= 12 && hour < 17) return 'bg-yellow-500/20 text-yellow-600'
-    return 'bg-purple-500/20 text-purple-600'
+    if (hour >= 6 && hour < 12) {
+      // Morning: soft blues
+      return 'bg-sky-500/25 text-sky-50 border border-sky-400/40'
+    }
+    if (hour >= 12 && hour < 17) {
+      // Afternoon: light gold
+      return 'bg-amber-400/25 text-amber-50 border border-amber-400/40'
+    }
+    // Evening: dark blue / purple sunset mix
+    return 'bg-gradient-to-r from-indigo-600/70 to-fuchsia-600/70 text-slate-50 border border-indigo-500/40'
   }
 
   return (
