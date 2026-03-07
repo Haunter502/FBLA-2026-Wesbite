@@ -47,3 +47,4 @@ drizzle/local.db
 
 # cursor
 .cursor/
+.env*.local
