@@ -5,7 +5,7 @@ import { FileText, BookOpen, Video, Layers } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { db } from "@/lib/db"
-import { worksheets, studyGuides, videoResources, flashcardSets } from "@/lib/schema"
+import { worksheets, studyGuides, lessons, flashcardSets } from "@/lib/schema"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
 import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
 import { ParticleBackground } from "@/components/animations/particle-background"
@@ -18,7 +18,12 @@ async function getResourceCounts() {
   const [worksheetsCount, studyGuidesCount, videosCount, flashcardsCount] = await Promise.all([
     db.select().from(worksheets).then((rows: typeof worksheets.$inferSelect[]) => rows.length),
     db.select().from(studyGuides).then((rows: typeof studyGuides.$inferSelect[]) => rows.length),
-    db.select().from(videoResources).then((rows: typeof videoResources.$inferSelect[]) => rows.length),
+    db
+      .select({ type: lessons.type })
+      .from(lessons)
+      .then((rows: Array<{ type: (typeof lessons.$inferSelect)["type"] }>) =>
+        rows.filter((row) => row.type === "VIDEO").length,
+      ),
     db.select().from(flashcardSets).then((rows: typeof flashcardSets.$inferSelect[]) => rows.length),
   ])
 

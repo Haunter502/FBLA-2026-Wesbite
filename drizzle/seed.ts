@@ -7,8 +7,9 @@ import { eq, asc } from '../src/lib/drizzle-helpers';
 const db = getDbSync();
 
 async function seed() {
+  const dbUrl = process.env.DATABASE_URL || process.env.DATABASE_TURSO_DATABASE_URL || 'file:./dev.db';
   console.log('🌱 Seeding database...');
-  console.log('Database path:', process.env.DATABASE_URL);
+  console.log('Database:', dbUrl.startsWith('file:') ? `${dbUrl} (cwd: ${process.cwd()})` : dbUrl);
 
   // Create demo users (or get existing ones)
   const hashedPassword = await bcrypt.hash('Passw0rd!', 10);
@@ -144,8 +145,8 @@ async function seed() {
     insertedUnits = await db.insert(schema.units).values(unitsData).returning();
     console.log(`✅ Created ${insertedUnits.length} units`);
   } catch (error: any) {
-    console.log('Insert failed with error:', error.message, 'code:', error.code);
-    if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+    const code = error.cause?.code ?? error.code;
+    if (code === 'SQLITE_CONSTRAINT_UNIQUE') {
       insertedUnits = await db.select().from(schema.units).orderBy(asc(schema.units.order));
       console.log(`✅ Units already exist, using existing ones (${insertedUnits.length} units)`);
     } else {
@@ -153,9 +154,106 @@ async function seed() {
     }
   }
 
+  // Unique embed-safe Khan Academy YouTube ID per video lesson (intro / examples / advanced / applications).
+  // Each unit has 4 different videos so the Video Resources grid is not repetitive.
+  const lessonYoutubeByUnitSlug: Record<
+    string,
+    { intro: string; examples: string; advanced: string; applications: string }
+  > = {
+    'linear-equations': {
+      intro: 'bAerID24QJ0',   // Linear equations 1
+      examples: 'LzYJVsvqS50', // Understanding steps when solving equations
+      advanced: 'p5e5mf_G3FI', // Two-step equation with numerator x
+      applications: 'uk7gS3cZVp4', // Graph from slope-intercept (graphing linear)
+    },
+    'systems-of-equations': {
+      intro: 'wYrxKGt_bLg',   // Systems with elimination
+      examples: 'SkMNREAMNvc', // Checking solutions to systems
+      advanced: 'IWigvJcCAJ0', // Intro to quadratic (algebra connections)
+      applications: 'Vm7H0VTlIco', // Polynomials intro (algebra connections)
+    },
+    polynomials: {
+      intro: 'Vm7H0VTlIco',   // Polynomials intro
+      examples: 'mDmRYfma9C0', // Quadratic formula (proof) — algebra
+      advanced: 'K5ggNnKTmNM', // Factoring quadratics
+      applications: 'eF6zYNzlZKQ', // More factoring quadratics examples
+    },
+    quadratics: {
+      intro: 'IWigvJcCAJ0',   // Introduction to the quadratic equation
+      examples: '_MllyJivas4', // Strategy in solving quadratic equations
+      advanced: '6agzj3A9IgA', // Completing the square example 2
+      applications: 'eU41vG9z35M', // Solve by completing the square
+    },
+    functions: {
+      intro: 'za0QJRZ-yQ4',   // Domain and range of a function
+      examples: 'uk7gS3cZVp4', // Graph from slope-intercept
+      advanced: 'IL3UCuXrUzE', // Slope-intercept form
+      applications: 'qgsNNqmlLoA', // Worked examples slope-intercept intro
+    },
+    'exponents-radicals': {
+      intro: '6QJtWfIiyZo',   // Simplifying radicals
+      examples: 'kITJ6qH7jS0', // Exponent rules part 1
+      advanced: '7Uos1ED3KHI', // Simplifying rational expressions intro
+      applications: 'XFwQV-KCudw', // Simplifying rational expressions monomial factors
+    },
+    'rational-expressions': {
+      intro: '7Uos1ED3KHI',   // Simplifying rational expressions introduction
+      examples: 'XFwQV-KCudw', // Common monomial factors
+      advanced: '6QJtWfIiyZo', // Simplifying radicals
+      applications: 'kITJ6qH7jS0', // Exponent rules part 1
+    },
+    'graphing-functions': {
+      intro: 'uk7gS3cZVp4',   // Graph from slope-intercept equation example
+      examples: 'IL3UCuXrUzE', // Slope-intercept form
+      advanced: 'qgsNNqmlLoA', // Worked examples slope-intercept intro
+      applications: 'za0QJRZ-yQ4', // Domain and range
+    },
+    'absolute-value': {
+      intro: 'iI_2Piwn_og',   // Absolute value inequalities
+      examples: 'bAerID24QJ0', // Linear equations 1
+      advanced: 'LzYJVsvqS50', // Understanding steps solving equations
+      applications: 'p5e5mf_G3FI', // Two-step equation
+    },
+    'exponential-functions': {
+      intro: 'm5Tf6vgoJtQ',   // Exponential growth and decay word problems
+      examples: 'za0QJRZ-yQ4', // Domain and range
+      advanced: '6QJtWfIiyZo', // Simplifying radicals
+      applications: 'uhxtUt_-GyM', // Statistics: the average
+    },
+    sequences: {
+      intro: 'IWigvJcCAJ0',   // Quadratic equation intro
+      examples: '_MllyJivas4', // Strategy solving quadratics
+      advanced: 'K5ggNnKTmNM', // Factoring quadratics
+      applications: 'mDmRYfma9C0', // Quadratic formula (proof)
+    },
+    'data-analysis': {
+      intro: 'uhxtUt_-GyM',   // Statistics: the average
+      examples: 'xTwDmnEEb9E', // Median in a histogram
+      advanced: '6QJtWfIiyZo', // Simplifying radicals
+      applications: 'kITJ6qH7jS0', // Exponent rules
+    },
+    probability: {
+      intro: 'uhxtUt_-GyM',   // Statistics: the average
+      examples: 'xTwDmnEEb9E', // Median in a histogram
+      advanced: 'm5Tf6vgoJtQ', // Exponential word problems
+      applications: '7Uos1ED3KHI', // Simplifying rational expressions
+    },
+    'real-world-applications': {
+      intro: 'bAerID24QJ0',   // Linear equations
+      examples: 'wYrxKGt_bLg', // Systems elimination
+      advanced: 'IWigvJcCAJ0', // Quadratic equation
+      applications: 'm5Tf6vgoJtQ', // Exponential word problems
+    },
+  };
+
+  const fallbackYoutubeId = 'Vm7H0VTlIco'; // Polynomials intro — embed-safe fallback
+
   // Create lessons for each unit (6-12 per unit)
   const lessonsData = [];
   for (const unit of insertedUnits) {
+    const unitSlug = (unit as typeof schema.units.$inferSelect).slug;
+    const videoIds = lessonYoutubeByUnitSlug[unitSlug];
+
     const unitLessons = [
       {
         slug: `${unit.slug}-intro`,
@@ -164,7 +262,7 @@ async function seed() {
         description: `Overview and key concepts of ${unit.title.toLowerCase()}.`,
         type: 'VIDEO' as const,
         khanUrl: `https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:${unit.slug}`,
-        youtubeId: 'dQw4w9WgXcQ',
+        youtubeId: videoIds?.intro ?? fallbackYoutubeId,
         duration: 12,
         order: 1,
       },
@@ -184,7 +282,7 @@ async function seed() {
         description: 'Step-by-step examples demonstrating key techniques.',
         type: 'VIDEO' as const,
         khanUrl: `https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:${unit.slug}-examples`,
-        youtubeId: 'dQw4w9WgXcQ',
+        youtubeId: videoIds?.examples ?? videoIds?.intro ?? fallbackYoutubeId,
         duration: 18,
         order: 3,
       },
@@ -204,7 +302,7 @@ async function seed() {
         title: 'Advanced Techniques',
         description: 'More challenging problems and advanced methods.',
         type: 'VIDEO' as const,
-        youtubeId: 'dQw4w9WgXcQ',
+        youtubeId: videoIds?.advanced ?? videoIds?.examples ?? videoIds?.intro ?? fallbackYoutubeId,
         duration: 16,
         order: 5,
       },
@@ -224,7 +322,12 @@ async function seed() {
         title: 'Real-World Applications',
         description: 'See how these concepts apply to real-world scenarios.',
         type: 'VIDEO' as const,
-        youtubeId: 'dQw4w9WgXcQ',
+        youtubeId:
+          videoIds?.applications ??
+          videoIds?.advanced ??
+          videoIds?.examples ??
+          videoIds?.intro ??
+          fallbackYoutubeId,
         duration: 14,
         order: 7,
       },
@@ -241,17 +344,10 @@ async function seed() {
     lessonsData.push(...unitLessons);
   }
 
-  // Check if lessons already exist
-  const existingLessons = await db.select().from(schema.lessons);
-  let insertedLessons;
-  
-  if (existingLessons.length === 0) {
-    insertedLessons = await db.insert(schema.lessons).values(lessonsData).returning();
-    console.log(`✅ Created ${insertedLessons.length} lessons`);
-  } else {
-    insertedLessons = existingLessons;
-    console.log(`✅ Lessons already exist, using existing ones (${existingLessons.length} lessons)`);
-  }
+  // Always refresh lessons so updates to video mappings and content are applied
+  await db.delete(schema.lessons);
+  const insertedLessons = await db.insert(schema.lessons).values(lessonsData).returning();
+  console.log(`✅ Created ${insertedLessons.length} lessons`);
 
   // Create quizzes for each unit
   type MCQ = { id: number; question: string; options: string[]; correctAnswer: number; explanation?: string }
@@ -615,46 +711,121 @@ async function seed() {
     console.log('✅ Updated tests with real questions');
   }
 
-  // Create flashcard sets for some lessons
-  const flashcardSetsData = [];
-  for (let i = 0; i < Math.min(20, insertedLessons.length); i++) {
-    const lesson = insertedLessons[i];
-    flashcardSetsData.push({
-      lessonId: lesson.id,
-      title: `${lesson.title} - Key Terms`,
-      description: `Flashcards for mastering ${lesson.title.toLowerCase()}`,
+  // Create one flashcard set per unit (14 sets) with real term/definition content
+  const flashcardTermsBySlug: Record<string, Array<{ front: string; back: string; hint?: string }>> = {
+    'linear-equations': [
+      { front: 'Linear equation', back: 'An equation where the highest power of the variable is 1 (e.g. 2x + 3 = 7).', hint: 'Think "line" when you see linear.' },
+      { front: 'Inverse operations', back: 'Operations that undo each other: addition ↔ subtraction, multiplication ↔ division. Use them to isolate the variable.', hint: 'Opposites.' },
+      { front: 'Solution of an equation', back: 'The value(s) of the variable that make the equation true. Substitute back to check.', hint: 'The answer that works.' },
+      { front: 'Linear inequality', back: 'A comparison using <, >, ≤, or ≥. Solutions often form a range (e.g. x > 3).', hint: 'Like an equation but with inequality symbols.' },
+      { front: 'Slope-intercept form', back: 'y = mx + b, where m is slope and b is the y-intercept. Used to graph lines quickly.', hint: 'm and b tell you the line.' },
+    ],
+    'systems-of-equations': [
+      { front: 'System of equations', back: 'Two or more equations with the same variables. The solution is the point(s) that satisfy all equations.', hint: 'Usually one solution (x, y).' },
+      { front: 'Substitution method', back: 'Solve one equation for one variable, then substitute that expression into the other equation.', hint: 'Replace one variable with an expression.' },
+      { front: 'Elimination method', back: 'Add or subtract equations to eliminate one variable so you can solve for the other.', hint: 'Make a variable cancel out.' },
+      { front: 'Solution of a system', back: 'The ordered pair (x, y) that makes both equations true. Graphically, the intersection of the two lines.', hint: 'Where the lines cross.' },
+    ],
+    'polynomials': [
+      { front: 'Polynomial', back: 'An expression with variables raised to whole-number powers and coefficients (e.g. 3x² + 2x - 1).', hint: 'Sums of terms like axⁿ.' },
+      { front: 'Like terms', back: 'Terms with the same variable(s) raised to the same power. Only like terms can be combined (e.g. 2x² and 5x²).', hint: 'Same variable, same exponent.' },
+      { front: 'FOIL', back: 'First, Outer, Inner, Last—a way to multiply two binomials: (a+b)(c+d) = ac + ad + bc + bd.', hint: 'Order of products when multiplying binomials.' },
+      { front: 'Degree of a polynomial', back: 'The highest power of the variable in the polynomial. 3x² + x has degree 2.', hint: 'Largest exponent.' },
+    ],
+    'quadratics': [
+      { front: 'Quadratic equation', back: 'An equation of the form ax² + bx + c = 0 (a ≠ 0). Has at most 2 real solutions.', hint: 'Squared term.' },
+      { front: 'Parabola', back: 'The U-shaped graph of a quadratic function. Opens up if a > 0, down if a < 0.', hint: 'Vertex is the turning point.' },
+      { front: 'Vertex', back: 'The highest or lowest point on a parabola. For y = ax² + bx + c, x = -b/(2a).', hint: 'Where the curve turns.' },
+      { front: 'Quadratic formula', back: 'x = (-b ± √(b² - 4ac)) / (2a). Solves any quadratic equation.', hint: 'The "±" gives two solutions.' },
+      { front: 'Discriminant', back: 'b² - 4ac. If positive: 2 real roots; zero: 1 real root; negative: no real roots.', hint: 'Under the square root in the formula.' },
+    ],
+    'functions': [
+      { front: 'Function', back: 'A relation that assigns exactly one output to each input. Passes the vertical line test.', hint: 'One x → one y.' },
+      { front: 'Domain', back: 'The set of all allowed inputs (x-values) for a function.', hint: 'What x can be.' },
+      { front: 'Range', back: 'The set of all possible outputs (y-values) of a function.', hint: 'What y can be.' },
+      { front: 'Function notation', back: 'f(x) means "f of x"—the output when the input is x. Example: f(2) = 2(2) + 1 = 5.', hint: 'Replace x with the given number.' },
+    ],
+    'exponents-radicals': [
+      { front: 'Product of powers', back: 'aᵐ · aⁿ = aᵐ⁺ⁿ. When multiplying same base, add the exponents.', hint: 'Same base, add exponents.' },
+      { front: 'Power of a power', back: '(aᵐ)ⁿ = aᵐⁿ. When raising a power to a power, multiply the exponents.', hint: 'Multiply exponents.' },
+      { front: 'Zero exponent', back: 'a⁰ = 1 for any nonzero a.', hint: 'Anything to the 0 power is 1.' },
+      { front: 'Square root', back: '√a is the nonnegative number whose square is a. √9 = 3.', hint: 'Undoes squaring.' },
+    ],
+    'rational-expressions': [
+      { front: 'Rational expression', back: 'A fraction whose numerator and denominator are polynomials. Denominator cannot be zero.', hint: 'Algebraic fraction.' },
+      { front: 'Simplified form', back: 'Numerator and denominator have no common factors (other than ±1).', hint: 'Cancel common factors.' },
+      { front: 'Common denominator', back: 'When adding/subtracting rationals, find a shared denominator (often the product) and convert.', hint: 'Same bottom number.' },
+    ],
+    'graphing-functions': [
+      { front: 'Slope', back: 'Rise over run: (y₂ - y₁)/(x₂ - x₁). Measures steepness of a line.', hint: 'm in y = mx + b.' },
+      { front: 'Y-intercept', back: 'Where the graph crosses the y-axis. In y = mx + b, it is (0, b).', hint: 'When x = 0.' },
+      { front: 'Axis of symmetry', back: 'For a parabola, the vertical line through the vertex. Equation is x = (vertex x).', hint: 'Folds in half along this line.' },
+    ],
+    'absolute-value': [
+      { front: 'Absolute value', back: '|x| is the distance of x from 0. Always nonnegative. |−5| = 5.', hint: 'Distance from zero.' },
+      { front: 'Absolute value equation', back: '|expression| = k has two cases: expression = k or expression = −k. Solve both.', hint: 'Two equations.' },
+      { front: 'Absolute value inequality', back: '|x| < k → −k < x < k; |x| > k → x < −k or x > k.', hint: 'And vs or.' },
+    ],
+    'exponential-functions': [
+      { front: 'Exponential function', back: 'y = a·bˣ (b > 0, b ≠ 1). Grows or decays by a constant factor over equal steps.', hint: 'Variable in the exponent.' },
+      { front: 'Exponential growth', back: 'When b > 1, the function increases. Doubling or percent increase are examples.', hint: 'Getting bigger.' },
+      { front: 'Exponential decay', back: 'When 0 < b < 1, the function decreases. Half-life or percent decrease.', hint: 'Getting smaller.' },
+    ],
+    'sequences': [
+      { front: 'Arithmetic sequence', back: 'Sequence with a common difference d: aₙ = a₁ + (n−1)d.', hint: 'Add the same number each time.' },
+      { front: 'Geometric sequence', back: 'Sequence with a common ratio r: aₙ = a₁·rⁿ⁻¹.', hint: 'Multiply by the same number each time.' },
+      { front: 'Common difference', back: 'In an arithmetic sequence, d = aₙ₊₁ − aₙ (constant).', hint: 'What you add each time.' },
+    ],
+    'data-analysis': [
+      { front: 'Mean', back: 'Average: sum of values divided by the number of values. Sensitive to outliers.', hint: 'Add them up, divide by count.' },
+      { front: 'Median', back: 'Middle value when data are ordered. Better than mean for skewed data.', hint: 'Middle number.' },
+      { front: 'Mode', back: 'The value(s) that appear most often. There can be no mode or more than one.', hint: 'Most frequent.' },
+    ],
+    'probability': [
+      { front: 'Probability', back: 'Number of favorable outcomes divided by total outcomes (when equally likely). Between 0 and 1.', hint: 'Chance of an event.' },
+      { front: 'Independent events', back: 'Events where one does not affect the other. P(A and B) = P(A)·P(B).', hint: 'No influence.' },
+      { front: 'Complement', back: 'P(not A) = 1 − P(A). The probability that A does not happen.', hint: 'Opposite event.' },
+    ],
+    'real-world-applications': [
+      { front: 'Linear model', back: 'Using y = mx + b to represent a real situation (e.g. cost vs. quantity).', hint: 'Constant rate of change.' },
+      { front: 'Rate of change', back: 'Slope in context: how much y changes per unit change in x (e.g. dollars per hour).', hint: 'Same as slope.' },
+    ],
+  };
+
+  // Clear existing resources so this seed always applies the latest worksheets, study guides, videos, and flashcards
+  await db.delete(schema.flashcards);
+  await db.delete(schema.flashcardSets);
+  await db.delete(schema.videoResources);
+  await db.delete(schema.studyGuides);
+  await db.delete(schema.worksheets);
+  console.log('🔄 Cleared existing worksheets, study guides, video resources, and flashcards');
+
+  const flashcardSetsData = insertedUnits.map((unit: typeof schema.units.$inferSelect) => ({
+    unitId: unit.id,
+    title: `${unit.title} - Key Terms`,
+    description: `Key terms and concepts for ${unit.title.toLowerCase()}`,
+  }));
+
+  const insertedSets = await db.insert(schema.flashcardSets).values(flashcardSetsData).returning();
+  console.log(`✅ Created ${insertedSets.length} flashcard sets`);
+
+  const flashcardsData: Array<{ setId: string; front: string; back: string; hint?: string; order: number }> = [];
+  for (const set of insertedSets) {
+    const unit = insertedUnits.find((u: typeof schema.units.$inferSelect) => u.id === set.unitId);
+    const terms = unit ? flashcardTermsBySlug[(unit as typeof schema.units.$inferSelect).slug] : [];
+    terms.forEach((t, i) => {
+      flashcardsData.push({
+        setId: set.id,
+        front: t.front,
+        back: t.back,
+        hint: t.hint,
+        order: i + 1,
+      });
     });
   }
-
-  const existingFlashcardSets = await db.select().from(schema.flashcardSets);
-  let insertedSets;
-  if (existingFlashcardSets.length === 0) {
-    insertedSets = await db.insert(schema.flashcardSets).values(flashcardSetsData).returning();
-    console.log(`✅ Created ${insertedSets.length} flashcard sets`);
-  } else {
-    insertedSets = existingFlashcardSets;
-    console.log(`✅ Flashcard sets already exist`);
-  }
-
-  // Create flashcards
-  const existingFlashcards = await db.select().from(schema.flashcards);
-  if (existingFlashcards.length === 0) {
-    const flashcardsData = [];
-    for (const set of insertedSets) {
-      for (let i = 1; i <= 8; i++) {
-        flashcardsData.push({
-          setId: set.id,
-          front: `Term ${i}`,
-          back: `Definition ${i}: This is an important concept that helps understand the material.`,
-          hint: i % 3 === 0 ? `Hint: Think about the fundamentals` : undefined,
-          order: i,
-        });
-      }
-    }
+  if (flashcardsData.length > 0) {
     await db.insert(schema.flashcards).values(flashcardsData);
     console.log(`✅ Created ${flashcardsData.length} flashcards`);
-  } else {
-    console.log(`✅ Flashcards already exist`);
   }
 
   // Create badges
@@ -744,6 +915,7 @@ async function seed() {
           description: 'Solving and graphing linear inequalities.',
           difficulty: 'Medium',
           estimatedTime: 25,
+          fileUrl: 'https://www.kutasoftware.com/FreeWorksheets/Alg1Worksheets/Multi-Step%20Inequalities.pdf',
         }
       );
     }
@@ -756,6 +928,7 @@ async function seed() {
           description: 'Practice solving systems of equations by graphing.',
           difficulty: 'Easy',
           estimatedTime: 25,
+          fileUrl: 'https://www.kutasoftware.com/FreeWorksheets/Alg1Worksheets/Systems%20of%20Equations%20Graphing.pdf',
         },
         {
           unitId: systemsUnit.id,
@@ -763,6 +936,7 @@ async function seed() {
           description: 'Master the substitution method for solving systems.',
           difficulty: 'Medium',
           estimatedTime: 30,
+          fileUrl: 'https://www.kutasoftware.com/FreeWorksheets/Alg1Worksheets/Systems%20of%20Equations%20Substitution.pdf',
         },
         {
           unitId: systemsUnit.id,
@@ -794,197 +968,344 @@ async function seed() {
     }
 
     if (worksheetsData.length > 0) {
-      const existingWorksheets = await db.select().from(schema.worksheets);
-      if (existingWorksheets.length === 0) {
-        await db.insert(schema.worksheets).values(worksheetsData);
-        console.log(`✅ Created ${worksheetsData.length} worksheets`);
-      } else {
-        console.log('✅ Worksheets already exist');
+      await db.insert(schema.worksheets).values(worksheetsData);
+      console.log(`✅ Created ${worksheetsData.length} worksheets`);
+    }
+  }
+
+  // Create study guides (one per unit, 14 total)
+  const studyGuideBySlug: Record<string, { title: string; description: string; content: string }> = {
+    'linear-equations': {
+      title: 'Linear Equations & Inequalities Study Guide',
+      description: 'Complete guide covering solving and graphing linear equations and inequalities.',
+      content: `
+        <h2>Linear Equations & Inequalities</h2>
+        <p>This guide covers the core skills you need for one-variable linear equations and inequalities.</p>
+        <h3>Key Concepts</h3>
+        <ul>
+          <li><strong>Linear equation:</strong> An equation where the highest power of the variable is 1 (e.g. 2x + 3 = 7).</li>
+          <li><strong>Solution:</strong> The value(s) that make the equation true. Use inverse operations to isolate the variable.</li>
+          <li><strong>Linear inequality:</strong> Uses &lt;, &gt;, ≤, or ≥ instead of =. Graph solutions on a number line; open vs. closed dots matter.</li>
+        </ul>
+        <h3>Important Forms</h3>
+        <ul>
+          <li>Standard form: ax + b = 0</li>
+          <li>Slope-intercept form: y = mx + b (for two-variable lines)</li>
+        </ul>
+        <h3>Problem-Solving Steps</h3>
+        <ol>
+          <li>Simplify both sides (combine like terms, distribute).</li>
+          <li>Use inverse operations to isolate the variable (undo addition, then multiplication).</li>
+          <li>Check your solution by substituting back into the original equation.</li>
+        </ol>
+      `,
+    },
+    'systems-of-equations': {
+      title: 'Systems of Equations Study Guide',
+      description: 'Comprehensive guide to solving systems of linear equations.',
+      content: `
+        <h2>Systems of Equations</h2>
+        <p>A system of equations is two or more equations with the same variables. The solution is the point(s) that satisfy all equations.</p>
+        <h3>Three Solution Methods</h3>
+        <ol>
+          <li><strong>Graphing:</strong> Graph both lines and find the intersection. Best when you need a visual or approximate answer.</li>
+          <li><strong>Substitution:</strong> Solve one equation for one variable, then substitute into the other. Best when one variable is already isolated (e.g. y = 2x + 1).</li>
+          <li><strong>Elimination:</strong> Add or subtract equations to cancel one variable. Best when coefficients line up (e.g. same x-coefficient).</li>
+        </ol>
+        <h3>When to Use Each</h3>
+        <ul>
+          <li>Graphing: Visual check or estimating.</li>
+          <li>Substitution: One equation already solved for a variable.</li>
+          <li>Elimination: Opposite or same coefficients for one variable.</li>
+        </ul>
+      `,
+    },
+    'polynomials': {
+      title: 'Polynomial Operations Study Guide',
+      description: 'Master adding, subtracting, and multiplying polynomials.',
+      content: `
+        <h2>Polynomial Operations</h2>
+        <p>Polynomials are expressions with variables raised to whole-number powers. Like terms have the same variable and exponent.</p>
+        <h3>Adding Polynomials</h3>
+        <p>Combine like terms only. Example: (3x² + 2x - 1) + (x² - 4x + 5) = 4x² - 2x + 4.</p>
+        <h3>Subtracting Polynomials</h3>
+        <p>Distribute the negative to the second polynomial, then combine like terms. Example: (3x² + 2x - 1) - (x² - 4x + 5) = 2x² + 6x - 6.</p>
+        <h3>Multiplying Polynomials</h3>
+        <p>Use the distributive property. For binomials, FOIL (First, Outer, Inner, Last) is helpful: (x + 2)(x + 3) = x² + 5x + 6.</p>
+      `,
+    },
+    'quadratics': {
+      title: 'Quadratic Equations & Functions Study Guide',
+      description: 'Solve quadratics by factoring, completing the square, and the quadratic formula.',
+      content: `
+        <h2>Quadratic Equations & Functions</h2>
+        <p>Quadratic equations have the form ax² + bx + c = 0. Their graphs are parabolas.</p>
+        <h3>Key Concepts</h3>
+        <ul>
+          <li><strong>Standard form:</strong> ax² + bx + c = 0 (a ≠ 0).</li>
+          <li><strong>Vertex form:</strong> y = a(x - h)² + k gives vertex (h, k).</li>
+          <li><strong>Solutions:</strong> Up to 2 real roots (x-intercepts).</li>
+        </ul>
+        <h3>Solution Methods</h3>
+        <ol>
+          <li><strong>Factoring:</strong> Set equation equal to 0, factor, use zero-product property.</li>
+          <li><strong>Quadratic formula:</strong> x = (-b ± √(b² - 4ac)) / (2a). Works for any quadratic.</li>
+          <li><strong>Completing the square:</strong> Rewrite in vertex form to solve or find the vertex.</li>
+        </ol>
+      `,
+    },
+    'functions': {
+      title: 'Functions & Function Notation Study Guide',
+      description: 'Understand functions, domain, range, and f(x) notation.',
+      content: `
+        <h2>Functions & Function Notation</h2>
+        <p>A function assigns exactly one output to each input. We write f(x) and read it as "f of x."</p>
+        <h3>Key Ideas</h3>
+        <ul>
+          <li><strong>Domain:</strong> The set of allowed inputs (x-values).</li>
+          <li><strong>Range:</strong> The set of possible outputs (y-values).</li>
+          <li><strong>Vertical line test:</strong> A graph is a function if no vertical line hits it more than once.</li>
+        </ul>
+        <h3>Notation & Evaluation</h3>
+        <p>f(x) = 2x + 1 means "double x and add 1." So f(3) = 2(3) + 1 = 7. Replace x with the given value and simplify.</p>
+      `,
+    },
+    'exponents-radicals': {
+      title: 'Exponents & Radicals Study Guide',
+      description: 'Simplify expressions with exponents and radicals, including rational exponents.',
+      content: `
+        <h2>Exponents & Radicals</h2>
+        <p>Exponents show repeated multiplication; radicals (e.g. square roots) undo powers.</p>
+        <h3>Exponent Rules</h3>
+        <ul>
+          <li>aᵐ · aⁿ = aᵐ⁺ⁿ (same base, add exponents)</li>
+          <li>aᵐ ÷ aⁿ = aᵐ⁻ⁿ (same base, subtract exponents)</li>
+          <li>(aᵐ)ⁿ = aᵐⁿ (power of a power, multiply exponents)</li>
+          <li>a⁰ = 1 (a ≠ 0); a⁻ⁿ = 1/aⁿ</li>
+        </ul>
+        <h3>Radicals & Rational Exponents</h3>
+        <p>√a = a^(1/2); ⁿ√a = a^(1/n). Use these to convert between radical and exponent form and simplify.</p>
+      `,
+    },
+    'rational-expressions': {
+      title: 'Rational Expressions Study Guide',
+      description: 'Simplify, add, subtract, multiply, and divide rational expressions.',
+      content: `
+        <h2>Rational Expressions</h2>
+        <p>Rational expressions are fractions whose numerator and denominator are polynomials. The denominator cannot be zero.</p>
+        <h3>Key Skills</h3>
+        <ul>
+          <li><strong>Simplify:</strong> Factor numerator and denominator; cancel common factors.</li>
+          <li><strong>Multiply/divide:</strong> Multiply across or flip and multiply; then simplify.</li>
+          <li><strong>Add/subtract:</strong> Find a common denominator (often the product of denominators), then combine numerators.</li>
+        </ul>
+        <h3>Domain</h3>
+        <p>Exclude any x that makes the denominator equal to zero.</p>
+      `,
+    },
+    'graphing-functions': {
+      title: 'Graphing Linear & Quadratic Functions Study Guide',
+      description: 'Graph lines and parabolas and identify key features.',
+      content: `
+        <h2>Graphing Linear & Quadratic Functions</h2>
+        <p>Linear functions graph as lines; quadratic functions graph as parabolas.</p>
+        <h3>Linear: y = mx + b</h3>
+        <ul>
+          <li>m = slope (rise over run); b = y-intercept.</li>
+          <li>Plot the y-intercept, then use slope to find another point.</li>
+        </ul>
+        <h3>Quadratic: y = ax² + bx + c</h3>
+        <ul>
+          <li>Vertex: x = -b/(2a); substitute to find y.</li>
+          <li>Axis of symmetry: vertical line through the vertex. Parabola opens up if a &gt; 0, down if a &lt; 0.</li>
+        </ul>
+      `,
+    },
+    'absolute-value': {
+      title: 'Absolute Value Equations & Inequalities Study Guide',
+      description: 'Solve and graph absolute value equations and inequalities.',
+      content: `
+        <h2>Absolute Value Equations & Inequalities</h2>
+        <p>|x| is the distance of x from 0. So |x| = 5 means x = 5 or x = -5.</p>
+        <h3>Equations</h3>
+        <p>|expression| = k (k ≥ 0) gives two cases: expression = k or expression = -k. Solve each.</p>
+        <h3>Inequalities</h3>
+        <ul>
+          <li>|x| &lt; k → -k &lt; x &lt; k (and compound inequality).</li>
+          <li>|x| &gt; k → x &lt; -k or x &gt; k (or compound).</li>
+        </ul>
+      `,
+    },
+    'exponential-functions': {
+      title: 'Exponential Functions Study Guide',
+      description: 'Exponential growth and decay, and their graphs and applications.',
+      content: `
+        <h2>Exponential Functions</h2>
+        <p>Exponential functions have the form y = a·bˣ (b &gt; 0, b ≠ 1). They model growth (b &gt; 1) or decay (0 &lt; b &lt; 1).</p>
+        <h3>Key Ideas</h3>
+        <ul>
+          <li>Initial value: when x = 0, y = a.</li>
+          <li>Base b: growth/decay factor per unit increase in x.</li>
+          <li>Graph: no x-intercept; horizontal asymptote (often y = 0).</li>
+        </ul>
+        <h3>Applications</h3>
+        <p>Used for population growth, radioactive decay, compound interest, and similar real-world situations.</p>
+      `,
+    },
+    'sequences': {
+      title: 'Sequences & Series Study Guide',
+      description: 'Arithmetic and geometric sequences and their sums.',
+      content: `
+        <h2>Sequences & Series</h2>
+        <p>A sequence is an ordered list of numbers; a series is the sum of terms of a sequence.</p>
+        <h3>Arithmetic</h3>
+        <p>Common difference d: aₙ = a₁ + (n - 1)d. Sum: Sₙ = n/2 · (first + last).</p>
+        <h3>Geometric</h3>
+        <p>Common ratio r: aₙ = a₁ · rⁿ⁻¹. Sum (finite): Sₙ = a₁(1 - rⁿ)/(1 - r) when r ≠ 1.</p>
+      `,
+    },
+    'data-analysis': {
+      title: 'Data Analysis & Statistics Study Guide',
+      description: 'Measures of center, spread, and visual representations of data.',
+      content: `
+        <h2>Data Analysis & Statistics</h2>
+        <p>Use measures of center and spread to summarize and compare data sets.</p>
+        <h3>Measures of Center</h3>
+        <ul>
+          <li><strong>Mean:</strong> Sum of values divided by count (average).</li>
+          <li><strong>Median:</strong> Middle value when ordered; use for skewed data.</li>
+          <li><strong>Mode:</strong> Most frequent value(s).</li>
+        </ul>
+        <h3>Spread &amp; Displays</h3>
+        <p>Range, IQR, box plots, histograms, and scatter plots help visualize and compare distributions and relationships.</p>
+      `,
+    },
+    'probability': {
+      title: 'Probability Study Guide',
+      description: 'Calculate probabilities of simple and compound events.',
+      content: `
+        <h2>Probability</h2>
+        <p>Probability of an event = (number of favorable outcomes) / (number of possible outcomes), when outcomes are equally likely.</p>
+        <h3>Key Rules</h3>
+        <ul>
+          <li>P(not A) = 1 - P(A).</li>
+          <li>P(A and B) = P(A) · P(B) when A and B are independent.</li>
+          <li>P(A or B) = P(A) + P(B) - P(A and B) for overlapping events.</li>
+        </ul>
+      `,
+    },
+    'real-world-applications': {
+      title: 'Real-World Applications Study Guide',
+      description: 'Apply algebra to solve problems in context.',
+      content: `
+        <h2>Real-World Applications</h2>
+        <p>Algebra is used to model and solve problems from finance, science, and daily life.</p>
+        <h3>Strategies</h3>
+        <ol>
+          <li>Define variables (what does x represent?).</li>
+          <li>Write an equation or inequality from the situation.</li>
+          <li>Solve and interpret the result in context.</li>
+        </ol>
+        <p>Common topics: linear models, systems (mixing, distance-rate-time), quadratics (area, projectiles), and exponentials (growth/decay).</p>
+      `,
+    },
+  };
+
+  const studyGuidesData = allUnits
+    .filter((u: typeof schema.units.$inferSelect) => studyGuideBySlug[u.slug])
+    .map((u: typeof schema.units.$inferSelect) => {
+      const g = studyGuideBySlug[u.slug];
+      return { unitId: u.id, title: g.title, description: g.description, content: g.content };
+    });
+
+  if (studyGuidesData.length > 0) {
+    await db.insert(schema.studyGuides).values(studyGuidesData);
+    console.log(`✅ Created ${studyGuidesData.length} study guides`);
+  }
+
+  // Create video resources (Khan Academy Algebra 1) for all 14 units
+  const videosByUnitSlug: Record<string, Array<{ title: string; description: string; videoId: string; duration: number }>> = {
+    'linear-equations': [
+      { title: 'Introduction to Linear Equations', description: 'Khan Academy: basics of linear equations.', videoId: '7q4r7IJWnKE', duration: 12 },
+      { title: 'Solving Multi-Step Linear Equations', description: 'Khan Academy: multi-step equation solving.', videoId: 'x-PlBk5nzA0', duration: 15 },
+      { title: 'Linear Inequalities', description: 'Khan Academy: solving and graphing inequalities.', videoId: 'JY8w5Xg5Y3Q', duration: 18 },
+    ],
+    'systems-of-equations': [
+      { title: 'Solving Systems by Graphing', description: 'Khan Academy: graphical solution of systems.', videoId: 'uk7gS3cZVp4', duration: 10 },
+      { title: 'Substitution Method', description: 'Khan Academy: substitution method for systems.', videoId: 'H9k0z6uG_9k', duration: 14 },
+      { title: 'Elimination Method', description: 'Khan Academy: elimination method.', videoId: 'HKgS8O9q9zY', duration: 16 },
+    ],
+    'polynomials': [
+      { title: 'Polynomial Basics', description: 'Khan Academy: introduction to polynomials.', videoId: 'Vm7H0VTlIco', duration: 11 },
+      { title: 'Multiplying Polynomials', description: 'Khan Academy: multiplying polynomials.', videoId: 'LK1t6-mOHTQ', duration: 13 },
+    ],
+    'quadratics': [
+      { title: 'Introduction to Quadratic Functions', description: 'Khan Academy: quadratics and parabolas.', videoId: 'R948Tsyq4vA', duration: 14 },
+      { title: 'Solving Quadratics by Factoring', description: 'Khan Academy: factoring to solve quadratics.', videoId: 'MRO2iyLeDPk', duration: 14 },
+      { title: 'Quadratic Formula', description: 'Khan Academy: the quadratic formula.', videoId: 'zY84UGHEh78', duration: 16 },
+    ],
+    'functions': [
+      { title: 'What is a Function?', description: 'Khan Academy: functions and relations.', videoId: '52tpYl2tTqk', duration: 11 },
+      { title: 'Domain and Range', description: 'Khan Academy: domain and range of functions.', videoId: 'dqGT9b0aXV0', duration: 13 },
+    ],
+    'exponents-radicals': [
+      { title: 'Properties of Exponents', description: 'Khan Academy: exponent rules.', videoId: 'kITJ6qH7jS0', duration: 14 },
+      { title: 'Simplifying Radicals', description: 'Khan Academy: simplifying radical expressions.', videoId: 'jvTwqN0-4KU', duration: 13 },
+    ],
+    'rational-expressions': [
+      { title: 'Simplifying Rational Expressions', description: 'Khan Academy: simplify rational expressions.', videoId: 'vn9xqWNGOPM', duration: 13 },
+      { title: 'Multiplying and Dividing Rationals', description: 'Khan Academy: operations with rationals.', videoId: 'cYXb_6pprdE', duration: 14 },
+    ],
+    'graphing-functions': [
+      { title: 'Slope-Intercept Form', description: 'Khan Academy: graphing lines y = mx + b.', videoId: '9AnhkL5yYVQ', duration: 15 },
+      { title: 'Graphing Parabolas', description: 'Khan Academy: graphing quadratic functions.', videoId: 'taooHfbLfvA', duration: 15 },
+    ],
+    'absolute-value': [
+      { title: 'Absolute Value Equations', description: 'Khan Academy: solving absolute value equations.', videoId: 'fH5sLqnXYYg', duration: 10 },
+      { title: 'Absolute Value Inequalities', description: 'Khan Academy: absolute value inequalities.', videoId: 'fLXkW3hCHZs', duration: 17 },
+    ],
+    'exponential-functions': [
+      { title: 'Exponential Growth', description: 'Khan Academy: exponential growth functions.', videoId: '6WMZ7J0wwMI', duration: 15 },
+      { title: 'Exponential Decay', description: 'Khan Academy: exponential decay.', videoId: 'xwJwLYtvO94', duration: 14 },
+    ],
+    'sequences': [
+      { title: 'Arithmetic Sequences', description: 'Khan Academy: arithmetic sequences.', videoId: 'TW-3vTcGDfk', duration: 13 },
+      { title: 'Geometric Sequences', description: 'Khan Academy: geometric sequences.', videoId: 'P9iRhvJqM50', duration: 14 },
+    ],
+    'data-analysis': [
+      { title: 'Mean, Median, Mode', description: 'Khan Academy: measures of center.', videoId: 'B1HEzNTGeZ4', duration: 12 },
+      { title: 'Box and Whisker Plots', description: 'Khan Academy: box plots.', videoId: '4iN1wSKqTHw', duration: 13 },
+    ],
+    'probability': [
+      { title: 'Introduction to Probability', description: 'Khan Academy: basic probability.', videoId: 'uzkc-qNVoOk', duration: 14 },
+      { title: 'Compound Probability', description: 'Khan Academy: compound events.', videoId: 'JCOaGqxd9as', duration: 16 },
+    ],
+    'real-world-applications': [
+      { title: 'Linear Models Word Problems', description: 'Khan Academy: modeling with linear equations.', videoId: 'IHWJHbM_5zc', duration: 16 },
+      { title: 'Quadratic Word Problems', description: 'Khan Academy: applying quadratics.', videoId: '2EeAKoxQyEQ', duration: 12 },
+    ],
+  };
+
+  const videoResourcesData: Array<{ unitId: string; title: string; description: string; videoUrl: string; videoId: string; duration: number }> = [];
+  for (const unit of allUnits) {
+    const list = videosByUnitSlug[(unit as typeof schema.units.$inferSelect).slug];
+    if (list) {
+      for (const v of list) {
+        videoResourcesData.push({
+          unitId: (unit as typeof schema.units.$inferSelect).id,
+          title: v.title,
+          description: v.description,
+          videoUrl: `https://www.youtube.com/watch?v=${v.videoId}`,
+          videoId: v.videoId,
+          duration: v.duration,
+        });
       }
     }
   }
 
-  // Create study guides
-  if (linearEquationsUnit || systemsUnit || polynomialsUnit) {
-    const studyGuidesData = [];
-    
-    if (linearEquationsUnit) {
-      studyGuidesData.push(
-        {
-          unitId: linearEquationsUnit.id,
-          title: 'Linear Equations & Inequalities Study Guide',
-          description: 'Complete guide covering all concepts in this unit.',
-          content: `
-            <h2>Linear Equations & Inequalities</h2>
-            <h3>Key Concepts</h3>
-            <ul>
-              <li><strong>Linear Equations:</strong> An equation where the highest power of the variable is 1</li>
-              <li><strong>Solving:</strong> Use inverse operations to isolate the variable</li>
-              <li><strong>Linear Inequalities:</strong> Similar to equations but use &lt;, &gt;, ≤, or ≥</li>
-            </ul>
-            <h3>Important Formulas</h3>
-            <ul>
-              <li>Standard form: ax + b = 0</li>
-              <li>Slope-intercept form: y = mx + b</li>
-            </ul>
-            <h3>Problem-Solving Strategies</h3>
-            <ol>
-              <li>Simplify both sides of the equation</li>
-              <li>Use inverse operations</li>
-              <li>Check your solution</li>
-            </ol>
-          `,
-        }
-      );
-    }
-
-    if (systemsUnit) {
-      studyGuidesData.push(
-        {
-          unitId: systemsUnit.id,
-          title: 'Systems of Equations Study Guide',
-          description: 'Comprehensive guide to solving systems of equations.',
-          content: `
-            <h2>Systems of Equations</h2>
-            <h3>Three Methods</h3>
-            <ol>
-              <li><strong>Graphing:</strong> Plot both equations and find the intersection</li>
-              <li><strong>Substitution:</strong> Solve one equation for a variable, substitute into the other</li>
-              <li><strong>Elimination:</strong> Add or subtract equations to eliminate a variable</li>
-            </ol>
-            <h3>When to Use Each Method</h3>
-            <ul>
-              <li>Graphing: When you need a visual representation</li>
-              <li>Substitution: When one variable is already isolated</li>
-              <li>Elimination: When coefficients are easily matched</li>
-            </ul>
-          `,
-        }
-      );
-    }
-
-    if (polynomialsUnit) {
-      studyGuidesData.push(
-        {
-          unitId: polynomialsUnit.id,
-          title: 'Polynomial Operations Study Guide',
-          description: 'Master adding, subtracting, and multiplying polynomials.',
-          content: `
-            <h2>Polynomial Operations</h2>
-            <h3>Adding Polynomials</h3>
-            <p>Combine like terms: (3x² + 2x - 1) + (x² - 4x + 5) = 4x² - 2x + 4</p>
-            <h3>Subtracting Polynomials</h3>
-            <p>Distribute the negative: (3x² + 2x - 1) - (x² - 4x + 5) = 2x² + 6x - 6</p>
-            <h3>Multiplying Polynomials</h3>
-            <p>Use FOIL for binomials: (x + 2)(x + 3) = x² + 5x + 6</p>
-          `,
-        }
-      );
-    }
-
-    if (studyGuidesData.length > 0) {
-      const existingStudyGuides = await db.select().from(schema.studyGuides);
-      if (existingStudyGuides.length === 0) {
-        await db.insert(schema.studyGuides).values(studyGuidesData);
-        console.log(`✅ Created ${studyGuidesData.length} study guides`);
-      } else {
-        console.log('✅ Study guides already exist');
-      }
-    }
-  }
-
-  // Create video resources
-  if (linearEquationsUnit || systemsUnit || polynomialsUnit) {
-    const videoResourcesData = [];
-    
-    if (linearEquationsUnit) {
-      videoResourcesData.push(
-        {
-          unitId: linearEquationsUnit.id,
-          title: 'Introduction to Linear Equations',
-          description: 'Learn the basics of linear equations with clear examples.',
-          videoUrl: 'https://www.youtube.com/watch?v=7q4r7IJWnKE',
-          videoId: '7q4r7IJWnKE',
-          duration: 12,
-        },
-        {
-          unitId: linearEquationsUnit.id,
-          title: 'Solving Multi-Step Linear Equations',
-          description: 'Master solving complex linear equations step by step.',
-          videoUrl: 'https://www.youtube.com/watch?v=x-PlBk5nzA0',
-          videoId: 'x-PlBk5nzA0',
-          duration: 15,
-        },
-        {
-          unitId: linearEquationsUnit.id,
-          title: 'Linear Inequalities Explained',
-          description: 'Understand how to solve and graph linear inequalities.',
-          videoUrl: 'https://www.youtube.com/watch?v=JY8w5Xg5Y3Q',
-          videoId: 'JY8w5Xg5Y3Q',
-          duration: 18,
-        }
-      );
-    }
-
-    if (systemsUnit) {
-      videoResourcesData.push(
-        {
-          unitId: systemsUnit.id,
-          title: 'Solving Systems by Graphing',
-          description: 'Visual method for solving systems of equations.',
-          videoUrl: 'https://www.youtube.com/watch?v=uk7gS3cZVp4',
-          videoId: 'uk7gS3cZVp4',
-          duration: 10,
-        },
-        {
-          unitId: systemsUnit.id,
-          title: 'Substitution Method Tutorial',
-          description: 'Step-by-step guide to the substitution method.',
-          videoUrl: 'https://www.youtube.com/watch?v=H9k0z6uG_9k',
-          videoId: 'H9k0z6uG_9k',
-          duration: 14,
-        },
-        {
-          unitId: systemsUnit.id,
-          title: 'Elimination Method Deep Dive',
-          description: 'Master the elimination method with practice problems.',
-          videoUrl: 'https://www.youtube.com/watch?v=HKgS8O9q9zY',
-          videoId: 'HKgS8O9q9zY',
-          duration: 16,
-        }
-      );
-    }
-
-    if (polynomialsUnit) {
-      videoResourcesData.push(
-        {
-          unitId: polynomialsUnit.id,
-          title: 'Polynomial Basics',
-          description: 'Introduction to polynomials and their properties.',
-          videoUrl: 'https://www.youtube.com/watch?v=Vm7H0VTlIco',
-          videoId: 'Vm7H0VTlIco',
-          duration: 11,
-        },
-        {
-          unitId: polynomialsUnit.id,
-          title: 'Multiplying Polynomials',
-          description: 'Learn how to multiply polynomials using various methods.',
-          videoUrl: 'https://www.youtube.com/watch?v=LK1t6-mOHTQ',
-          videoId: 'LK1t6-mOHTQ',
-          duration: 13,
-        }
-      );
-    }
-
-    if (videoResourcesData.length > 0) {
-      const existingVideos = await db.select().from(schema.videoResources);
-      if (existingVideos.length === 0) {
-        await db.insert(schema.videoResources).values(videoResourcesData);
-        console.log(`✅ Created ${videoResourcesData.length} video resources`);
-      } else {
-        console.log('✅ Video resources already exist');
-      }
-    }
+  if (videoResourcesData.length > 0) {
+    await db.insert(schema.videoResources).values(videoResourcesData);
+    console.log(`✅ Created ${videoResourcesData.length} video resources`);
   }
 
   // Create sample reviews

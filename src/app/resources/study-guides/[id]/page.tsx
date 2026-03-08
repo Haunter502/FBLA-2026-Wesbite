@@ -50,58 +50,62 @@ export default async function StudyGuidePage({ params }: { params: Promise<{ id:
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <ScrollReveal>
         <div className="mb-8">
-          <Link 
+          <Link
             href="/resources/study-guides"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Study Guides
           </Link>
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">{guide.title}</h1>
-              {guide.description && (
-                <p className="text-lg text-muted-foreground">{guide.description}</p>
+          <div className="rounded-2xl border bg-gradient-to-r from-primary/10 via-background to-sky-500/5 px-6 py-5 shadow-sm">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2">
+                    {guide.title}
+                  </h1>
+                  {guide.description && (
+                    <p className="text-sm md:text-base text-muted-foreground">
+                      {guide.description}
+                    </p>
+                  )}
+                </div>
+                {guide.fileUrl && (
+                  <a href={guide.fileUrl} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="whitespace-nowrap">
+                      <Download className="mr-2 h-4 w-4" />
+                      Download PDF
+                    </Button>
+                  </a>
+                )}
+              </div>
+              {guide.unit && (
+                <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm">
+                  <span className="text-muted-foreground">Unit:</span>
+                  <Link
+                    href={`/units/${guide.unit.slug}`}
+                    className="inline-flex items-center rounded-full bg-background/80 px-3 py-1 text-xs font-medium hover:bg-background transition-colors"
+                  >
+                    {guide.unit.title}
+                  </Link>
+                </div>
               )}
             </div>
-            {guide.fileUrl && (
-              <a
-                href={guide.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline">
-                  <Download className="mr-2 h-4 w-4" />
-                  Download PDF
-                </Button>
-              </a>
-            )}
           </div>
-          {guide.unit && (
-            <div className="text-sm mb-4">
-              <span className="text-muted-foreground">Unit: </span>
-              <Link 
-                href={`/units/${guide.unit.slug}`}
-                className="text-primary hover:underline"
-              >
-                {guide.unit.title}
-              </Link>
-            </div>
-          )}
         </div>
       </ScrollReveal>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
+      <Card className="border border-primary/10 bg-gradient-to-b from-background via-background to-background/80 shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+            <BookOpen className="h-5 w-5 text-primary" />
             Study Guide Content
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {guide.content ? (
-            <div 
-              className="prose prose-sm dark:prose-invert max-w-none"
+            <div
+              className="prose prose-sm md:prose-base dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-border prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-2 prose-p:my-2 prose-ul:my-3 prose-ol:my-3 prose-li:my-1"
               dangerouslySetInnerHTML={{ __html: guide.content }}
             />
           ) : (

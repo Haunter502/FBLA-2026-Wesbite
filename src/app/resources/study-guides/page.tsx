@@ -45,64 +45,68 @@ export default async function StudyGuidesPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <ScrollReveal>
-        <div className="mb-8">
+        <div className="mb-10">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <Link href="/resources" className="hover:text-foreground transition-colors">
               Resources
             </Link>
             <span>/</span>
-            <span>Study Guides</span>
+            <span className="text-foreground">Study Guides</span>
           </div>
-          <h1 className="text-4xl font-bold mb-2">Study Guides</h1>
-          <p className="text-lg text-muted-foreground">
-            Comprehensive study guides covering key concepts, formulas, and problem-solving strategies
-          </p>
+          <div className="rounded-2xl border bg-gradient-to-r from-primary/10 via-background to-sky-500/5 px-6 py-5 shadow-sm">
+            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2">
+              Deep‑dive guides for every unit
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
+              Read friendly, structured explanations with key ideas, common mistakes, and worked
+              examples—perfect for test prep or catching up after class.
+            </p>
+          </div>
         </div>
       </ScrollReveal>
 
       {studyGuidesList.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No study guides available</h3>
-              <p className="text-muted-foreground">
-                Study guides will be added soon. Check back later!
+        <Card className="border-dashed">
+          <CardContent className="pt-10 pb-12">
+            <div className="flex flex-col items-center justify-center text-center space-y-3">
+              <AlertCircle className="h-10 w-10 text-muted-foreground" />
+              <h3 className="text-lg font-semibold">No study guides available yet</h3>
+              <p className="text-sm text-muted-foreground max-w-md">
+                We&apos;re still writing full explanations and examples for each unit. New guides
+                will appear here as they&apos;re finished.
               </p>
             </div>
           </CardContent>
         </Card>
       ) : (
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {studyGuidesList.map((guide: typeof studyGuidesList[0]) => (
             <StaggerItem key={guide.id}>
               <AnimatedResourceCard>
-                <Card className="h-full">
-                  <CardHeader>
-                    <BookOpen className="h-8 w-8 text-primary mb-2" />
-                    <CardTitle className="text-lg">{guide.title}</CardTitle>
-                    <CardDescription>
-                      {guide.description || 'Comprehensive review materials'}
+                <Card className="h-full border border-primary/10 bg-gradient-to-b from-primary/5 via-background to-background/80 hover:border-primary/40 hover:shadow-lg transition-all">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary p-2">
+                        <BookOpen className="h-5 w-5" />
+                      </div>
+                      {guide.unit && (
+                        <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium">
+                          {guide.unit.title}
+                        </span>
+                      )}
+                    </div>
+                    <CardTitle className="text-base md:text-lg line-clamp-2">{guide.title}</CardTitle>
+                    <CardDescription className="text-xs md:text-sm line-clamp-3">
+                      {guide.description || "Comprehensive review materials"}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {guide.unit && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Unit: </span>
-                          <Link 
-                            href={`/units/${guide.unit.slug}`}
-                            className="text-primary hover:underline"
-                          >
-                            {guide.unit.title}
-                          </Link>
-                        </div>
-                      )}
-                      <div className="flex gap-2">
-                        <Link href={`/resources/study-guides/${guide.id}`} className="flex-1">
-                          <Button className="w-full" variant="default">
+                  <CardContent className="pt-0 pb-4">
+                    <div className="space-y-3 text-xs md:text-sm">
+                      <div className="flex flex-wrap gap-2">
+                        <Link href={`/resources/study-guides/${guide.id}`} className="flex-1 min-w-[8rem]">
+                          <Button className="w-full justify-center text-sm">
                             <BookOpen className="mr-2 h-4 w-4" />
-                            View Guide
+                            Read online
                           </Button>
                         </Link>
                         {guide.fileUrl && (
@@ -110,9 +114,11 @@ export default async function StudyGuidesPage() {
                             href={guide.fileUrl}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="flex-1 min-w-[3rem]"
                           >
-                            <Button variant="outline">
-                              <Download className="h-4 w-4" />
+                            <Button variant="outline" className="w-full justify-center text-sm">
+                              <Download className="h-4 w-4 mr-1" />
+                              PDF
                             </Button>
                           </a>
                         )}

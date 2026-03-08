@@ -1,43 +1,43 @@
 import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { videoResources, units } from "@/lib/schema"
+import { lessons, units } from "@/lib/schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Video, Clock, AlertCircle, Play } from "lucide-react"
 import { eq, asc } from "@/lib/drizzle-helpers"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
-import { StaggerChildren, StaggerItem } from "@/components/animations/stagger-children"
-import { AnimatedResourceCard } from "@/components/resources/animated-resource-card"
 
-async function getVideoResources() {
+async function getVideoLessons() {
   const allVideos = await db
     .select({
-      id: videoResources.id,
-      title: videoResources.title,
-      description: videoResources.description,
-      videoUrl: videoResources.videoUrl,
-      videoId: videoResources.videoId,
-      duration: videoResources.duration,
-      thumbnailUrl: videoResources.thumbnailUrl,
-      unitId: videoResources.unitId,
+      id: lessons.id,
+      slug: lessons.slug,
+      title: lessons.title,
+      description: lessons.description,
+      youtubeId: lessons.youtubeId,
+      duration: lessons.duration,
+      unitId: lessons.unitId,
       unit: {
         id: units.id,
         title: units.title,
         slug: units.slug,
       },
     })
-    .from(videoResources)
-    .leftJoin(units, eq(videoResources.unitId, units.id))
-    .orderBy(asc(videoResources.createdAt))
+    .from(lessons)
+    .leftJoin(units, eq(lessons.unitId, units.id))
+    .where(eq(lessons.type, "VIDEO"))
+    .orderBy(asc(lessons.createdAt))
 
-  return allVideos
+  // Only keep lessons that have an associated YouTube video
+  return allVideos.filter((video) => !!video.youtubeId)
 }
 
 function getYouTubeThumbnail(videoId: string | null): string {
   if (videoId) {
-    return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+    // Use hqdefault for more reliable thumbnails across Khan Academy videos
+    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
   }
   return ''
 }
@@ -49,104 +49,105 @@ export default async function VideosPage() {
     redirect("/auth/sign-in")
   }
 
-  const videosList = await getVideoResources()
+  const videosList = await getVideoLessons()
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <ScrollReveal>
-        <div className="mb-8">
+        <div className="mb-10">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <Link href="/resources" className="hover:text-foreground transition-colors">
               Resources
             </Link>
             <span>/</span>
-            <span>Video Resources</span>
+            <span className="text-foreground">Video Resources</span>
           </div>
-          <h1 className="text-4xl font-bold mb-2">Video Resources</h1>
-          <p className="text-lg text-muted-foreground">
-            Explore additional video lessons and tutorials to deepen your understanding
-          </p>
+          <div className="rounded-2xl border bg-gradient-to-r from-primary/10 via-background to-violet-500/5 px-6 py-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2">
+                Watch concepts come to life
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
+                Curated Khan Academy and algebra videos, organized by unit so you always know which
+                clip connects to what you&apos;re learning in class.
+              </p>
+            </div>
+          </div>
         </div>
       </ScrollReveal>
 
       {videosList.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No video resources available</h3>
-              <p className="text-muted-foreground">
-                Video resources will be added soon. Check back later!
+        <Card className="border-dashed">
+          <CardContent className="pt-10 pb-12">
+            <div className="flex flex-col items-center justify-center text-center space-y-3">
+              <AlertCircle className="h-10 w-10 text-muted-foreground" />
+              <h3 className="text-lg font-semibold">No video resources available yet</h3>
+              <p className="text-sm text-muted-foreground max-w-md">
+                We&apos;ll be adding short, focused videos here to match each Algebra 1 topic.
+                Check back soon.
               </p>
             </div>
           </CardContent>
         </Card>
       ) : (
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
           {videosList.map((video: typeof videosList[0]) => {
-            const thumbnailUrl = video.thumbnailUrl || (video.videoId ? getYouTubeThumbnail(video.videoId) : '')
+            const thumbnailUrl = video.youtubeId ? getYouTubeThumbnail(video.youtubeId) : ""
             
             return (
-              <StaggerItem key={video.id}>
-                <AnimatedResourceCard>
-                  <Card className="h-full overflow-hidden">
+              <Card key={video.id} className="h-full flex flex-col overflow-hidden border border-primary/10 bg-gradient-to-b from-primary/5 via-background to-background/80 hover:border-primary/40 hover:shadow-lg transition-all">
                     {thumbnailUrl && (
-                      <div className="relative w-full h-48 bg-muted">
+                      <div className="relative w-full aspect-video bg-muted overflow-hidden shrink-0">
                         <img
                           src={thumbnailUrl}
                           alt={video.title}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">
-                          <Play className="h-12 w-12 text-white" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                        <div className="absolute inset-0 flex flex-col justify-between p-3">
+                          <div className="flex items-center justify-between text-[11px] text-white/80">
+                            {video.unit && (
+                              <span className="inline-flex items-center rounded-full bg-black/40 px-2 py-0.5 backdrop-blur">
+                                {video.unit.title}
+                              </span>
+                            )}
+                            {video.duration && (
+                              <span className="inline-flex items-center rounded-full bg-black/60 px-2 py-0.5">
+                                <Clock className="h-3 w-3 mr-1" />
+                                {video.duration} min
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex justify-center">
+                            <div className="inline-flex items-center justify-center rounded-full bg-white/90 text-primary shadow-md p-3">
+                              <Play className="h-5 w-5" />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
-                    <CardHeader>
-                      <Video className="h-6 w-6 text-primary mb-2" />
-                      <CardTitle className="text-lg">{video.title}</CardTitle>
-                      <CardDescription>
-                        {video.description || 'Additional video content'}
+                    <CardHeader className="pb-3 flex-1 min-h-0">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                        <Video className="h-4 w-4 text-primary" />
+                        <span>Video lesson</span>
+                      </div>
+                      <CardTitle className="text-base md:text-lg line-clamp-2">{video.title}</CardTitle>
+                      <CardDescription className="text-xs md:text-sm line-clamp-3">
+                        {video.description || "Additional video content"}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {video.unit && (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Unit: </span>
-                            <Link 
-                              href={`/units/${video.unit.slug}`}
-                              className="text-primary hover:underline"
-                            >
-                              {video.unit.title}
-                            </Link>
-                          </div>
-                        )}
-                        {video.duration && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            <span>{video.duration} min</span>
-                          </div>
-                        )}
-                        <a
-                          href={video.videoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full"
-                        >
-                          <Button className="w-full">
-                            <Play className="mr-2 h-4 w-4" />
-                            Watch Video
-                          </Button>
-                        </a>
-                      </div>
+                    <CardContent className="pt-0 pb-4 shrink-0">
+                      <Link href={`/lessons/${video.slug}`} className="w-full block">
+                        <Button className="w-full justify-center text-sm">
+                          <Play className="mr-2 h-4 w-4" />
+                          Watch lesson
+                        </Button>
+                      </Link>
                     </CardContent>
                   </Card>
-                </AnimatedResourceCard>
-              </StaggerItem>
             )
           })}
-        </StaggerChildren>
+        </div>
       )}
     </div>
   )

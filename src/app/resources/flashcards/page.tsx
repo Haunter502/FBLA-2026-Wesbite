@@ -50,81 +50,93 @@ export default async function FlashcardsPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <ScrollReveal>
-        <div className="mb-8">
+        <div className="mb-10">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
             <Link href="/resources" className="hover:text-foreground transition-colors">
               Resources
             </Link>
             <span>/</span>
-            <span>Flashcards</span>
+            <span className="text-foreground">Flashcards</span>
           </div>
-          <h1 className="text-4xl font-bold mb-2">Flashcards</h1>
-          <p className="text-muted-foreground">
-            Review key terms and concepts with interactive flashcards
-          </p>
+          <div className="rounded-2xl border bg-gradient-to-r from-primary/10 via-background to-emerald-500/5 px-6 py-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2">
+                Smart review, one card at a time
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
+                Work through curated key‑term decks for each unit, then quickly loop back to the
+                cards you marked Again.
+              </p>
+            </div>
+          </div>
         </div>
       </ScrollReveal>
 
       {flashcardSetsList.length === 0 ? (
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center">
-              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No flashcards available</h3>
-              <p className="text-muted-foreground">
-                Flashcards will be added soon. Check back later!
+        <Card className="border-dashed">
+          <CardContent className="pt-10 pb-12">
+            <div className="flex flex-col items-center justify-center text-center space-y-3">
+              <AlertCircle className="h-10 w-10 text-muted-foreground" />
+              <h3 className="text-lg font-semibold">No flashcard sets available yet</h3>
+              <p className="text-sm text-muted-foreground max-w-md">
+                We&apos;re building card decks for each unit so you can review definitions and
+                examples quickly.
               </p>
             </div>
           </CardContent>
         </Card>
       ) : (
-        <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <StaggerChildren className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {flashcardSetsList.map((set: typeof flashcardSetsList[0]) => {
-            const href = set.lesson
-              ? `/lessons/${set.lesson.slug}/flashcards/${set.id}`
-              : set.unit
-              ? `/units/${set.unit.slug}/flashcards/${set.id}`
-              : `/resources/flashcards/${set.id}`
-            
+            const href = `/resources/flashcards/${set.id}`
             return (
               <StaggerItem key={set.id}>
                 <AnimatedResourceCard>
-                  <Card className="h-full">
-                    <CardHeader>
-                      <Layers className="h-8 w-8 text-primary mb-2" />
-                      <CardTitle className="text-lg">{set.title}</CardTitle>
-                      <CardDescription>
-                        {set.description || 'Review key terms and concepts'}
+                  <Card className="h-full border border-primary/10 bg-gradient-to-b from-primary/5 via-background to-background/80 hover:border-primary/40 hover:shadow-lg transition-all">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="inline-flex items-center justify-center rounded-full bg-primary/10 text-primary p-2">
+                          <Layers className="h-5 w-5" />
+                        </div>
+                        {set.unit && (
+                          <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium">
+                            {set.unit.title}
+                          </span>
+                        )}
+                      </div>
+                      <CardTitle className="text-base md:text-lg line-clamp-2">{set.title}</CardTitle>
+                      <CardDescription className="text-xs md:text-sm line-clamp-3">
+                        {set.description || "Review key terms and concepts"}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
+                    <CardContent className="pt-0 pb-4">
+                      <div className="space-y-3 text-xs md:text-sm">
                         {set.lesson && (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Lesson: </span>
-                            <Link 
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-muted-foreground">Lesson:</span>
+                            <Link
                               href={`/lessons/${set.lesson.slug}`}
-                              className="text-primary hover:underline"
+                              className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs hover:bg-muted/80 transition-colors"
                             >
                               {set.lesson.title}
                             </Link>
                           </div>
                         )}
                         {set.unit && !set.lesson && (
-                          <div className="text-sm">
-                            <span className="text-muted-foreground">Unit: </span>
-                            <Link 
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-muted-foreground">Unit:</span>
+                            <Link
                               href={`/units/${set.unit.slug}`}
-                              className="text-primary hover:underline"
+                              className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs hover:bg-muted/80 transition-colors"
                             >
                               {set.unit.title}
                             </Link>
                           </div>
                         )}
-                        <Link href={href} className="flex-1">
-                          <Button className="w-full" variant="default">
+                        <Link href={href} className="flex-1 block pt-1">
+                          <Button className="w-full justify-center text-sm" variant="default">
                             <BookOpen className="mr-2 h-4 w-4" />
-                            Study Flashcards
+                            Study flashcards
                           </Button>
                         </Link>
                       </div>
