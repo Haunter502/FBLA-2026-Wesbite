@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { getDbSync } from "../src/lib/db-server"
 import { tutoringSlots, teachers } from "../src/lib/schema"
 import { gte } from "../src/lib/drizzle-helpers"

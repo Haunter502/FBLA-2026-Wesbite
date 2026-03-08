@@ -13,9 +13,9 @@ async function seed() {
 
   // Create demo users (or get existing ones)
   const hashedPassword = await bcrypt.hash('Passw0rd!', 10);
-  
+
   let student, teacher, admin;
-  
+
   // Try to get existing users first
   [student] = await db.select().from(schema.users).where(eq(schema.users.email, 'student@example.com')).limit(1);
   if (!student) {
@@ -910,7 +910,7 @@ async function seed() {
   // Create worksheets
   if (linearEquationsUnit || systemsUnit || polynomialsUnit) {
     const worksheetsData = [];
-    
+
     if (linearEquationsUnit) {
       worksheetsData.push(
         {
@@ -1393,38 +1393,58 @@ async function seed() {
     console.log('✅ Teachers already exist');
   }
 
-  // Create tutoring slots
-  const existingSlots = await db.select().from(schema.tutoringSlots);
-  if (existingSlots.length === 0) {
-    const slotsData = [];
-    const now = new Date();
+  // Create tutoring slots (always refresh so they are correctly categorized)
+  await db.delete(schema.tutoringSlots);
+  const slotsData = [];
+  const now = new Date();
+
+  // Create slots for the next 14 days
+  for (let day = 0; day < 14; day++) {
+    const slotDate = new Date(now);
+    slotDate.setDate(now.getDate() + day);
+    const dayOfWeek = slotDate.getDay(); // 0 = Sunday, 6 = Saturday
+
+    // Only create slots on Monday (1), Wednesday (3), and Friday (5)
+    if (dayOfWeek !== 1 && dayOfWeek !== 3 && dayOfWeek !== 5) {
+      continue;
+    }
+
+    // Time slots: Morning (9:00 AM), Afternoon (1:30 PM), Evening (6:00 PM)
+    const timeSlots = [
+      { hour: 9, minute: 0 },
+      { hour: 13, minute: 30 },
+      { hour: 18, minute: 0 },
+    ];
+
     for (const teacher of insertedTeachers) {
-      for (let day = 0; day < 7; day++) {
-        const slotDate = new Date(now);
-        slotDate.setDate(now.getDate() + day);
-        slotDate.setHours(15, 0, 0, 0); // 3 PM
-        
+      // Give each teacher 1 random slot per active day to avoid giving everyone all slots
+      // Or just give them all 3 slots for simplicity and populated demo
+      for (const time of timeSlots) {
+        const start = new Date(slotDate);
+        start.setHours(time.hour, time.minute, 0, 0);
+
         slotsData.push({
           teacherId: teacher.id,
-          start: slotDate,
-          end: new Date(slotDate.getTime() + 60 * 60 * 1000), // 1 hour later
+          start: start,
+          end: new Date(start.getTime() + 60 * 60 * 1000), // 1 hour later
           capacity: 5,
           spotsLeft: 5,
         });
       }
     }
-    await db.insert(schema.tutoringSlots).values(slotsData);
-    console.log('✅ Created tutoring slots');
-  } else {
-    console.log('✅ Tutoring slots already exist');
   }
+
+  if (slotsData.length > 0) {
+    await db.insert(schema.tutoringSlots).values(slotsData);
+  }
+  console.log('✅ Recreated diverse tutoring slots');
 
   // Create some progress for the student
   const existingProgress = await db.select().from(schema.progress).where(eq(schema.progress.userId, student.id));
   if (existingProgress.length === 0) {
     const firstUnit = insertedUnits[0];
     const firstUnitLessons = insertedLessons.filter((l: typeof schema.lessons.$inferSelect) => l.unitId === firstUnit.id).slice(0, 3);
-    
+
     for (const lesson of firstUnitLessons) {
       await db.insert(schema.progress).values({
         userId: student.id,
