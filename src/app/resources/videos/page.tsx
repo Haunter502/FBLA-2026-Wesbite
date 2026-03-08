@@ -31,7 +31,7 @@ async function getVideoLessons() {
     .orderBy(asc(lessons.createdAt))
 
   // Only keep lessons that have an associated YouTube video
-  return allVideos.filter((video) => !!video.youtubeId)
+  return allVideos.filter((video: { youtubeId: string | null }) => !!video.youtubeId)
 }
 
 function getYouTubeThumbnail(videoId: string | null): string {
