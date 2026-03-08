@@ -2,9 +2,10 @@ import { notFound } from "next/navigation"
 import { unstable_noStore } from "next/cache"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
-import { units, lessons, quizzes, tests, skills, progress } from "@/lib/schema"
+import { units, lessons, quizzes, tests, skills, progress, flashcardSets } from "@/lib/schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BookOpen } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { BookOpen, Layers } from "lucide-react"
 import Link from "next/link"
 import { eq, asc } from "@/lib/drizzle-helpers"
 import { ScrollReveal } from "@/components/animations/scroll-reveal"
@@ -31,11 +32,12 @@ async function getUnit(slug: string, userId?: string) {
 
   if (!unit) return null
 
-  const [unitLessons, allUnitQuizzes, unitTests, unitSkills] = await Promise.all([
+  const [unitLessons, allUnitQuizzes, unitTests, unitSkills, unitFlashcardSets] = await Promise.all([
     db.select().from(lessons).where(eq(lessons.unitId, unit.id)).orderBy(asc(lessons.order)),
     db.select().from(quizzes).where(eq(quizzes.unitId, unit.id)),
     db.select().from(tests).where(eq(tests.unitId, unit.id)),
     db.select().from(skills).where(eq(skills.unitId, unit.id)).orderBy(asc(skills.name)),
+    db.select().from(flashcardSets).where(eq(flashcardSets.unitId, unit.id)),
   ])
 
 
@@ -119,6 +121,7 @@ async function getUnit(slug: string, userId?: string) {
     quizzes: unitQuizzes,
     tests: unitTests,
     skills: unitSkills,
+    flashcardSets: unitFlashcardSets,
     lessonProgress,
     quizProgress,
     testProgress,
@@ -268,6 +271,33 @@ export default async function UnitPage({ params }: { params: Promise<{ unitSlug:
                       }}
                     />
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Flashcards for this unit */}
+          {unit.flashcardSets.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Layers className="h-5 w-5" />
+                  Flashcards
+                </CardTitle>
+                <CardDescription>
+                  Review terms and definitions for {unit.title}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {unit.flashcardSets.map((set: typeof unit.flashcardSets[0]) => (
+                    <Button key={set.id} variant="outline" className="w-full justify-start" asChild>
+                      <Link href={`/resources/flashcards/${set.id}`}>
+                        <Layers className="mr-2 h-4 w-4" />
+                        {set.title}
+                      </Link>
+                    </Button>
+                  ))}
                 </div>
               </CardContent>
             </Card>

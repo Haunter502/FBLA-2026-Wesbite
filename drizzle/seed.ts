@@ -248,11 +248,31 @@ async function seed() {
 
   const fallbackYoutubeId = 'Vm7H0VTlIco'; // Polynomials intro — embed-safe fallback
 
+  // Khan Academy Algebra 1 (x2f8bb11595b61c86) unit URLs — each has practice exercises
+  const khanPracticeUrlByUnitSlug: Record<string, string> = {
+    'linear-equations': 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:solve-equations-inequalities',
+    'systems-of-equations': 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:systems-of-equations',
+    polynomials: 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:quadratics-multiplying-factoring',
+    quadratics: 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:quadratic-functions-equations',
+    functions: 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:foundation-algebra',
+    'exponents-radicals': 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:foundation-algebra',
+    'rational-expressions': 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:quadratics-multiplying-factoring',
+    'graphing-functions': 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:linear-equations-graphs',
+    'absolute-value': 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:solve-equations-inequalities',
+    'exponential-functions': 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:exponential-growth-decay',
+    sequences: 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:sequences',
+    'data-analysis': 'https://www.khanacademy.org/math/algebra',
+    probability: 'https://www.khanacademy.org/math/algebra',
+    'real-world-applications': 'https://www.khanacademy.org/math/algebra',
+  }
+  const khanPracticeFallback = 'https://www.khanacademy.org/math/algebra'
+
   // Create lessons for each unit (6-12 per unit)
   const lessonsData = [];
   for (const unit of insertedUnits) {
     const unitSlug = (unit as typeof schema.units.$inferSelect).slug;
     const videoIds = lessonYoutubeByUnitSlug[unitSlug];
+    const practiceUrl = khanPracticeUrlByUnitSlug[unitSlug] ?? khanPracticeFallback;
 
     const unitLessons = [
       {
@@ -292,7 +312,7 @@ async function seed() {
         title: 'Practice Problems - Set 1',
         description: 'Apply what you learned with guided practice.',
         type: 'EXERCISE' as const,
-        khanUrl: `https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:${unit.slug}-practice`,
+        khanUrl: practiceUrl,
         duration: 20,
         order: 4,
       },
@@ -312,7 +332,7 @@ async function seed() {
         title: 'Practice Problems - Set 2',
         description: 'Additional practice with more complex scenarios.',
         type: 'EXERCISE' as const,
-        khanUrl: `https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:${unit.slug}-advanced`,
+        khanUrl: practiceUrl,
         duration: 25,
         order: 6,
       },

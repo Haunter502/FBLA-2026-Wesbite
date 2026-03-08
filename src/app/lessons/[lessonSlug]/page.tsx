@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
-import { lessons, units, flashcardSets, flashcards, progress } from "@/lib/schema"
+import { lessons, units, flashcardSets, flashcards, progress, studyGuides } from "@/lib/schema"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { extractYouTubeId } from "@/lib/utils"
-import { Play, BookOpen, Lightbulb, ExternalLink } from "lucide-react"
+import { Play, BookOpen, Lightbulb, ExternalLink, Download } from "lucide-react"
 import Link from "next/link"
 import { eq, asc, and } from "@/lib/drizzle-helpers"
 import { CompleteLessonButton } from "@/components/lessons/complete-lesson-button"
@@ -204,11 +204,25 @@ async function getLesson(slug: string, userId?: string) {
     isCompleted = !!lessonProgress
   }
 
+  // Study guide for this unit (embedded as reading material on Reading lessons and Unit Review)
+  const [unitStudyGuide] = await db
+    .select({
+      id: studyGuides.id,
+      title: studyGuides.title,
+      description: studyGuides.description,
+      content: studyGuides.content,
+      fileUrl: studyGuides.fileUrl,
+    })
+    .from(studyGuides)
+    .where(eq(studyGuides.unitId, lesson.unitId))
+    .limit(1)
+
   return {
     ...lesson,
     unit,
     flashcardSets: setsWithCards,
     isCompleted,
+    unitStudyGuide: unitStudyGuide ?? null,
   }
 }
 
@@ -257,22 +271,44 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
               </FadeInUp>
             )}
 
-            {/* Reading Section */}
-            {lesson.type === "READING" && lesson.khanUrl && (
+            {/* Reading Section — embed unit study guide as reading material when available */}
+            {(lesson.type === "READING" || lesson.title === "Unit Review") && (lesson.unitStudyGuide || (lesson.type === "READING" && lesson.khanUrl)) && (
               <FadeInUp delay={0.2}>
                 <GlowEffect intensity="low">
                   <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <BookOpen className="h-5 w-5" />
-                        Reading Material
-                      </CardTitle>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <BookOpen className="h-5 w-5" />
+                            Reading Material
+                          </CardTitle>
+                          {lesson.unitStudyGuide?.title && (
+                            <CardDescription className="mt-1">
+                              {lesson.unitStudyGuide.description || lesson.unitStudyGuide.title}
+                            </CardDescription>
+                          )}
+                        </div>
+                        {lesson.unitStudyGuide?.fileUrl && (
+                          <a href={lesson.unitStudyGuide.fileUrl} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                            <Button variant="outline" size="sm" className="whitespace-nowrap">
+                              <Download className="mr-2 h-4 w-4" />
+                              Download PDF
+                            </Button>
+                          </a>
+                        )}
+                      </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="prose max-w-none">
-                        <p className="text-muted-foreground mb-4">{lesson.description}</p>
-                        <div className="mt-6">
-                          <a 
+                      {lesson.unitStudyGuide?.content ? (
+                        <div
+                          className="prose prose-sm md:prose-base dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-border prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-2 prose-p:my-2 prose-ul:my-3 prose-ol:my-3 prose-li:my-1"
+                          dangerouslySetInnerHTML={{ __html: lesson.unitStudyGuide.content }}
+                        />
+                      ) : lesson.type === "READING" && lesson.khanUrl ? (
+                        <div className="prose max-w-none">
+                          <p className="text-muted-foreground mb-4">{lesson.description}</p>
+                          <a
                             href={lesson.khanUrl}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -284,7 +320,9 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
                             </Button>
                           </a>
                         </div>
-                      </div>
+                      ) : (
+                        <p className="text-muted-foreground">Content coming soon.</p>
+                      )}
                     </CardContent>
                   </Card>
                 </GlowEffect>
@@ -344,6 +382,7 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonS
           </Card>
           </GlowEffect>
         </FadeInUp>
+
           </div>
 
           {/* Sidebar */}
