@@ -3,6 +3,8 @@ import { db } from "@/lib/db"
 import { tutoringSlots, teachers } from "@/lib/schema"
 import { gte, lte, gt, asc, eq, and } from "@/lib/drizzle-helpers"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const now = new Date()
@@ -36,10 +38,10 @@ export async function GET() {
     type SlotRow = (typeof slots)[number]
     const normalizedSlots = slots.map((slot: SlotRow) => ({
       ...slot,
-      start: typeof slot.start === 'number' 
+      start: typeof slot.start === 'number'
         ? (slot.start < 10000000000 ? slot.start : Math.floor(slot.start / 1000))
         : Math.floor(new Date(slot.start).getTime() / 1000),
-      end: typeof slot.end === 'number' 
+      end: typeof slot.end === 'number'
         ? (slot.end < 10000000000 ? slot.end : Math.floor(slot.end / 1000))
         : Math.floor(new Date(slot.end).getTime() / 1000),
     }))

@@ -5,6 +5,8 @@ import { progress, units, lessons, tutoringRequests, tutoringSlots, teachers } f
 import { eq, and, desc, asc, or, inArray, gte } from '@/lib/drizzle-helpers'
 import { getNextBestLesson, getUserProgressByUnit } from '@/lib/recommendations'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
@@ -122,24 +124,24 @@ export async function GET(
     type SlotRow = { id: string; start: number | Date; end: number | Date }
     const matchedTeachers: TeacherRow[] = matchedTeacherIds.length > 0
       ? await db
-          .select({
-            id: teachers.id,
-            name: teachers.name,
-            email: teachers.email,
-          })
-          .from(teachers)
-          .where(inArray(teachers.id, matchedTeacherIds))
+        .select({
+          id: teachers.id,
+          name: teachers.name,
+          email: teachers.email,
+        })
+        .from(teachers)
+        .where(inArray(teachers.id, matchedTeacherIds))
       : []
 
     const matchedSlots: SlotRow[] = matchedSlotIds.length > 0
       ? await db
-          .select({
-            id: tutoringSlots.id,
-            start: tutoringSlots.start,
-            end: tutoringSlots.end,
-          })
-          .from(tutoringSlots)
-          .where(inArray(tutoringSlots.id, matchedSlotIds))
+        .select({
+          id: tutoringSlots.id,
+          start: tutoringSlots.start,
+          end: tutoringSlots.end,
+        })
+        .from(tutoringSlots)
+        .where(inArray(tutoringSlots.id, matchedSlotIds))
       : []
 
     type SessionWithExtras = SessionRow & { matchedTeacher: TeacherRow | null; matchedSlot: SlotRow | null; slot?: { start: number | Date; end: number | Date } }
@@ -156,17 +158,17 @@ export async function GET(
       .filter((session: SessionWithExtras) => {
         // Get the start time from either scheduledSlot or matchedSlot
         let startTime: number | null = null
-        
+
         if (session.slot?.start) {
-          startTime = typeof session.slot.start === 'number' 
+          startTime = typeof session.slot.start === 'number'
             ? (session.slot.start < 10000000000 ? session.slot.start : Math.floor(session.slot.start / 1000))
             : Math.floor(new Date(session.slot.start).getTime() / 1000)
         } else if (session.matchedSlot?.start) {
-          startTime = typeof session.matchedSlot.start === 'number' 
+          startTime = typeof session.matchedSlot.start === 'number'
             ? (session.matchedSlot.start < 10000000000 ? session.matchedSlot.start : Math.floor(session.matchedSlot.start / 1000))
             : Math.floor(new Date(session.matchedSlot.start).getTime() / 1000)
         }
-        
+
         // Only include sessions with a future start time
         // If no start time is available, include it (pending scheduling)
         return startTime === null || startTime >= now
@@ -199,15 +201,15 @@ export async function GET(
         topic: session.topic,
         status: session.status,
         matchStatus: session.matchStatus,
-        startTime: (session.slot?.start || session.matchedSlot?.start) 
-          ? (typeof (session.slot?.start || session.matchedSlot?.start) === 'number' 
-              ? (session.slot?.start || session.matchedSlot?.start) 
-              : Math.floor(new Date(session.slot?.start || session.matchedSlot?.start).getTime() / 1000)) 
+        startTime: (session.slot?.start || session.matchedSlot?.start)
+          ? (typeof (session.slot?.start || session.matchedSlot?.start) === 'number'
+            ? (session.slot?.start || session.matchedSlot?.start)
+            : Math.floor(new Date(session.slot?.start || session.matchedSlot?.start).getTime() / 1000))
           : null,
         endTime: (session.slot?.end || session.matchedSlot?.end)
           ? (typeof (session.slot?.end || session.matchedSlot?.end) === 'number'
-              ? (session.slot?.end || session.matchedSlot?.end)
-              : Math.floor(new Date(session.slot?.end || session.matchedSlot?.end).getTime() / 1000))
+            ? (session.slot?.end || session.matchedSlot?.end)
+            : Math.floor(new Date(session.slot?.end || session.matchedSlot?.end).getTime() / 1000))
           : null,
         matchedTeacher: session.matchedTeacher ? {
           id: session.matchedTeacher.id,
