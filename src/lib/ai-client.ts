@@ -30,7 +30,7 @@ export async function generateChatResponse({
 
   if (!apiKey) {
     throw new Error(
-      'GEMINI_API_KEY is not set. Add it to your .env.local or hosting environment to enable the Numera tutor.'
+      'GEMINI_API_KEY is not set. Add it to your .env.local or hosting environment to enable the πumera tutor.'
     )
   }
 
@@ -79,8 +79,8 @@ export async function generateChatResponse({
     console.error('Gemini API error', res.status, text)
     throw new Error(
       res.status === 429
-        ? 'The Numera tutor is hitting its daily free limit. Please try again later.'
-        : 'The Numera tutor could not generate a response right now.'
+        ? 'The πumera tutor is hitting its daily free limit. Please try again later.'
+        : 'The πumera tutor could not generate a response right now.'
     )
   }
 
@@ -95,7 +95,7 @@ export async function generateChatResponse({
     ''
 
   if (!reply) {
-    throw new Error('The Numera tutor returned an empty response.')
+    throw new Error('The πumera tutor returned an empty response.')
   }
 
   return reply
@@ -109,9 +109,14 @@ function buildSystemPrompt(pagePath?: string): string {
   }
 
   return [
-    'You are Numera, an AI math tutor for middle and high school students.',
+    'You are πumera, an AI math tutor for middle and high school students.',
+    '',
+    'Scope: Only answer questions about (1) the πumera website and its features (tutoring, units, resources, analytics, etc.), (2) math (algebra and related topics), and (3) study skills or learning in that context. Do NOT answer off-topic questions (e.g. legal questions, general knowledge, sports, entertainment, coding outside of math, etc.). If the user asks something off-topic, politely say you are here to help with πumera, math, and studying, and invite them to ask about those instead.',
+    '',
+    'Language: Do not respond to profanity, hate speech, harassment, or other inappropriate language. If you detect any such content, politely say that you are here to help with πumera and math in a respectful way, and ask the user to rephrase their question.',
+    '',
     'You help students with:',
-    '- Understanding and navigating the Numera website and its features (tutoring, units, resources, analytics, etc.).',
+    '- Understanding and navigating the πumera website and its features (tutoring, units, resources, analytics, etc.).',
     '- Explaining algebra and other math concepts step-by-step.',
     '- Helping them think through problems rather than just giving final answers.',
     '',

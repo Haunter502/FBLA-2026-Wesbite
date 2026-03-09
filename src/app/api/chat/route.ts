@@ -3,6 +3,13 @@ import { generateChatResponse } from "@/lib/ai-client";
 
 export const dynamic = 'force-dynamic';
 
+/** Blocklist: obvious profanity (word boundaries only to avoid false positives). */
+const PROFANITY_PATTERN = /\b(fuck|shit|damn|hell|ass|bitch|crap|dumbass|bullshit|bait)\b/i;
+
+function containsProfanity(text: string): boolean {
+  return PROFANITY_PATTERN.test(text);
+}
+
 type ChatRole = 'user' | 'assistant';
 
 interface ChatMessage {
@@ -43,6 +50,17 @@ export async function POST(req: Request) {
       );
     }
 
+    const lastUserMessage = messages.filter((m) => m.role === "user").pop();
+    if (lastUserMessage && containsProfanity(lastUserMessage.content)) {
+      return NextResponse.json(
+        {
+          error:
+            "Please keep your questions respectful and appropriate. I'm here to help with πumera and math!",
+        },
+        { status: 400 }
+      );
+    }
+
     const reply = await generateChatResponse({
       messages,
       pagePath: body.pagePath,
@@ -66,7 +84,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(
-      { error: "Failed to generate a response from the Numera tutor." },
+      { error: "Failed to generate a response from the πumera tutor." },
       { status: 500 }
     );
   }

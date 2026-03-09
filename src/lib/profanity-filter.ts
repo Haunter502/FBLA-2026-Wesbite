@@ -27,6 +27,7 @@ const PROFANITY_WORDS = [
   // Other inappropriate terms
   'kill', 'killing', 'killed', // Only in threatening context
   'die', 'dying', 'death', // Only in threatening context
+  'bait',
 ]
 
 // Words that should be allowed in educational context
@@ -48,11 +49,8 @@ function containsProfanity(word: string): boolean {
     return false
   }
   
-  // Check against profanity list
-  return PROFANITY_WORDS.some(profanity => {
-    // Exact match or word contains profanity
-    return lowerWord === profanity || lowerWord.includes(profanity)
-  })
+  // Check against profanity list (exact match only to avoid false positives like "hello" containing "hell")
+  return PROFANITY_WORDS.some(profanity => lowerWord === profanity)
 }
 
 /**

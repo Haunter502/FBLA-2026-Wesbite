@@ -21,7 +21,7 @@ export function ChatbotWidget() {
       id: 'welcome',
       role: 'assistant',
       content:
-        "Hi, I’m your Numera tutor! Ask me anything about this site, Numera itself, or any math problem you’re working on.",
+        "Hi, I’m your πumera tutor! Ask me anything about this site, πumera itself, or any math problem you’re working on.",
     },
   ])
   const [input, setInput] = useState('')
@@ -84,7 +84,7 @@ export function ChatbotWidget() {
       setError(
         err instanceof Error
           ? err.message
-          : 'Unable to reach the Numera tutor right now. Please try again later.'
+          : 'Unable to reach the πumera tutor right now. Please try again later.'
       )
     } finally {
       setIsLoading(false)
@@ -98,7 +98,7 @@ export function ChatbotWidget() {
       ? 'Need help picking a tutor or time?'
       : pathname?.startsWith('/units')
         ? 'Stuck on a unit? Ask me about it.'
-        : 'Ask about Numera, this page, or any math problem.'
+        : 'Ask about πumera, this page, or any math problem.'
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
@@ -113,7 +113,7 @@ export function ChatbotWidget() {
               exit={{ opacity: 0, x: 40, y: 20 }}
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
               className="absolute bottom-16 right-0 w-80 sm:w-96 max-h-[70vh] rounded-xl border border-border bg-background shadow-brand-lg flex flex-col overflow-hidden"
-              aria-label="Numera tutor chat"
+              aria-label="πumera tutor chat"
             >
             {/* Header */}
             <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between">
@@ -126,7 +126,7 @@ export function ChatbotWidget() {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-semibold leading-tight">
-                    Numera Tutor
+                    πumera Tutor
                   </span>
                   <span className="text-[11px] opacity-80">
                     {contextSubtitle}
@@ -222,13 +222,13 @@ export function ChatbotWidget() {
                   onClick={() =>
                     setInput((prev) =>
                       prev
-                        ? `${prev.trim()} Where do I find this on Numera?`
-                        : 'Where do I find this on Numera?'
+                        ? `${prev.trim()} Where do I find this on πumera?`
+                        : 'Where do I find this on πumera?'
                     )
                   }
                   className="rounded-full bg-muted px-2.5 py-1 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                 >
-                  Where do I find this on Numera?
+                  Where do I find this on πumera?
                 </button>
               </div>
 
@@ -272,18 +272,18 @@ export function ChatbotWidget() {
           )}
           whileHover={{ scale: 1.1, rotate: -6 }}
           whileTap={{ scale: 0.94 }}
-          aria-label={isOpen ? 'Close Numera tutor chat' : 'Open Numera tutor chat'}
+          aria-label={isOpen ? 'Close πumera tutor chat' : 'Open πumera tutor chat'}
         >
           {/* Tooltip */}
           <div className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 rounded-full bg-card/90 px-3 py-1 text-[11px] font-medium text-foreground shadow-brand border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-            Ask Numera
+            Ask πumera
           </div>
 
           {/* Blur-glow border (shows on hover) */}
           <div className="pointer-events-none absolute -inset-1 rounded-full bg-primary/35 blur-md opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
           <div className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-white/20" />
 
-          {/* Numera logo (glass capsule) */}
+          {/* πumera logo (glass capsule) */}
           <div className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm text-white font-bold border border-white/25 shadow-brand transition-transform duration-200 group-hover:scale-[1.03]">
             <span className="text-2xl leading-none drop-shadow-sm">π</span>
             <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary/80 text-primary-foreground text-[10px] font-semibold border border-white/60" />
@@ -294,7 +294,7 @@ export function ChatbotWidget() {
           )}
 
           <span className="sr-only">
-            {isOpen ? 'Close Numera tutor chat' : 'Open Numera tutor chat'}
+            {isOpen ? 'Close πumera tutor chat' : 'Open πumera tutor chat'}
           </span>
         </motion.button>
       </div>
