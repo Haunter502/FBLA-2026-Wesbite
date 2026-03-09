@@ -97,15 +97,15 @@ export function TutoringCalendar() {
 
   // Build calendar weeks (Monday through Saturday, excluding Sunday)
   const weeks: Array<Array<{ day: number; date: dayjs.Dayjs } | null>> = []
-  
+
   // Get the first day of the month
   const firstDay = currentMonth.startOf('month')
-  
+
   // Find the Monday of the week containing the first day
   // day() returns 0=Sunday, 1=Monday, 2=Tuesday, etc.
   let startDate = firstDay
   const firstDayOfWeek = firstDay.day()
-  
+
   // Calculate days to go back to get to Monday
   // If Sunday (0), go back 6 days. Otherwise go back (dayOfWeek - 1) days
   if (firstDayOfWeek === 0) {
@@ -113,11 +113,11 @@ export function TutoringCalendar() {
   } else if (firstDayOfWeek !== 1) {
     startDate = firstDay.subtract(firstDayOfWeek - 1, 'day')
   }
-  
+
   // Get the last day of the month
   const lastDay = currentMonth.endOf('month')
   const lastDayOfWeek = lastDay.day()
-  
+
   // Calculate the Saturday of the week containing the last day
   let endDate = lastDay
   if (lastDayOfWeek !== 0 && lastDayOfWeek !== 6) {
@@ -127,13 +127,13 @@ export function TutoringCalendar() {
     // If Sunday, go back to Saturday
     endDate = lastDay.subtract(1, 'day')
   }
-  
+
   // Build weeks starting from the Monday
   let currentDate = startDate
-  
+
   while (currentDate.isBefore(endDate) || currentDate.isSame(endDate, 'day')) {
     const week: Array<{ day: number; date: dayjs.Dayjs } | null> = []
-    
+
     // Build a week (Monday through Saturday, 6 days total)
     for (let i = 0; i < 6; i++) {
       // Skip if it's Sunday (shouldn't happen if logic is correct, but just in case)
@@ -142,7 +142,7 @@ export function TutoringCalendar() {
         i-- // Decrement to maintain the loop count
         continue
       }
-      
+
       // Only include days from the current month
       if (currentDate.month() === currentMonth.month()) {
         week.push({
@@ -152,13 +152,15 @@ export function TutoringCalendar() {
       } else {
         week.push(null) // Day from previous/next month
       }
-      
+
       currentDate = currentDate.add(1, 'day')
     }
-    
-    // Add the week (even if it has nulls, we want to show the structure)
-    weeks.push(week)
-    
+
+    // Add the week only if it has at least one valid day from the current month
+    if (week.some(day => day !== null)) {
+      weeks.push(week)
+    }
+
     // Stop if we've passed the end date
     if (currentDate.isAfter(endDate)) {
       break
@@ -216,7 +218,7 @@ export function TutoringCalendar() {
           {error}
         </div>
       )}
-      
+
       {loading ? (
         <>
           <div className="flex items-center justify-between border-b border-border pb-2">
@@ -233,166 +235,163 @@ export function TutoringCalendar() {
         </>
       ) : (
         <>
-      {/* Calendar Header */}
-      <div className="flex items-center justify-between border-b border-border pb-2">
-        <Button variant="outline" size="sm" onClick={previousMonth} className="border-primary/30 hover:border-primary">
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <h3 className="text-lg font-semibold text-foreground">
-          {currentMonth.format('MMMM YYYY')}
-        </h3>
-        <Button variant="outline" size="sm" onClick={nextMonth} className="border-primary/30 hover:border-primary">
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
+          {/* Calendar Header */}
+          <div className="flex items-center justify-between border-b border-border pb-2">
+            <Button variant="outline" size="sm" onClick={previousMonth} className="border-primary/30 hover:border-primary">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <h3 className="text-lg font-semibold text-foreground">
+              {currentMonth.format('MMMM YYYY')}
+            </h3>
+            <Button variant="outline" size="sm" onClick={nextMonth} className="border-primary/30 hover:border-primary">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
 
-      {/* Calendar Grid - Monday through Saturday (excluding Sunday) */}
-      <div className="space-y-2 mb-4">
-        {/* Header row with weekday labels */}
-        <div className="grid grid-cols-6 gap-2">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayLabel) => (
-            <div key={dayLabel} className="text-center text-sm font-medium text-muted-foreground p-2">
-              {dayLabel}
+          {/* Calendar Grid - Monday through Saturday (excluding Sunday) */}
+          <div className="space-y-2 mb-4">
+            {/* Header row with weekday labels */}
+            <div className="grid grid-cols-6 gap-2">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayLabel) => (
+                <div key={dayLabel} className="text-center text-sm font-medium text-muted-foreground p-2">
+                  {dayLabel}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        
-        {/* Calendar weeks - each week is a row */}
-        {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-6 gap-2">
-            {week.map((dayData, dayIndex) => {
-              if (!dayData) {
-                return <div key={`empty-${weekIndex}-${dayIndex}`} className="flex-1 min-h-[115px]"></div>
-              }
-              
-              const { day, date } = dayData
-              const dateSlots = getSlotsForDate(date)
-              const isToday = dayjs().isSame(date, 'day')
-              const hasSlots = dateSlots.length > 0
-              const dateKey = date.format('YYYY-MM-DD')
-              const isSelected = selectedDate === dateKey
-              const isWeekend = date.day() === 6 // Saturday
 
-              return (
-                <div
-                  key={day}
-                  className={`flex-1 flex flex-col min-h-[115px] p-2 border-2 rounded-lg transition-all ${
-                    isWeekend ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
-                  } ${
-                    isToday ? 'bg-primary/20 border-primary shadow-md shadow-primary/20' : 'border-border bg-card'
-                  } ${isSelected ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : ''} ${
-                    hasSlots && !isWeekend ? 'hover:bg-muted/50 hover:border-primary/50 hover:shadow-sm' : ''
-                  }`}
-                  onClick={() => handleDateClick(date)}
-                >
-                  <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-primary' : 'text-foreground'}`}>
-                    {day}
-                  </div>
-                  <div className="flex-1 flex flex-col justify-start">
-                    {isWeekend ? (
-                      <div className="text-xs text-muted-foreground/30 italic">Saturday</div>
-                    ) : hasSlots ? (
-                      <div className="space-y-1">
-                        {dateSlots.slice(0, 3).map((slot: Slot) => (
-                          <div
-                            key={slot.id}
-                            className={`text-xs ${getTimeSlotColor(slot)} px-1.5 py-0.5 rounded font-medium`}
-                            title={`${getTimeSlotLabel(slot)}: ${dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start).format('h:mm A')} - ${slot.teacher?.name || 'Teacher'}`}
-                          >
-                            {getTimeSlotLabel(slot)}
+            {/* Calendar weeks - each week is a row */}
+            {weeks.map((week, weekIndex) => (
+              <div key={weekIndex} className="grid grid-cols-6 gap-2">
+                {week.map((dayData, dayIndex) => {
+                  if (!dayData) {
+                    return <div key={`empty-${weekIndex}-${dayIndex}`} className="flex-1 min-h-[115px]"></div>
+                  }
+
+                  const { day, date } = dayData
+                  const dateSlots = getSlotsForDate(date)
+                  const isToday = dayjs().isSame(date, 'day')
+                  const hasSlots = dateSlots.length > 0
+                  const dateKey = date.format('YYYY-MM-DD')
+                  const isSelected = selectedDate === dateKey
+                  const isWeekend = date.day() === 6 // Saturday
+
+                  return (
+                    <div
+                      key={day}
+                      className={`flex-1 flex flex-col min-h-[115px] p-2 border-2 rounded-lg transition-all ${isWeekend ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+                        } ${isToday ? 'bg-primary/20 border-primary shadow-md shadow-primary/20' : 'border-border bg-card'
+                        } ${isSelected ? 'ring-2 ring-primary ring-offset-2 bg-primary/10' : ''} ${hasSlots && !isWeekend ? 'hover:bg-muted/50 hover:border-primary/50 hover:shadow-sm' : ''
+                        }`}
+                      onClick={() => handleDateClick(date)}
+                    >
+                      <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-primary' : 'text-foreground'}`}>
+                        {day}
+                      </div>
+                      <div className="flex-1 flex flex-col justify-start">
+                        {isWeekend ? (
+                          <div className="text-xs text-muted-foreground/30 italic">Saturday</div>
+                        ) : hasSlots ? (
+                          <div className="space-y-1">
+                            {dateSlots.slice(0, 3).map((slot: Slot) => (
+                              <div
+                                key={slot.id}
+                                className={`text-xs ${getTimeSlotColor(slot)} px-1.5 py-0.5 rounded font-medium`}
+                                title={`${getTimeSlotLabel(slot)}: ${dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start).format('h:mm A')} - ${slot.teacher?.name || 'Teacher'}`}
+                              >
+                                {getTimeSlotLabel(slot)}
+                              </div>
+                            ))}
+                            {dateSlots.length > 3 && (
+                              <div className="text-xs text-muted-foreground font-medium">
+                                +{dateSlots.length - 3} more
+                              </div>
+                            )}
                           </div>
-                        ))}
-                        {dateSlots.length > 3 && (
-                          <div className="text-xs text-muted-foreground font-medium">
-                            +{dateSlots.length - 3} more
-                          </div>
+                        ) : (
+                          <div className="text-xs text-muted-foreground/50">No slots</div>
                         )}
                       </div>
-                    ) : (
-                      <div className="text-xs text-muted-foreground/50">No slots</div>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Selected Date Slots */}
-      {selectedDate && selectedDateSlots.length > 0 && (
-        <Card className="border-primary/20">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="font-semibold">
-                Sessions for {dayjs(selectedDate).isValid() ? dayjs(selectedDate).format('MMMM D, YYYY') : 'Selected Date'}
-              </h4>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedDate(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {selectedDateSlots
-                .sort((a, b) => {
-                  const aTime = dayjs(typeof a.start === 'number' ? a.start * 1000 : a.start)
-                  const bTime = dayjs(typeof b.start === 'number' ? b.start * 1000 : b.start)
-                  return aTime.diff(bTime)
-                })
-                .map((slot) => (
-                  <Card key={slot.id} className="border">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-semibold">
-                              {getTimeSlotLabel(slot)}: {dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start).format('h:mm A')} - {dayjs(typeof slot.end === 'number' ? slot.end * 1000 : slot.end).format('h:mm A')}
-                            </span>
+          {/* Selected Date Slots */}
+          {selectedDate && selectedDateSlots.length > 0 && (
+            <Card className="border-primary/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-semibold">
+                    Sessions for {dayjs(selectedDate).isValid() ? dayjs(selectedDate).format('MMMM D, YYYY') : 'Selected Date'}
+                  </h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedDate(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {selectedDateSlots
+                    .sort((a, b) => {
+                      const aTime = dayjs(typeof a.start === 'number' ? a.start * 1000 : a.start)
+                      const bTime = dayjs(typeof b.start === 'number' ? b.start * 1000 : b.start)
+                      return aTime.diff(bTime)
+                    })
+                    .map((slot) => (
+                      <Card key={slot.id} className="border">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-semibold">
+                                  {getTimeSlotLabel(slot)}: {dayjs(typeof slot.start === 'number' ? slot.start * 1000 : slot.start).format('h:mm A')} - {dayjs(typeof slot.end === 'number' ? slot.end * 1000 : slot.end).format('h:mm A')}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Users className="h-4 w-4" />
+                                <span>{slot.spotsLeft} spots available</span>
+                              </div>
+                              <div className="text-sm font-medium">{slot.teacher?.name}</div>
+                            </div>
+                            <Button
+                              onClick={() => handleBook(slot.id)}
+                              disabled={slot.spotsLeft === 0 || booked.has(slot.id)}
+                              size="sm"
+                            >
+                              {booked.has(slot.id) ? (
+                                <>
+                                  <Check className="h-4 w-4 mr-2" />
+                                  Booked
+                                </>
+                              ) : (
+                                'Book Session'
+                              )}
+                            </Button>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Users className="h-4 w-4" />
-                            <span>{slot.spotsLeft} spots available</span>
-                          </div>
-                          <div className="text-sm font-medium">{slot.teacher?.name}</div>
-                        </div>
-                        <Button
-                          onClick={() => handleBook(slot.id)}
-                          disabled={slot.spotsLeft === 0 || booked.has(slot.id)}
-                          size="sm"
-                        >
-                          {booked.has(slot.id) ? (
-                            <>
-                              <Check className="h-4 w-4 mr-2" />
-                              Booked
-                            </>
-                          ) : (
-                            'Book Session'
-                          )}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-      {selectedDate && selectedDateSlots.length === 0 && (
-        <Card className="border-primary/20">
-          <CardContent className="p-4 text-center">
-            <p className="text-sm text-muted-foreground">
-              {dayjs(selectedDate).isValid() 
-                ? `No sessions available for ${dayjs(selectedDate).format('MMMM D, YYYY')}`
-                : 'No sessions available for the selected date'}
-            </p>
-          </CardContent>
-        </Card>
-      )}
+          {selectedDate && selectedDateSlots.length === 0 && (
+            <Card className="border-primary/20">
+              <CardContent className="p-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                  {dayjs(selectedDate).isValid()
+                    ? `No sessions available for ${dayjs(selectedDate).format('MMMM D, YYYY')}`
+                    : 'No sessions available for the selected date'}
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {slots.length === 0 && !selectedDate && (
             <div className="border-2 border-dashed border-muted rounded-lg p-6 text-center mt-4">
