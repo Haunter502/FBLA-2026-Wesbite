@@ -5,6 +5,7 @@ import { NavBar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { ScrollProgressWrapper } from "@/components/layout/scroll-progress-wrapper";
+import { ChatbotWidget } from "@/components/chatbot/chatbot-widget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <ChatbotWidget />
         </SessionProvider>
       </body>
     </html>
