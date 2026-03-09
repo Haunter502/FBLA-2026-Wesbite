@@ -25,6 +25,7 @@ export function Popover({ children, open: controlledOpen, onOpenChange }: Popove
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
+  const triggerRef = React.useRef<HTMLElement | null>(null)
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!isControlled) {
@@ -34,13 +35,17 @@ export function Popover({ children, open: controlledOpen, onOpenChange }: Popove
   }
 
   return (
-    <PopoverContext.Provider value={{ open, onOpenChange: handleOpenChange }}>
+    <PopoverContext.Provider value={{ open, onOpenChange: handleOpenChange, triggerRef }}>
       {children}
     </PopoverContext.Provider>
   )
 }
 
-const PopoverContext = React.createContext<{ open: boolean; onOpenChange: (open: boolean) => void } | null>(null)
+const PopoverContext = React.createContext<{
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  triggerRef: React.RefObject<HTMLElement | null>
+} | null>(null)
 
 function usePopoverContext() {
   const context = React.useContext(PopoverContext)
@@ -51,34 +56,39 @@ function usePopoverContext() {
 }
 
 export function PopoverTrigger({ asChild, children }: PopoverTriggerProps) {
-  const { open, onOpenChange } = usePopoverContext()
-  const triggerRef = useRef<HTMLDivElement>(null)
+  const { open, onOpenChange, triggerRef } = usePopoverContext()
 
   const handleClick = () => {
     onOpenChange(!open)
   }
 
+  const setRef = (el: HTMLElement | null) => {
+    (triggerRef as React.MutableRefObject<HTMLElement | null>).current = el
+  }
+
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
       onClick: handleClick,
-      ref: triggerRef,
+      ref: setRef,
     } as any)
   }
 
   return (
-    <div ref={triggerRef} onClick={handleClick} className="cursor-pointer">
+    <div ref={setRef} onClick={handleClick} className="cursor-pointer">
       {children}
     </div>
   )
 }
 
 export function PopoverContent({ children, className, align = 'end' }: PopoverContentProps) {
-  const { open, onOpenChange } = usePopoverContext()
+  const { open, onOpenChange, triggerRef } = usePopoverContext()
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      if (triggerRef.current?.contains(target)) return
+      if (contentRef.current && !contentRef.current.contains(target)) {
         onOpenChange(false)
       }
     }

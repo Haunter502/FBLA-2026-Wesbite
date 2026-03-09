@@ -21,10 +21,10 @@ interface UnitPerformanceListProps {
 export function UnitPerformanceList({ unitProgress }: UnitPerformanceListProps) {
   return (
     <GlowEffect intensity="low">
-      <Card className="mb-8 border-cyan-500/30 bg-gradient-to-br from-cyan-500/5 via-background to-background">
+      <Card className="mb-8 border-primary/30 bg-gradient-to-br from-primary/5 via-background to-background">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-cyan-500" />
+            <Target className="h-5 w-5 text-primary" />
             Unit Performance Analysis
           </CardTitle>
           <CardDescription>Detailed performance metrics for each unit</CardDescription>
@@ -48,7 +48,7 @@ export function UnitPerformanceList({ unitProgress }: UnitPerformanceListProps) 
                       {unit.averageScore !== null && (
                         <span className={`text-sm font-semibold ${
                           unit.averageScore >= 90 ? 'text-green-500' :
-                          unit.averageScore >= 80 ? 'text-blue-500' :
+                          unit.averageScore >= 80 ? 'text-primary' :
                           unit.averageScore >= 70 ? 'text-yellow-500' :
                           'text-red-500'
                         }`}>
@@ -69,7 +69,7 @@ export function UnitPerformanceList({ unitProgress }: UnitPerformanceListProps) 
                     transition={{ duration: 1, delay: 0.2 }}
                     className={`h-full rounded-full ${
                       unit.completionRate === 100 ? 'bg-gradient-to-r from-green-500 to-emerald-400' :
-                      unit.completionRate >= 75 ? 'bg-gradient-to-r from-blue-500 to-cyan-400' :
+                      unit.completionRate >= 75 ? 'bg-gradient-to-r from-primary to-primary/80' :
                       unit.completionRate >= 50 ? 'bg-gradient-to-r from-yellow-500 to-orange-400' :
                       'bg-gradient-to-r from-red-500 to-pink-400'
                     }`}

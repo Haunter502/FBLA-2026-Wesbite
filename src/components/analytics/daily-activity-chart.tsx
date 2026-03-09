@@ -14,10 +14,10 @@ interface DailyActivityChartProps {
 export function DailyActivityChart({ dailyActivity, weeklyActivity, improvement }: DailyActivityChartProps) {
   return (
     <GlowEffect intensity="low">
-      <Card className="mb-8 border-blue-500/30 bg-gradient-to-br from-blue-500/5 via-background to-background">
+      <Card className="mb-8 border-primary/30 bg-gradient-to-br from-primary/5 via-background to-background">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-blue-500" />
+            <BarChart3 className="h-5 w-5 text-primary" />
             Daily Activity Trend
           </CardTitle>
           <CardDescription>Your activity over the last 7 days</CardDescription>
@@ -37,7 +37,7 @@ export function DailyActivityChart({ dailyActivity, weeklyActivity, improvement 
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: `${barHeight}px`, opacity: 1 }}
                         transition={{ duration: 0.8, delay: index * 0.1, ease: "easeOut" }}
-                        className="w-full bg-gradient-to-t from-blue-500 to-cyan-400 rounded-t-lg min-h-[4px] relative group"
+                        className="w-full bg-gradient-to-t from-primary to-primary/80 rounded-t-lg min-h-[4px] relative group"
                         style={{ maxHeight: '160px' }}
                       >
                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-background border rounded px-2 py-1 text-xs font-semibold shadow-lg whitespace-nowrap z-10">

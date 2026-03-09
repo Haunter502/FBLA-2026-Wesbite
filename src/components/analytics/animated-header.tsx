@@ -12,7 +12,7 @@ export function AnimatedAnalyticsHeader() {
           animate={{ rotate: [0, 360] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         >
-          <BarChart3 className="h-10 w-10 text-blue-500" />
+          <BarChart3 className="h-10 w-10 text-primary" />
         </motion.div>
         <h1 className="text-5xl font-bold">
           <GradientText variant="primary" className="text-5xl md:text-6xl">

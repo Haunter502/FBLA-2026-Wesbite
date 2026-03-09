@@ -159,11 +159,11 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Unique analytics theme - blue/cyan gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-primary/10" />
+      {/* Theme-aware gradient and blur (uses selected primary/secondary) */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/10" />
       <div className="absolute inset-0">
-        <div className="absolute top-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-20 right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
       </div>
       <ParticleBackground count={20} />
       
@@ -176,10 +176,10 @@ export default async function AnalyticsPage() {
       <FadeInUp delay={0.2}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <GlowEffect intensity="medium">
-            <Card className="bg-gradient-to-br from-blue-500/10 via-background to-background border-blue-500/30 hover:border-blue-500/50 transition-all hover:shadow-lg hover:shadow-blue-500/20">
+            <Card className="bg-gradient-to-br from-primary/10 via-background to-background border-primary/30 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/20">
               <CardHeader>
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-blue-500" />
+                  <Calendar className="h-4 w-4 text-primary" />
                   Weekly Activity
                 </CardTitle>
               </CardHeader>
@@ -205,10 +205,10 @@ export default async function AnalyticsPage() {
           </GlowEffect>
 
           <GlowEffect intensity="medium">
-            <Card className="bg-gradient-to-br from-cyan-500/10 via-background to-background border-cyan-500/30 hover:border-cyan-500/50 transition-all hover:shadow-lg hover:shadow-cyan-500/20">
+            <Card className="bg-gradient-to-br from-secondary/10 via-background to-background border-secondary/30 hover:border-secondary/50 transition-all hover:shadow-lg hover:shadow-secondary/20">
               <CardHeader>
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Target className="h-4 w-4 text-cyan-500" />
+                  <Target className="h-4 w-4 text-secondary" />
                   Average Score
                 </CardTitle>
               </CardHeader>
