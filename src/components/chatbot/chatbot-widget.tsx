@@ -119,7 +119,7 @@ export function ChatbotWidget() {
             <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-brand shadow-brand">
-                  <span className="text-xl font-bold">N</span>
+                  <span className="text-xl font-bold">π</span>
                   <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-foreground border border-primary">
                     √
                   </span>
