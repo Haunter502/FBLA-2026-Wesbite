@@ -108,18 +108,24 @@ export function ChatbotWidget() {
           {isOpen && (
             <motion.div
               key="chat-panel"
-              initial={{ opacity: 0, x: 40, y: 20 }}
-              animate={{ opacity: 1, x: 0, y: 0 }}
-              exit={{ opacity: 0, x: 40, y: 20 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-              className="absolute bottom-16 right-0 w-80 sm:w-96 max-h-[70vh] rounded-xl border border-border bg-background shadow-brand-lg flex flex-col overflow-hidden"
+              initial={{ opacity: 0, x: 32, y: 24, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 24, y: 16, scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+              className="absolute bottom-16 right-0 w-80 sm:w-96 max-h-[70vh] rounded-2xl border border-border/70 bg-gradient-to-b from-background/95 via-background/98 to-background shadow-brand-lg flex flex-col overflow-hidden backdrop-blur-sm"
               aria-label="πumera tutor chat"
             >
             {/* Header */}
-            <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-brand shadow-brand">
-                  <span className="text-xl font-bold">π</span>
+                  <motion.span
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                    className="text-xl font-bold inline-block"
+                  >
+                    π
+                  </motion.span>
                   <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-foreground border border-primary">
                     √
                   </span>
@@ -268,10 +274,11 @@ export function ChatbotWidget() {
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           className={cn(
-            'group absolute bottom-0 right-0 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-brand text-white shadow-brand-lg hover:shadow-brand transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+            'group absolute bottom-0 right-0 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-brand text-white shadow-brand-lg hover:shadow-brand transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            !isOpen && 'animate-pulse-glow'
           )}
-          whileHover={{ scale: 1.1, rotate: -6 }}
-          whileTap={{ scale: 0.94 }}
+          whileHover={{ scale: 1.12, rotate: -4, y: -2 }}
+          whileTap={{ scale: 0.9 }}
           aria-label={isOpen ? 'Close πumera tutor chat' : 'Open πumera tutor chat'}
         >
           {/* Tooltip */}
@@ -284,8 +291,14 @@ export function ChatbotWidget() {
           <div className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-white/20" />
 
           {/* πumera logo (glass capsule) */}
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm text-white font-bold border border-white/25 shadow-brand transition-transform duration-200 group-hover:scale-[1.03]">
-            <span className="text-2xl leading-none drop-shadow-sm">π</span>
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm text-white font-bold border border-white/25 shadow-brand transition-transform duration-200 group-hover:scale-[1.06] group-hover:-rotate-6">
+            <motion.span
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+              className="text-2xl leading-none drop-shadow-sm inline-block"
+            >
+              π
+            </motion.span>
             <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary/80 text-primary-foreground text-[10px] font-semibold border border-white/60" />
           </div>
 
